@@ -1,0 +1,2811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hearthhold Home &amp; Business</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f0f0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .iphone {
+            background: white;
+            border-radius: 40px;
+            border: 12px solid #000;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            height: 812px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .status-bar {
+            background: #000;
+            color: white;
+            padding: 8px 16px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 44px;
+        }
+
+        .screen-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        .screen-content.active {
+            display: flex;
+        }
+
+        /* COMMON */
+        .month-header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            padding: 8px 0;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* SUMMARY CARDS */
+        .bill-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .summary-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .summary-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .summary-toggle {
+            font-size: 11px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* EXPANDABLE SECTION */
+        .expandable-section {
+            margin-bottom: 20px;
+        }
+
+        .expandable-items {
+            display: none;
+            margin-top: 8px;
+        }
+
+        .expandable-items.open {
+            display: block;
+        }
+
+        .expandable-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            font-size: 13px;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .item-amount {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .item-date {
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* BILLS ITEMS */
+        .bills-section {
+            margin-bottom: 16px;
+        }
+
+        .add-expense-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .add-expense-btn:active {
+            transform: scale(0.98);
+        }
+
+        .bill-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .bill-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .bill-item.expanded {
+            background: #f8f9fa;
+        }
+
+        .action-buttons {
+            display: none;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .action-buttons.show {
+            display: flex;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .action-btn-mark {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .action-btn-mark:active {
+            transform: scale(0.98);
+        }
+
+        .action-btn-edit {
+            background: #cfe2ff;
+            color: #0c5460;
+        }
+
+        .action-btn-edit:active {
+            transform: scale(0.98);
+        }
+
+        .bill-item.collapsible-header {
+            cursor: pointer;
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .bill-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .bill-amount {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .bill-details {
+            display: flex;
+            gap: 8px;
+            font-size: 12px;
+            color: #999;
+            flex-wrap: wrap;
+        }
+
+        .bill-detail {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-unpaid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-estimate {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .recurr-toggle {
+            font-size: 11px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .collapsed-items {
+            display: none;
+            margin-left: 12px;
+        }
+
+        .collapsed-items.open {
+            display: block;
+        }
+
+        /* ACTIVITY SCREEN */
+        .activity-content {
+            color: #333;
+        }
+
+        .activity-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .activity-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .activity-action {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .activity-amount {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .activity-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .activity-by {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .activity-item {
+            cursor: pointer;
+        }
+
+        .activity-category-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #667eea;
+            background: #eef0ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-top: 6px;
+        }
+
+        .reclassify-panel {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+            gap: 8px;
+            flex-direction: column;
+        }
+
+        .reclassify-panel.show {
+            display: flex;
+        }
+
+        .reclassify-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .reclassify-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* REPORTS SCREEN */
+        .reports-content {
+            color: #333;
+        }
+
+        .reports-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .reports-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 16px;
+        }
+
+        .reports-total-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .reports-total-label {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-bottom: 4px;
+        }
+
+        .reports-total-amount {
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .reports-category-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .reports-category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reports-category-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .reports-category-line {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .reports-category-amount {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .reports-export-btn {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .reports-export-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* PLANNER SCREEN */
+        .planner-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 16px;
+        }
+
+        .planner-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .planner-tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .planner-panel { display: none; }
+        .planner-panel.active { display: block; }
+
+        .cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .cal-title { font-size: 16px; font-weight: bold; }
+
+        .cal-nav-btn {
+            background: #eef0ff;
+            color: #667eea;
+            border: none;
+            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .cal-dow {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            padding-bottom: 4px;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            font-size: 12px;
+        }
+
+        .cal-day.empty { visibility: hidden; cursor: default; }
+        .cal-day.today { background: #667eea; color: white; font-weight: bold; }
+        .cal-day.has-note::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #f5a623;
+        }
+        .cal-day.today.has-note::after { background: white; }
+
+        .note-editor {
+            display: none;
+            margin-top: 14px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .note-editor.show { display: block; }
+
+        .note-editor-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .note-editor textarea {
+            width: 100%;
+            min-height: 70px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            margin-bottom: 8px;
+        }
+
+        .note-editor-actions { display: flex; gap: 8px; }
+
+        .todo-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .todo-input-row input {
+            flex: 1;
+            padding: 9px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 9px 10px;
+        }
+
+        .todo-check {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 2px solid #d0d5dd;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: white;
+        }
+
+        .todo-item.done .todo-check {
+            background: #667eea;
+            border-color: #667eea;
+        }
+
+        .todo-text { flex: 1; font-size: 13px; word-break: break-word; }
+
+        .todo-item.done .todo-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .todo-delete {
+            background: none;
+            border: none;
+            color: #c00;
+            font-size: 15px;
+            cursor: pointer;
+            opacity: 0.5;
+            flex-shrink: 0;
+        }
+
+        .planner-empty {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            padding: 20px 0;
+        }
+
+        /* CAPTURE SCREEN */
+        .capture-content {
+            color: #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .capture-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .video-preview {
+            background: #000;
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .video-preview.playing {
+            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+        }
+
+        .capture-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .control-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .control-btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        /* WISHLIST SCREEN */
+        .wishlist-content {
+            color: #333;
+        }
+
+        .wishlist-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .add-item-box {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .wishlist-input {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 8px;
+        }
+
+        .add-button {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-button:active {
+            transform: scale(0.98);
+        }
+
+        .upload-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .upload-btn {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.2s;
+        }
+
+        .upload-btn:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .wishlist-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .wishlist-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        .wishlist-item-text {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .wishlist-item-action {
+            font-size: 12px;
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* NAV */
+        .nav-reference {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-around;
+            height: 58px;
+            align-items: center;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-reference.hidden {
+            display: none;
+        }
+
+        /* ONBOARDING */
+        .screen-content.onboarding {
+            background: #fff;
+            padding: 28px 24px 32px;
+            justify-content: space-between;
+        }
+
+        .screen-content.splash {
+            background: #6d82e8;
+            color: white;
+            padding: 28px 22px 26px;
+            justify-content: space-between;
+            align-items: stretch;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .splash-scene {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .splash-scene svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .splash-copy {
+            position: relative;
+            z-index: 1;
+            padding-top: 12px;
+            text-shadow: 0 2px 18px rgba(40, 48, 110, 0.4);
+        }
+
+        .splash-title {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            margin-bottom: 6px;
+        }
+
+        .splash-brand-line {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            opacity: 0.95;
+            margin-bottom: 10px;
+        }
+
+        .splash-tagline {
+            font-size: 15px;
+            line-height: 1.45;
+            opacity: 0.92;
+            max-width: 260px;
+            margin: 0 auto;
+        }
+
+        .splash-enter {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            background: white;
+            color: #4c51bf;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 28px rgba(30, 36, 80, 0.28);
+        }
+
+        .splash-enter:active {
+            transform: scale(0.98);
+        }
+
+        .onboard-kicker {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .onboard-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 8px;
+        }
+
+        .onboard-copy {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.45;
+            margin-bottom: 24px;
+        }
+
+        .onboard-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .onboard-input {
+            width: 100%;
+            padding: 14px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            margin-bottom: 12px;
+        }
+
+        .onboard-input:focus {
+            outline: 2px solid #c7d2fe;
+            border-color: #667eea;
+        }
+
+        .onboard-error {
+            display: none;
+            font-size: 12px;
+            color: #b42318;
+            margin: -4px 0 10px;
+        }
+
+        .onboard-error.show {
+            display: block;
+        }
+
+        .onboard-primary {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .onboard-primary:active {
+            transform: scale(0.98);
+        }
+
+        .onboard-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0;
+            color: #999;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .onboard-divider::before,
+        .onboard-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .apple-btn {
+            width: 100%;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .apple-btn:active {
+            transform: scale(0.98);
+        }
+
+        .welcome-hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-bottom: 18px;
+        }
+
+        .welcome-scene {
+            width: 100%;
+            margin-bottom: 22px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #dbe7f4;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .welcome-scene svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .welcome-hero .onboard-copy {
+            margin-bottom: 0;
+        }
+
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .empty-card {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: #eef0ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 14px;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .empty-copy {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.45;
+            max-width: 260px;
+            margin-bottom: 18px;
+        }
+
+        .empty-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 240px;
+        }
+
+        .empty-secondary {
+            width: 100%;
+            background: white;
+            color: #667eea;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .capture-box {
+            background: #f0f4ff;
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .capture-hint {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.45;
+            text-align: left;
+            margin: 0 0 12px;
+        }
+
+        .capture-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .capture-btns button {
+            background: white;
+            border: 1px solid #667eea;
+            color: #667eea;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .found-block {
+            margin-top: 4px;
+        }
+
+        .found-heading {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .found-empty {
+            font-size: 13px;
+            color: #999;
+            padding: 12px 0;
+        }
+
+        .found-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+
+        .found-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .found-row input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .found-item .found-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .found-remove {
+            background: none;
+            border: none;
+            color: #c00;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .manual-add {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .status-pair {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-pair button {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #333;
+            background: white;
+        }
+
+        .status-pair button.on {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="iphone">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>● ● ●</span>
+            </div>
+
+            <!-- SPLASH -->
+            <div class="screen-content splash active" id="splash">
+                <div class="splash-scene" aria-hidden="true">
+                    <svg viewBox="0 0 360 720" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="sp-sky" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="#5d74e4"/>
+                                <stop offset=".42" stop-color="#8aa0ee"/>
+                                <stop offset=".68" stop-color="#e8b48a"/>
+                                <stop offset="1" stop-color="#f4d2a6"/>
+                            </linearGradient>
+                            <linearGradient id="sp-glass" x1="0" y1="0" x2=".2" y2="1">
+                                <stop offset="0" stop-color="#f3e2b0"/>
+                                <stop offset="1" stop-color="#c9894a"/>
+                            </linearGradient>
+                            <linearGradient id="sp-shop" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="#eef6fb"/>
+                                <stop offset="1" stop-color="#8fb0c6"/>
+                            </linearGradient>
+                            <radialGradient id="sp-sun" cx=".5" cy=".5" r=".5">
+                                <stop offset="0" stop-color="#fff6d0"/>
+                                <stop offset=".45" stop-color="#ffd98a"/>
+                                <stop offset="1" stop-color="#ffd98a" stop-opacity="0"/>
+                            </radialGradient>
+                            <linearGradient id="sp-street" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="#8b93a1"/>
+                                <stop offset="1" stop-color="#6e7584"/>
+                            </linearGradient>
+                        </defs>
+
+                        <rect width="360" height="720" fill="url(#sp-sky)"/>
+                        <circle cx="298" cy="168" r="88" fill="url(#sp-sun)"/>
+                        <circle cx="298" cy="168" r="36" fill="#ffe9b4"/>
+
+                        <ellipse cx="48" cy="92" rx="44" ry="16" fill="#fff" fill-opacity=".28"/>
+                        <ellipse cx="78" cy="86" rx="26" ry="12" fill="#fff" fill-opacity=".22"/>
+                        <ellipse cx="210" cy="64" rx="38" ry="13" fill="#fff" fill-opacity=".18"/>
+
+                        <!-- far hills -->
+                        <path d="M-20 330 C40 300 90 318 150 304 C210 290 250 318 390 298 L390 400 L-20 400Z" fill="#7d8cc8" fill-opacity=".35"/>
+
+                        <!-- distant rooftops -->
+                        <g fill="#9aa6d4" fill-opacity=".55">
+                            <rect x="-10" y="292" width="48" height="90"/>
+                            <rect x="34" y="272" width="40" height="110"/>
+                            <rect x="70" y="286" width="36" height="96"/>
+                        </g>
+
+                        <!-- left brick walk-up -->
+                        <rect x="-24" y="248" width="118" height="292" fill="#c17a5c"/>
+                        <rect x="-24" y="248" width="118" height="14" fill="#a8644a"/>
+                        <g fill="url(#sp-glass)">
+                            <rect x="-8" y="276" width="28" height="34" rx="1"/>
+                            <rect x="32" y="276" width="28" height="34" rx="1"/>
+                            <rect x="-8" y="322" width="28" height="34" rx="1"/>
+                            <rect x="32" y="322" width="28" height="34" rx="1"/>
+                            <rect x="-8" y="368" width="28" height="34" rx="1"/>
+                            <rect x="32" y="368" width="28" height="34" rx="1"/>
+                        </g>
+                        <rect x="8" y="430" width="36" height="110" fill="#4b3a32"/>
+                        <rect x="14" y="438" width="24" height="28" fill="url(#sp-shop)"/>
+
+                        <!-- right neighbor cafe -->
+                        <rect x="286" y="268" width="90" height="272" fill="#e7d3b6"/>
+                        <rect x="286" y="268" width="90" height="12" fill="#d4bc96"/>
+                        <rect x="298" y="292" width="28" height="36" rx="1" fill="url(#sp-glass)"/>
+                        <rect x="332" y="292" width="28" height="36" rx="1" fill="url(#sp-glass)"/>
+                        <path d="M286 380h90l-6 18H292z" fill="#c45b4a"/>
+                        <rect x="300" y="404" width="62" height="42" rx="1" fill="url(#sp-shop)"/>
+                        <g fill="#c4a574" opacity=".75">
+                            <rect x="308" y="424" width="12" height="14" rx=".5"/>
+                            <rect x="324" y="420" width="10" height="18" rx=".5"/>
+                            <rect x="338" y="426" width="14" height="12" rx=".5"/>
+                        </g>
+                        <rect x="318" y="454" width="26" height="86" fill="#5a463c"/>
+
+                        <!-- main mixed-use: shop below, home above -->
+                        <rect x="86" y="220" width="208" height="320" fill="#f3ebe0"/>
+                        <rect x="86" y="220" width="12" height="320" fill="#e2d3c2"/>
+                        <rect x="86" y="220" width="208" height="16" fill="#d7c3a8"/>
+                        <rect x="98" y="208" width="184" height="14" rx="1" fill="#cbb08a"/>
+                        <rect x="248" y="186" width="16" height="36" fill="#b08962"/>
+                        <path d="M254 186c6-14 18-22 18-22" stroke="#d9d6d0" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+
+                        <!-- apartment floor -->
+                        <g fill="url(#sp-glass)" stroke="#efe4d4" stroke-width="2.4">
+                            <rect x="110" y="252" width="42" height="48" rx="1.5"/>
+                            <rect x="164" y="252" width="42" height="48" rx="1.5"/>
+                            <rect x="230" y="248" width="46" height="56" rx="1.5"/>
+                        </g>
+                        <path d="M114 252h34v20H114z" fill="#e8c4ae" fill-opacity=".45"/>
+                        <path d="M168 252h24v18H168z" fill="#e8c4ae" fill-opacity=".35"/>
+                        <rect x="110" y="298" width="42" height="4" fill="#d4c0a6"/>
+                        <rect x="164" y="298" width="42" height="4" fill="#d4c0a6"/>
+                        <rect x="224" y="300" width="58" height="7" fill="#d4c0a6"/>
+                        <g stroke="#8a8378" stroke-width="1.8" fill="none">
+                            <path d="M226 300v-16h54v16"/>
+                            <path d="M239 284v16M253 284v16M267 284v16"/>
+                        </g>
+                        <rect x="236" y="288" width="12" height="7" rx="1" fill="#3f8f62"/>
+                        <rect x="258" y="288" width="12" height="7" rx="1" fill="#c45b4a"/>
+
+                        <!-- second apartment row -->
+                        <g fill="url(#sp-glass)" stroke="#efe4d4" stroke-width="2.4">
+                            <rect x="110" y="320" width="42" height="44" rx="1.5"/>
+                            <rect x="164" y="320" width="42" height="44" rx="1.5"/>
+                            <rect x="228" y="320" width="42" height="44" rx="1.5"/>
+                        </g>
+                        <path d="M114 320h20v16H114z" fill="#e8c4ae" fill-opacity=".3"/>
+
+                        <!-- shop awning -->
+                        <path d="M90 378h200l-10 22H100z" fill="#667eea"/>
+                        <path d="M112 378l-4 22M136 378l-4 22M160 378l-4 22M184 378l-4 22M208 378l-4 22M232 378l-4 22M256 378l-4 22M280 378l-4 22" stroke="#5a62d0" stroke-width="3.5"/>
+                        <path d="M90 378h200" stroke="#8b93f4" stroke-width="2.5"/>
+
+                        <!-- shop front -->
+                        <rect x="108" y="406" width="34" height="134" fill="#4a3c32"/>
+                        <rect x="114" y="414" width="22" height="36" fill="url(#sp-shop)"/>
+                        <circle cx="134" cy="470" r="2.2" fill="#e8c27a"/>
+                        <rect x="152" y="410" width="62" height="52" rx="1.5" fill="url(#sp-shop)" stroke="#efe4d4" stroke-width="2.5"/>
+                        <rect x="222" y="410" width="62" height="52" rx="1.5" fill="url(#sp-shop)" stroke="#efe4d4" stroke-width="2.5"/>
+                        <g>
+                            <path d="M158 446h50M226 446h50" stroke="#d7c4ab" stroke-width="2"/>
+                            <rect x="160" y="430" width="14" height="16" rx="1" fill="#d9a05a"/>
+                            <rect x="178" y="422" width="9" height="24" rx="3" fill="#7a4a32"/>
+                            <circle cx="198" cy="438" r="7" fill="#e8c27a"/>
+                            <rect x="230" y="428" width="16" height="18" rx="1" fill="#c45b4a"/>
+                            <rect x="250" y="418" width="8" height="28" rx="3" fill="#3f6f8f"/>
+                            <rect x="262" y="432" width="12" height="14" rx="1" fill="#d9a05a"/>
+                        </g>
+                        <rect x="108" y="520" width="186" height="20" fill="#e8ddd0"/>
+
+                        <!-- sidewalk -->
+                        <rect x="0" y="540" width="360" height="52" fill="#e4dccf"/>
+                        <path d="M0 540h360" stroke="#cfc5b4" stroke-width="5"/>
+                        <path d="M36 540v52M72 540v52M108 540v52M144 540v52M180 540v52M216 540v52M252 540v52M288 540v52M324 540v52" stroke="#d8d0c2" stroke-width="1.2"/>
+
+                        <!-- street -->
+                        <rect x="0" y="592" width="360" height="128" fill="url(#sp-street)"/>
+                        <path d="M18 656h28M68 656h28M118 656h28M168 656h28M218 656h28M268 656h28M318 656h28" stroke="#d5dae2" stroke-width="5" stroke-linecap="round"/>
+
+                        <!-- lamp -->
+                        <rect x="72" y="430" width="6" height="118" rx="1" fill="#5c534a"/>
+                        <path d="M75 430c0-18 16-28 28-28" stroke="#5c534a" stroke-width="5" fill="none" stroke-linecap="round"/>
+                        <ellipse cx="107" cy="404" rx="10" ry="7" fill="#ffe7b0"/>
+                        <ellipse cx="107" cy="404" rx="22" ry="16" fill="#ffe7b0" fill-opacity=".28"/>
+
+                        <!-- left street tree -->
+                        <ellipse cx="48" cy="548" rx="22" ry="7" fill="#c3baab"/>
+                        <rect x="42" y="430" width="12" height="118" rx="3" fill="#6b4a38"/>
+                        <circle cx="28" cy="410" r="38" fill="#245a3d"/>
+                        <circle cx="62" cy="398" r="32" fill="#2f6a4a"/>
+                        <circle cx="46" cy="372" r="30" fill="#3d8658"/>
+                        <circle cx="70" cy="424" r="20" fill="#357850"/>
+
+                        <!-- right street tree -->
+                        <ellipse cx="332" cy="548" rx="18" ry="6" fill="#c3baab"/>
+                        <rect x="326" y="456" width="10" height="92" rx="2.5" fill="#6b4a38"/>
+                        <circle cx="318" cy="444" r="24" fill="#2f6a4a"/>
+                        <circle cx="344" cy="438" r="20" fill="#3d8658"/>
+                        <circle cx="332" cy="422" r="18" fill="#4f9a66"/>
+
+                        <!-- bench + planter -->
+                        <rect x="150" y="520" width="70" height="6" rx="1" fill="#6b5344"/>
+                        <rect x="156" y="526" width="6" height="14" fill="#6b5344"/>
+                        <rect x="208" y="526" width="6" height="14" fill="#6b5344"/>
+                        <rect x="230" y="528" width="28" height="12" rx="2" fill="#8a6a48"/>
+                        <circle cx="238" cy="524" r="6" fill="#3f8f62"/>
+                        <circle cx="250" cy="522" r="5" fill="#c45b4a"/>
+                    </svg>
+                </div>
+                <div class="splash-copy">
+                    <div class="splash-title">Hearthhold</div>
+                    <div class="splash-brand-line">Home &amp; Business</div>
+                    <div class="splash-tagline">Run the house and the work from one place.</div>
+                </div>
+                <button class="splash-enter" onclick="showOnboardingScreen('signup')">Enter</button>
+            </div>
+
+            <!-- SIGN UP / SIGN IN -->
+            <div class="screen-content onboarding" id="signup">
+                <div>
+                    <div class="onboard-kicker">Sign in</div>
+                    <div class="onboard-title">Get started</div>
+                    <div class="onboard-copy">Use your email or Apple. You can add household details later.</div>
+
+                    <form onsubmit="continueWithEmail(event)" novalidate>
+                        <label class="onboard-label" for="signup-email">Email</label>
+                        <input class="onboard-input" id="signup-email" type="text" value="you@hearthhold.app" autocomplete="email">
+                        <div class="onboard-error" id="signup-error">Enter a valid email.</div>
+                        <button class="onboard-primary" type="submit">Continue with email</button>
+                    </form>
+
+                    <div class="onboard-divider">or</div>
+
+                    <button class="apple-btn" type="button" onclick="signInWithApple()">
+                        <svg width="16" height="20" viewBox="0 0 16 20" fill="currentColor" aria-hidden="true">
+                            <path d="M13.23 10.54c.02 2.27 1.99 3.03 2.02 3.04-.02.06-.31 1.08-1.04 2.13-.63.91-1.29 1.82-2.32 1.84-1.01.02-1.34-.6-2.5-.6-1.16 0-1.52.58-2.48.62-1 .04-1.76-.98-2.4-1.88-1.31-1.85-2.31-5.23-0.97-7.51.67-1.14 1.86-1.86 3.16-1.88 1-.02 1.93.67 2.5.67.57 0 1.64-.83 2.77-.71.47.02 1.79.19 2.64 1.44-.07.04-1.58.92-1.56 2.84zM11.1 3.28c.54-.66.91-1.57.81-2.48-.78.03-1.73.52-2.29 1.18-.5.58-.94 1.51-.82 2.4.87.07 1.76-.44 2.3-1.1z"/>
+                        </svg>
+                        Continue with Apple
+                    </button>
+                </div>
+                <div style="font-size: 11px; color: #999; text-align: center; line-height: 1.4;">By continuing you agree this is a household account. Access is approved before anyone else can join.</div>
+            </div>
+
+            <!-- WELCOME -->
+            <div class="screen-content onboarding" id="welcome">
+                <div class="welcome-hero">
+                    <div class="welcome-scene" aria-hidden="true">
+                        <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="welcome-sky" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#c9dcf0"/>
+                                    <stop offset="1" stop-color="#e7eef6"/>
+                                </linearGradient>
+                                <linearGradient id="welcome-glass" x1="0" y1="0" x2=".3" y2="1">
+                                    <stop offset="0" stop-color="#d7ebf6"/>
+                                    <stop offset="1" stop-color="#7fa3be"/>
+                                </linearGradient>
+                                <linearGradient id="welcome-shopglass" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#e7f3fa"/>
+                                    <stop offset="1" stop-color="#9ab8cc"/>
+                                </linearGradient>
+                            </defs>
+
+                            <rect width="320" height="200" fill="url(#welcome-sky)"/>
+                            <ellipse cx="54" cy="38" rx="28" ry="12" fill="#fff" fill-opacity=".55"/>
+                            <ellipse cx="78" cy="34" rx="18" ry="10" fill="#fff" fill-opacity=".45"/>
+
+                            <!-- distant neighbor facade -->
+                            <rect x="268" y="58" width="52" height="100" fill="#e4d5c4"/>
+                            <rect x="276" y="68" width="14" height="18" fill="url(#welcome-glass)"/>
+                            <rect x="296" y="68" width="14" height="18" fill="url(#welcome-glass)"/>
+                            <rect x="276" y="94" width="14" height="18" fill="url(#welcome-glass)"/>
+                            <rect x="268" y="128" width="52" height="8" fill="#667eea"/>
+
+                            <!-- main mixed-use building -->
+                            <rect x="92" y="28" width="184" height="132" fill="#f4eee4"/>
+                            <rect x="92" y="28" width="8" height="132" fill="#e5d8c6"/>
+                            <rect x="92" y="28" width="184" height="10" fill="#d9c7ae"/>
+                            <rect x="100" y="22" width="168" height="8" rx="1" fill="#cbb899"/>
+
+                            <!-- apartment windows -->
+                            <g fill="url(#welcome-glass)" stroke="#efe6d8" stroke-width="2">
+                                <rect x="112" y="48" width="34" height="38" rx="1"/>
+                                <rect x="158" y="48" width="34" height="38" rx="1"/>
+                                <rect x="216" y="46" width="38" height="44" rx="1"/>
+                            </g>
+                            <path d="M116 48h26v16H116z" fill="#e8c4ae" fill-opacity=".55"/>
+                            <path d="M162 48h20v14H162z" fill="#e8c4ae" fill-opacity=".4"/>
+                            <rect x="112" y="84" width="34" height="3" fill="#d7c4ab"/>
+                            <rect x="158" y="84" width="34" height="3" fill="#d7c4ab"/>
+
+                            <!-- balcony -->
+                            <rect x="210" y="86" width="50" height="6" fill="#d7c4ab"/>
+                            <g stroke="#8a8378" stroke-width="1.6" fill="none">
+                                <path d="M212 86v-12h46v12"/>
+                                <path d="M223 74v12M235 74v12M247 74v12"/>
+                            </g>
+                            <rect x="218" y="78" width="10" height="6" rx="1" fill="#3f8f62"/>
+                            <rect x="242" y="78" width="10" height="6" rx="1" fill="#c45b4a"/>
+
+                            <!-- shop awning -->
+                            <path d="M96 104h176l-8 16H104z" fill="#667eea"/>
+                            <path d="M112 104l-3 16M136 104l-3 16M160 104l-3 16M184 104l-3 16M208 104l-3 16M232 104l-3 16M256 104l-3 16" stroke="#5a62d0" stroke-width="3"/>
+                            <path d="M96 104h176" stroke="#7b85f0" stroke-width="2"/>
+
+                            <!-- shop front -->
+                            <rect x="108" y="122" width="28" height="38" fill="#4a3c32"/>
+                            <rect x="112" y="126" width="20" height="18" fill="url(#welcome-shopglass)"/>
+                            <circle cx="132" cy="148" r="1.6" fill="#e8c27a"/>
+                            <rect x="146" y="124" width="54" height="30" rx="1" fill="url(#welcome-shopglass)" stroke="#efe6d8" stroke-width="2"/>
+                            <rect x="208" y="124" width="54" height="30" rx="1" fill="url(#welcome-shopglass)" stroke="#efe6d8" stroke-width="2"/>
+                            <g fill="#c4a574" opacity=".7">
+                                <rect x="154" y="140" width="10" height="8" rx=".5"/>
+                                <rect x="168" y="136" width="8" height="12" rx=".5"/>
+                                <rect x="180" y="138" width="12" height="10" rx=".5"/>
+                                <rect x="216" y="138" width="12" height="10" rx=".5"/>
+                                <rect x="232" y="134" width="9" height="14" rx=".5"/>
+                                <rect x="246" y="140" width="8" height="8" rx=".5"/>
+                            </g>
+
+                            <!-- sidewalk + street -->
+                            <rect x="0" y="160" width="320" height="22" fill="#e6dfd2"/>
+                            <path d="M0 160h320" stroke="#d3cbbd" stroke-width="3"/>
+                            <path d="M40 160v22M80 160v22M120 160v22M160 160v22M200 160v22M240 160v22M280 160v22" stroke="#ddd6c8" stroke-width="1"/>
+                            <rect x="0" y="182" width="320" height="18" fill="#9aa3b2"/>
+                            <path d="M24 191h18M64 191h18M104 191h18" stroke="#c5ccd6" stroke-width="3" stroke-linecap="round"/>
+
+                            <!-- street tree -->
+                            <ellipse cx="48" cy="168" rx="16" ry="5" fill="#c9c0b2"/>
+                            <rect x="44" y="108" width="8" height="58" rx="2" fill="#6b4a38"/>
+                            <circle cx="36" cy="96" r="26" fill="#2f6a4a"/>
+                            <circle cx="62" cy="92" r="22" fill="#3d8658"/>
+                            <circle cx="48" cy="76" r="20" fill="#4f9a66"/>
+                            <circle cx="58" cy="104" r="14" fill="#357850"/>
+                        </svg>
+                    </div>
+                    <div class="onboard-title" id="welcome-title">Welcome</div>
+                    <div class="onboard-copy" id="welcome-copy">The app is ready to start organizing your work.</div>
+                </div>
+                <button class="onboard-primary" onclick="finishOnboarding()">Get started</button>
+            </div>
+
+            <!-- HOME SCREEN (BILLS VIEW) -->
+            <div class="screen-content" id="home">
+                <div id="home-empty" class="empty-state">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div class="month-header" style="margin-bottom: 0;">September 2026</div>
+                    </div>
+                    <div class="bill-summary">
+                        <div class="summary-card" style="cursor: default;">
+                            <div class="summary-label">Bills Paid</div>
+                            <div class="summary-amount">0</div>
+                            <div class="summary-toggle">No items</div>
+                        </div>
+                        <div class="summary-card" style="cursor: default;">
+                            <div class="summary-label">Bills Unpaid</div>
+                            <div class="summary-amount">0</div>
+                            <div class="summary-toggle">No items</div>
+                        </div>
+                    </div>
+                    <div class="empty-card">
+                        <div class="empty-icon">📭</div>
+                        <div class="empty-title">No bills yet</div>
+                        <div class="empty-copy">Add a bill or snap a receipt. You can save it with nothing filled in and reconcile it later.</div>
+                        <div class="empty-actions">
+                            <button class="add-expense-btn" onclick="createNewExpense()">New</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="home-populated" hidden>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div class="month-header" style="margin-bottom: 0;">August 2026</div>
+                    <button class="add-expense-btn" onclick="createNewExpense()">+ New</button>
+                </div>
+
+                <!-- BILLS PAID / UNPAID SUMMARY -->
+                <div class="bill-summary">
+                    <div class="summary-card" onclick="toggleBillsPaid()">
+                        <div class="summary-label">Bills Paid</div>
+                        <div class="summary-amount">3.280.000</div>
+                        <div class="summary-toggle" id="paid-toggle">5 items ▼</div>
+                    </div>
+                    <div class="summary-card" onclick="toggleBillsUnpaid()">
+                        <div class="summary-label">Bills Unpaid</div>
+                        <div class="summary-amount">1.200.000</div>
+                        <div class="summary-toggle" id="unpaid-toggle">2 items ▼</div>
+                    </div>
+                </div>
+
+                <!-- PAID BILLS EXPANDABLE -->
+                <div class="expandable-section">
+                    <div id="paid-bills" class="expandable-items">
+                        <div class="expandable-item">
+                            <div>
+                                <div class="item-name">🏠 Rent</div>
+                                <div class="item-date">Paid Aug 3</div>
+                            </div>
+                            <div class="item-amount">1,500k</div>
+                        </div>
+                        <div class="expandable-item">
+                            <div>
+                                <div class="item-name">🔥 Gas</div>
+                                <div class="item-date">Paid Aug 10</div>
+                            </div>
+                            <div class="item-amount">24k</div>
+                        </div>
+                        <div class="expandable-item">
+                            <div>
+                                <div class="item-name">🏥 Medical Insurance</div>
+                                <div class="item-date">Paid Jul 30</div>
+                            </div>
+                            <div class="item-amount">350k</div>
+                        </div>
+                        <div class="expandable-item">
+                            <div>
+                                <div class="item-name">💧 Water</div>
+                                <div class="item-date">Pending</div>
+                            </div>
+                            <div class="item-amount">240k</div>
+                        </div>
+                        <div class="expandable-item">
+                            <div>
+                                <div class="item-name">🛒 Groceries</div>
+                                <div class="item-date">12 transactions</div>
+                            </div>
+                            <div class="item-amount">1,166k</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UNPAID BILLS EXPANDABLE -->
+                <div class="expandable-section">
+                    <div id="unpaid-bills" class="expandable-items">
+                        <div class="expandable-item">
+                            <div>
+                                <div class="item-name">⚡ Electric</div>
+                                <div class="item-date">Due Aug 15 - Not Received</div>
+                            </div>
+                            <div class="item-amount">400k</div>
+                        </div>
+                        <div class="expandable-item">
+                            <div>
+                                <div class="item-name">👶 Yanet (Liam care)</div>
+                                <div class="item-date">Due Aug 25</div>
+                            </div>
+                            <div class="item-amount">800k</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MONTHLY BILLS SECTION -->
+                <div class="bills-section">
+                    <div class="section-title">📋 Monthly Bills</div>
+
+                    <div class="bill-item" onclick="toggleActions(this)">
+                        <div style="width: 100%;">
+                            <div class="bill-header">
+                                <div class="bill-name">🏠 Rent</div>
+                                <div class="bill-amount">1.500.000 COP</div>
+                            </div>
+                            <div class="bill-details">
+                                <div class="bill-detail">Due: Aug 5</div>
+                                <span class="status-badge status-paid">✓ Paid</span>
+                                <div class="bill-detail">Aug 3</div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn action-btn-mark" onclick="markAsPaid(event)">✓ Mark Paid</button>
+                                <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bill-item" onclick="toggleActions(this)">
+                        <div style="width: 100%;">
+                            <div class="bill-header">
+                                <div class="bill-name">🏥 Medical Insurance</div>
+                                <div class="bill-amount">350.000 COP</div>
+                            </div>
+                            <div class="bill-details">
+                                <div class="bill-detail">Due: Aug 1</div>
+                                <span class="status-badge status-paid">✓ Paid</span>
+                                <div class="bill-detail">Jul 30</div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn action-btn-mark" onclick="markAsPaid(event)">✓ Mark Paid</button>
+                                <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LIAM CARE SECTION -->
+                <div class="bills-section">
+                    <div class="section-title">👶 Liam Care</div>
+
+                    <div class="bill-item" onclick="toggleActions(this)">
+                        <div style="width: 100%;">
+                            <div class="bill-header">
+                                <div class="bill-name">👩 Yanet</div>
+                                <div class="bill-amount">800.000 COP</div>
+                            </div>
+                            <div class="bill-details">
+                                <div class="bill-detail">Due: Aug 25</div>
+                                <span class="status-badge status-unpaid">Unpaid</span>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn action-btn-mark" onclick="markAsPaid(event)">✓ Mark Paid</button>
+                                <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bill-item" onclick="toggleActions(this)">
+                        <div style="width: 100%;">
+                            <div class="bill-header">
+                                <div class="bill-name">👩 Lili</div>
+                                <div class="bill-amount">400.000 COP</div>
+                            </div>
+                            <div class="bill-details">
+                                <div class="bill-detail">Due: Aug 20</div>
+                                <span class="status-badge status-pending">Received</span>
+                            </div>
+                            <div class="bill-details" style="margin-top: 4px; font-size: 11px;">
+                                <div class="bill-detail">Ready to pay</div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn action-btn-mark" onclick="markAsPaid(event)">✓ Mark Paid</button>
+                                <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UTILITIES -->
+                <div class="bills-section">
+                    <div class="bill-item collapsible-header" onclick="toggleUtilities()">
+                        <div style="width: 100%;">
+                            <div class="bill-header">
+                                <div class="bill-name">⚡ Utilities</div>
+                            </div>
+                            <div class="bill-details">
+                                <span class="recurr-toggle" id="utilities-toggle">3 items ▼</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="utilities" class="collapsed-items open">
+                        <div class="bill-item" style="margin-left: 12px;">
+                            <div style="width: 100%;">
+                                <div class="bill-header">
+                                    <div class="bill-name">💡 Electric</div>
+                                    <div class="bill-amount">400.000 COP</div>
+                                </div>
+                                <div class="bill-details">
+                                    <div class="bill-detail">Due: Aug 15</div>
+                                    <span class="status-badge status-unpaid">Not Received</span>
+                                </div>
+                                <div class="bill-details" style="margin-top: 4px;">
+                                    <span class="status-badge status-estimate">Est. 400k</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bill-item" style="margin-left: 12px;">
+                            <div style="width: 100%;">
+                                <div class="bill-header">
+                                    <div class="bill-name">🔥 Gas</div>
+                                    <div class="bill-amount">24.000 COP</div>
+                                </div>
+                                <div class="bill-details">
+                                    <div class="bill-detail">Due: Aug 12</div>
+                                    <span class="status-badge status-paid">✓ Received</span>
+                                </div>
+                                <div class="bill-details" style="margin-top: 4px;">
+                                    <div class="bill-detail">Paid Aug 10</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bill-item" style="margin-left: 12px;">
+                            <div style="width: 100%;">
+                                <div class="bill-header">
+                                    <div class="bill-name">💧 Water</div>
+                                    <div class="bill-amount">240.000 COP</div>
+                                </div>
+                                <div class="bill-details">
+                                    <div class="bill-detail">Due: Aug 20</div>
+                                    <span class="status-badge status-pending">Received</span>
+                                </div>
+                                <div class="bill-details" style="margin-top: 4px;">
+                                    <div class="bill-detail">Ready to pay</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GROCERIES -->
+                <div class="bills-section">
+                    <div class="section-title">🛒 Groceries & Expenses</div>
+                    <div class="bill-item">
+                        <div style="width: 100%;">
+                            <div class="bill-header">
+                                <div class="bill-name">🛒 Groceries (Last 30 days)</div>
+                                <div class="bill-amount">1,166k COP</div>
+                            </div>
+                            <div class="bill-details">
+                                <div class="bill-detail">12 transactions</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- ACTIVITY SCREEN -->
+            <div class="screen-content" id="activity">
+                <div class="activity-content">
+                    <div class="activity-title">Activity</div>
+
+                    <div id="activity-empty" class="empty-card" style="margin-top: 8px;">
+                        <div class="empty-icon">📋</div>
+                        <div class="empty-title">No activity yet</div>
+                        <div class="empty-copy">Payments and captures will show up here.</div>
+                    </div>
+
+                    <div class="activity-list" id="activity-populated" hidden>
+                        <div class="activity-item" onclick="toggleReclassify(this)">
+                            <div class="activity-action">Paid Sergio — Rent</div>
+                            <div class="activity-amount">2.200.000 COP</div>
+                            <div class="activity-meta"><span class="activity-by">You</span> • Today, Sep 1</div>
+                            <div class="activity-category-tag">Rent Expense</div>
+                            <div class="reclassify-panel">
+                                <select class="reclassify-select" onclick="event.stopPropagation()">
+                                    <option>Rent Expense</option>
+                                    <option>Utilities</option>
+                                    <option>Insurance</option>
+                                    <option>Contract Labor</option>
+                                    <option>Repairs &amp; Maintenance</option>
+                                    <option>Supplies</option>
+                                    <option>Meals &amp; Entertainment</option>
+                                    <option>Education</option>
+                                    <option>Other</option>
+                                </select>
+                                <div class="reclassify-actions">
+                                    <button class="action-btn action-btn-mark" onclick="saveReclassify(event, this)">✓ Save</button>
+                                    <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item" onclick="toggleReclassify(this)">
+                            <div class="activity-action">Paid Yaneris — Childcare</div>
+                            <div class="activity-amount">2.150.000 COP</div>
+                            <div class="activity-meta"><span class="activity-by">You</span> • Today, Sep 1</div>
+                            <div class="activity-category-tag">Contract Labor</div>
+                            <div class="reclassify-panel">
+                                <select class="reclassify-select" onclick="event.stopPropagation()">
+                                    <option>Contract Labor</option>
+                                    <option>Rent Expense</option>
+                                    <option>Utilities</option>
+                                    <option>Insurance</option>
+                                    <option>Repairs &amp; Maintenance</option>
+                                    <option>Supplies</option>
+                                    <option>Meals &amp; Entertainment</option>
+                                    <option>Education</option>
+                                    <option>Other</option>
+                                </select>
+                                <div class="reclassify-actions">
+                                    <button class="action-btn action-btn-mark" onclick="saveReclassify(event, this)">✓ Save</button>
+                                    <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item" onclick="toggleReclassify(this)">
+                            <div class="activity-action">Paid Meraly — Agua, Gas, Luz, Libros y Transporte Uni</div>
+                            <div class="activity-amount">1.390.000 COP</div>
+                            <div class="activity-meta"><span class="activity-by">You</span> • Today, Sep 1</div>
+                            <div class="activity-category-tag">Utilities</div>
+                            <div class="bill-detail" style="font-size: 11px; color: #c77700; margin-top: 4px;">⚠️ Bundles utilities + university books/transport — split when you reclassify</div>
+                            <div class="reclassify-panel">
+                                <select class="reclassify-select" onclick="event.stopPropagation()">
+                                    <option>Utilities</option>
+                                    <option>Education</option>
+                                    <option>Rent Expense</option>
+                                    <option>Insurance</option>
+                                    <option>Contract Labor</option>
+                                    <option>Repairs &amp; Maintenance</option>
+                                    <option>Supplies</option>
+                                    <option>Meals &amp; Entertainment</option>
+                                    <option>Other</option>
+                                </select>
+                                <div class="reclassify-actions">
+                                    <button class="action-btn action-btn-mark" onclick="saveReclassify(event, this)">✓ Save</button>
+                                    <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item" onclick="toggleReclassify(this)">
+                            <div class="activity-action">Paid Electric Bill</div>
+                            <div class="activity-amount">400.000 COP</div>
+                            <div class="activity-meta"><span class="activity-by">You</span> • 2 hours ago</div>
+                            <div class="activity-category-tag">Utilities</div>
+                            <div class="reclassify-panel">
+                                <select class="reclassify-select" onclick="event.stopPropagation()">
+                                    <option>Utilities</option>
+                                    <option>Rent Expense</option>
+                                    <option>Insurance</option>
+                                    <option>Contract Labor</option>
+                                    <option>Repairs &amp; Maintenance</option>
+                                    <option>Supplies</option>
+                                    <option>Meals &amp; Entertainment</option>
+                                    <option>Education</option>
+                                    <option>Other</option>
+                                </select>
+                                <div class="reclassify-actions">
+                                    <button class="action-btn action-btn-mark" onclick="saveReclassify(event, this)">✓ Save</button>
+                                    <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item" onclick="toggleReclassify(this)">
+                            <div class="activity-action">Added Yanet Payment</div>
+                            <div class="activity-amount">800.000 COP</div>
+                            <div class="activity-meta"><span class="activity-by">You</span> • 4 hours ago</div>
+                            <div class="activity-category-tag">Contract Labor</div>
+                            <div class="reclassify-panel">
+                                <select class="reclassify-select" onclick="event.stopPropagation()">
+                                    <option>Contract Labor</option>
+                                    <option>Rent Expense</option>
+                                    <option>Utilities</option>
+                                    <option>Insurance</option>
+                                    <option>Repairs &amp; Maintenance</option>
+                                    <option>Supplies</option>
+                                    <option>Meals &amp; Entertainment</option>
+                                    <option>Education</option>
+                                    <option>Other</option>
+                                </select>
+                                <div class="reclassify-actions">
+                                    <button class="action-btn action-btn-mark" onclick="saveReclassify(event, this)">✓ Save</button>
+                                    <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item" onclick="toggleReclassify(this)">
+                            <div class="activity-action">Water Bill Received</div>
+                            <div class="activity-amount">240.000 COP</div>
+                            <div class="activity-meta"><span class="activity-by">You</span> • Yesterday</div>
+                            <div class="activity-category-tag">Utilities</div>
+                            <div class="reclassify-panel">
+                                <select class="reclassify-select" onclick="event.stopPropagation()">
+                                    <option>Utilities</option>
+                                    <option>Rent Expense</option>
+                                    <option>Insurance</option>
+                                    <option>Contract Labor</option>
+                                    <option>Repairs &amp; Maintenance</option>
+                                    <option>Supplies</option>
+                                    <option>Meals &amp; Entertainment</option>
+                                    <option>Education</option>
+                                    <option>Other</option>
+                                </select>
+                                <div class="reclassify-actions">
+                                    <button class="action-btn action-btn-mark" onclick="saveReclassify(event, this)">✓ Save</button>
+                                    <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item" onclick="toggleReclassify(this)">
+                            <div class="activity-action">Medical Insurance Paid</div>
+                            <div class="activity-amount">350.000 COP</div>
+                            <div class="activity-meta"><span class="activity-by">You</span> • 3 days ago</div>
+                            <div class="activity-category-tag">Insurance</div>
+                            <div class="reclassify-panel">
+                                <select class="reclassify-select" onclick="event.stopPropagation()">
+                                    <option>Insurance</option>
+                                    <option>Rent Expense</option>
+                                    <option>Utilities</option>
+                                    <option>Contract Labor</option>
+                                    <option>Repairs &amp; Maintenance</option>
+                                    <option>Supplies</option>
+                                    <option>Meals &amp; Entertainment</option>
+                                    <option>Education</option>
+                                    <option>Other</option>
+                                </select>
+                                <div class="reclassify-actions">
+                                    <button class="action-btn action-btn-mark" onclick="saveReclassify(event, this)">✓ Save</button>
+                                    <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item" onclick="toggleReclassify(this)">
+                            <div class="activity-action">Grocery Purchase</div>
+                            <div class="activity-amount">85.500 COP</div>
+                            <div class="activity-meta"><span class="activity-by">You</span> • 5 days ago</div>
+                            <div class="activity-category-tag">Supplies</div>
+                            <div class="reclassify-panel">
+                                <select class="reclassify-select" onclick="event.stopPropagation()">
+                                    <option>Supplies</option>
+                                    <option>Rent Expense</option>
+                                    <option>Utilities</option>
+                                    <option>Insurance</option>
+                                    <option>Contract Labor</option>
+                                    <option>Repairs &amp; Maintenance</option>
+                                    <option>Meals &amp; Entertainment</option>
+                                    <option>Education</option>
+                                    <option>Other</option>
+                                </select>
+                                <div class="reclassify-actions">
+                                    <button class="action-btn action-btn-mark" onclick="saveReclassify(event, this)">✓ Save</button>
+                                    <button class="action-btn action-btn-edit" onclick="editExpense(event)">✏️ Edit Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- WISHLIST SCREEN -->
+            <div class="screen-content" id="wishlist">
+                <div class="wishlist-content">
+                    <div class="wishlist-title">Wishlist</div>
+
+                    <div class="add-item-box">
+                        <input type="text" class="wishlist-input" placeholder="Type item name...">
+                        <div class="upload-options">
+                            <div class="upload-btn">📷 Photo</div>
+                            <div class="upload-btn">📸 Screenshot</div>
+                        </div>
+                        <button class="add-button" onclick="addWishlistItem()">+ Add Item</button>
+                    </div>
+
+                    <div id="wishlist-empty" class="empty-card" style="min-height: 180px;">
+                        <div class="empty-icon">⭐</div>
+                        <div class="empty-title">Wishlist is empty</div>
+                        <div class="empty-copy">Add something you want. A name is enough.</div>
+                    </div>
+
+                    <div class="wishlist-items" id="wishlist-populated" hidden>
+                        <div class="wishlist-item">
+                            <div class="wishlist-item-text">Sony Headphones</div>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <div style="font-weight: 600; color: #667eea; font-size: 14px;">$399.000</div>
+                                <div class="wishlist-item-action">Edit</div>
+                            </div>
+                        </div>
+                        <div class="wishlist-item">
+                            <div class="wishlist-item-text">Running Shoes Nike</div>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <div style="font-weight: 600; color: #667eea; font-size: 14px;">$145.000</div>
+                                <div class="wishlist-item-action">Edit</div>
+                            </div>
+                        </div>
+                        <div class="wishlist-item">
+                            <div class="wishlist-item-text">Laptop Stand</div>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <div style="font-weight: 600; color: #667eea; font-size: 14px;">$85.000</div>
+                                <div class="wishlist-item-action">Edit</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORTS SCREEN -->
+            <div class="screen-content" id="reports">
+                <div class="reports-content">
+                    <div class="reports-title">Reports</div>
+                    <div class="reports-subtitle">Tax Year 2026 · Jan 1 – Dec 31 · for LLC income statement</div>
+
+                    <div id="reports-empty" class="empty-card" style="margin-bottom: 16px;">
+                        <div class="empty-icon">📊</div>
+                        <div class="empty-title">Nothing to report</div>
+                        <div class="empty-copy">Totals show up here after you add expenses.</div>
+                    </div>
+
+                    <div id="reports-populated" hidden>
+
+                    <div class="reports-total-card">
+                        <div class="reports-total-label">Total Expenses YTD</div>
+                        <div class="reports-total-amount">7.845.000 COP</div>
+                    </div>
+
+                    <div class="section-title">By Income Statement Category</div>
+
+                    <div class="reports-category-item">
+                        <div class="reports-category-header">
+                            <div>
+                                <div class="reports-category-name">Rent Expense</div>
+                                <div class="reports-category-line">Line 20b · 8 payments</div>
+                            </div>
+                            <div class="reports-category-amount">12.000.000 COP</div>
+                        </div>
+                    </div>
+
+                    <div class="reports-category-item">
+                        <div class="reports-category-header">
+                            <div>
+                                <div class="reports-category-name">Utilities</div>
+                                <div class="reports-category-line">Line 25 · 24 payments (Electric, Gas, Water)</div>
+                            </div>
+                            <div class="reports-category-amount">5.184.000 COP</div>
+                        </div>
+                    </div>
+
+                    <div class="reports-category-item">
+                        <div class="reports-category-header">
+                            <div>
+                                <div class="reports-category-name">Insurance</div>
+                                <div class="reports-category-line">Line 15 · 8 payments</div>
+                            </div>
+                            <div class="reports-category-amount">2.800.000 COP</div>
+                        </div>
+                    </div>
+
+                    <div class="reports-category-item">
+                        <div class="reports-category-header">
+                            <div>
+                                <div class="reports-category-name">Contract Labor</div>
+                                <div class="reports-category-line">Line 11 · Yanet &amp; Lili · 16 payments</div>
+                            </div>
+                            <div class="reports-category-amount">9.600.000 COP</div>
+                        </div>
+                    </div>
+
+                    <div class="reports-category-item">
+                        <div class="reports-category-header">
+                            <div>
+                                <div class="reports-category-name">Supplies</div>
+                                <div class="reports-category-line">Line 22 · groceries &amp; incidental purchases</div>
+                            </div>
+                            <div class="reports-category-amount">9.328.000 COP</div>
+                        </div>
+                    </div>
+
+                    <div class="reports-category-item">
+                        <div class="reports-category-header">
+                            <div>
+                                <div class="reports-category-name">Uncategorized</div>
+                                <div class="reports-category-line">3 items need a category before filing — tap in Activity to fix</div>
+                            </div>
+                            <div class="reports-category-amount">245.000 COP</div>
+                        </div>
+                    </div>
+
+                    <button class="reports-export-btn" onclick="exportReport()">📤 Export for Accountant</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PLANNER SCREEN (Calendar + To-Do) -->
+            <div class="screen-content" id="planner">
+                <div class="month-header">Planner</div>
+
+                <div class="planner-tabs">
+                    <div class="planner-tab active" onclick="showPlannerPanel('planner-calendar', this)">📅 Calendar</div>
+                    <div class="planner-tab" onclick="showPlannerPanel('planner-todo', this)">✅ To-Do</div>
+                </div>
+
+                <div class="planner-panel active" id="planner-calendar-panel">
+                    <div class="cal-header">
+                        <button class="cal-nav-btn" onclick="changeCalMonth(-1)">‹</button>
+                        <div class="cal-title" id="cal-title"></div>
+                        <button class="cal-nav-btn" onclick="changeCalMonth(1)">›</button>
+                    </div>
+                    <div class="cal-grid" id="cal-grid"></div>
+
+                    <div class="note-editor" id="note-editor">
+                        <div class="note-editor-title" id="note-editor-title"></div>
+                        <textarea id="note-editor-textarea" placeholder="Add a note for this day..."></textarea>
+                        <div class="note-editor-actions">
+                            <button class="btn action-btn action-btn-mark" style="flex:1;" onclick="saveNote()">Save Note</button>
+                            <button class="btn action-btn action-btn-edit" style="flex:1;" onclick="closeNoteEditor()">Close</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planner-panel" id="planner-todo-panel">
+                    <div class="todo-input-row">
+                        <input type="text" id="todo-input" placeholder="Add a task..." onkeydown="if(event.key==='Enter') addTodo()">
+                        <button class="add-expense-btn" onclick="addTodo()">Add</button>
+                    </div>
+                    <div class="todo-list" id="todo-list"></div>
+                </div>
+            </div>
+
+            <!-- CREATE EXPENSE SCREEN -->
+            <div class="screen-content" id="create-expense">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div class="month-header" style="margin-bottom: 0;">New</div>
+                    <button style="background: #e5e7eb; color: #333; border: none; border-radius: 8px; padding: 6px 12px; font-weight: 600; cursor: pointer; font-size: 14px;" onclick="showScreen('home')">✕</button>
+                </div>
+
+                <div class="capture-box">
+                    <div id="capture-idle-label" style="font-size: 22px; font-weight: 700; color: #4c51bf; margin-bottom: 8px;">AI Capture</div>
+                    <p class="capture-hint" id="capture-idle-hint">One at a time, or several at once. In voice, list them: “rent two million, electric four hundred thousand, groceries eighty-five thousand.” It will pull out each expense.</p>
+
+                    <div id="capture-video-preview" class="video-preview" style="display: none; height: 140px; margin-bottom: 12px;">
+                        Recording... point at the receipt, or keep talking
+                    </div>
+
+                    <div id="capture-idle-buttons" class="capture-btns">
+                        <button type="button" onclick="voiceOnly()">🎤 Voice</button>
+                        <button type="button" onclick="startVideoCapture()">📹 Video</button>
+                        <button type="button" onclick="capturePhoto()">📸 Photo</button>
+                    </div>
+
+                    <div id="capture-recording-buttons" class="capture-btns" style="display: none;">
+                        <button type="button" style="background: #667eea; color: white; border-color: #667eea;" onclick="snapPhoto()">📸 Snap Receipt</button>
+                        <button type="button" style="color: #333; border-color: #d0d5dd;" onclick="stopVideoCapture()">⏹ Stop</button>
+                    </div>
+                </div>
+
+                <div class="found-block">
+                    <div class="found-heading" id="found-heading">Found expenses (0)</div>
+                    <div id="captured-empty" class="found-empty">Nothing in the list yet. Capture a few, or add one by hand below.</div>
+                    <div id="captured-list"></div>
+                </div>
+
+                <div class="manual-add">
+                    <div class="found-heading">Add one by hand</div>
+                    <div>
+                        <label class="field-label" for="manual-name">Expense name</label>
+                        <input class="field-input" id="manual-name" type="text" placeholder="e.g., Water bill">
+                    </div>
+                    <div>
+                        <label class="field-label" for="manual-amount">Amount (COP)</label>
+                        <input class="field-input" id="manual-amount" type="number" placeholder="e.g., 240000">
+                    </div>
+                    <div>
+                        <label class="field-label" for="manual-due">Date due</label>
+                        <input class="field-input" id="manual-due" type="date">
+                    </div>
+                    <div>
+                        <label class="field-label">Status</label>
+                        <div class="status-pair">
+                            <button type="button" id="manual-unpaid" class="on" onclick="setManualStatus('Unpaid')">Unpaid</button>
+                            <button type="button" id="manual-paid" onclick="setManualStatus('Paid')">Paid</button>
+                        </div>
+                    </div>
+                    <button type="button" class="empty-secondary" onclick="addManualExpense()">Add to list</button>
+                    <button type="button" class="onboard-primary" onclick="saveExpense()">Save all</button>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="nav-reference hidden" id="app-nav">
+                <div class="nav-item active" onclick="showScreen('home')">
+                    <div class="nav-icon">💰</div>
+                    <div>Home</div>
+                </div>
+                <div class="nav-item" onclick="showScreen('activity')">
+                    <div class="nav-icon">📋</div>
+                    <div>Activity</div>
+                </div>
+                <div class="nav-item" onclick="showScreen('create-expense')">
+                    <div class="nav-icon">📹</div>
+                    <div>Capture</div>
+                </div>
+                <div class="nav-item" onclick="showScreen('wishlist')">
+                    <div class="nav-icon">⭐</div>
+                    <div>Wishlist</div>
+                </div>
+                <div class="nav-item" onclick="showScreen('reports')">
+                    <div class="nav-icon">📊</div>
+                    <div>Reports</div>
+                </div>
+                <div class="nav-item" onclick="showScreen('planner')">
+                    <div class="nav-icon">🗓️</div>
+                    <div>Planner</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ONBOARDING_SCREENS = ['splash', 'signup', 'welcome'];
+        const NAV_INDEX = {
+            home: 0,
+            activity: 1,
+            'create-expense': 2,
+            wishlist: 3,
+            reports: 4,
+            planner: 5
+        };
+
+        function showOnboardingScreen(screenId) {
+            document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            document.getElementById('app-nav').classList.add('hidden');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+
+            const nav = document.getElementById('app-nav');
+            if (ONBOARDING_SCREENS.includes(screenId)) {
+                nav.classList.add('hidden');
+                return;
+            }
+            nav.classList.remove('hidden');
+
+            const idx = NAV_INDEX[screenId];
+            if (idx !== undefined) {
+                document.querySelectorAll('.nav-item')[idx].classList.add('active');
+            }
+        }
+
+        function continueWithEmail(event) {
+            event.preventDefault();
+            const input = document.getElementById('signup-email');
+            const email = (input.value || '').trim() || 'you@hearthhold.app';
+            document.getElementById('signup-error').classList.remove('show');
+            openWelcome(email);
+        }
+
+        function signInWithApple() {
+            openWelcome(null);
+        }
+
+        function openWelcome(email) {
+            const title = document.getElementById('welcome-title');
+            title.textContent = email ? 'Welcome, ' + email.split('@')[0] : 'Welcome';
+            showOnboardingScreen('welcome');
+        }
+
+        function finishOnboarding() {
+            showScreen('home');
+        }
+
+        function toggleBillsPaid() {
+            const bills = document.getElementById('paid-bills');
+            const toggle = document.getElementById('paid-toggle');
+
+            bills.classList.toggle('open');
+            if (bills.classList.contains('open')) {
+                toggle.textContent = '5 items ▼';
+            } else {
+                toggle.textContent = '5 items ▶';
+            }
+        }
+
+        function toggleBillsUnpaid() {
+            const bills = document.getElementById('unpaid-bills');
+            const toggle = document.getElementById('unpaid-toggle');
+
+            bills.classList.toggle('open');
+            if (bills.classList.contains('open')) {
+                toggle.textContent = '2 items ▼';
+            } else {
+                toggle.textContent = '2 items ▶';
+            }
+        }
+
+        function toggleUtilities() {
+            const utilities = document.getElementById('utilities');
+            const toggle = document.getElementById('utilities-toggle');
+
+            utilities.classList.toggle('open');
+            if (utilities.classList.contains('open')) {
+                toggle.textContent = '3 items ▼';
+            } else {
+                toggle.textContent = '3 items ▶';
+            }
+        }
+
+        let capturedExpenses = [];
+        let manualStatus = 'Unpaid';
+
+        function setManualStatus(status) {
+            manualStatus = status;
+            document.getElementById('manual-unpaid').classList.toggle('on', status === 'Unpaid');
+            document.getElementById('manual-paid').classList.toggle('on', status === 'Paid');
+        }
+
+        function renderCapturedExpenses() {
+            const list = document.getElementById('captured-list');
+            const empty = document.getElementById('captured-empty');
+            document.getElementById('found-heading').textContent = 'Found expenses (' + capturedExpenses.length + ')';
+            empty.style.display = capturedExpenses.length ? 'none' : 'block';
+            list.innerHTML = '';
+            capturedExpenses.forEach((item, i) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'found-item';
+                wrap.innerHTML =
+                    '<div class="found-row">' +
+                        '<input data-field="name" placeholder="Name" value="' + String(item.name).replace(/"/g, '&quot;') + '">' +
+                        '<input data-field="amount" type="number" placeholder="Amount" value="' + item.amount + '" style="max-width:110px">' +
+                        '<button class="found-remove" type="button" aria-label="Remove">✕</button>' +
+                    '</div>' +
+                    '<div class="found-row">' +
+                        '<input data-field="due" type="date" value="' + (item.due || '') + '">' +
+                        '<input data-field="status" value="' + item.status + '" placeholder="Unpaid or Paid">' +
+                    '</div>';
+                wrap.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('input', () => {
+                        capturedExpenses[i][input.getAttribute('data-field')] = input.value;
+                    });
+                });
+                wrap.querySelector('.found-remove').onclick = () => {
+                    capturedExpenses.splice(i, 1);
+                    renderCapturedExpenses();
+                };
+                list.appendChild(wrap);
+            });
+        }
+
+        function addCapturedExpenses(items) {
+            capturedExpenses = capturedExpenses.concat(items);
+            renderCapturedExpenses();
+        }
+
+        function addManualExpense() {
+            const name = document.getElementById('manual-name').value.trim();
+            const amount = document.getElementById('manual-amount').value.trim();
+            addCapturedExpenses([{
+                name: name || 'Untitled',
+                amount: amount,
+                due: document.getElementById('manual-due').value,
+                status: manualStatus
+            }]);
+            document.getElementById('manual-name').value = '';
+            document.getElementById('manual-amount').value = '';
+        }
+
+        function setCaptureListening(on, message) {
+            const hint = document.getElementById('capture-idle-hint');
+            const label = document.getElementById('capture-idle-label');
+            if (on) {
+                label.textContent = 'Listening';
+                hint.textContent = message || 'Keep going. Name as many as you want.';
+            } else {
+                label.textContent = 'AI Capture';
+                hint.textContent = 'One at a time, or several at once. In voice, list them: “rent two million, electric four hundred thousand, groceries eighty-five thousand.” It will pull out each expense.';
+            }
+        }
+
+        function startVideoCapture() {
+            document.getElementById('capture-idle-label').style.display = 'none';
+            document.getElementById('capture-idle-hint').style.display = 'none';
+            document.getElementById('capture-idle-buttons').style.display = 'none';
+
+            const preview = document.getElementById('capture-video-preview');
+            preview.style.display = 'flex';
+            preview.classList.add('playing');
+
+            document.getElementById('capture-recording-buttons').style.display = 'flex';
+        }
+
+        function stopVideoCapture() {
+            document.getElementById('capture-idle-label').style.display = 'block';
+            document.getElementById('capture-idle-hint').style.display = 'block';
+            document.getElementById('capture-idle-buttons').style.display = 'flex';
+
+            const preview = document.getElementById('capture-video-preview');
+            preview.style.display = 'none';
+            preview.classList.remove('playing');
+
+            document.getElementById('capture-recording-buttons').style.display = 'none';
+            setCaptureListening(false);
+        }
+
+        function snapPhoto() {
+            addCapturedExpenses([
+                { name: 'Electric bill', amount: '400000', due: '', status: 'Unpaid' },
+                { name: 'Gas', amount: '24000', due: '', status: 'Unpaid' }
+            ]);
+            stopVideoCapture();
+        }
+
+        function capturePhoto() {
+            addCapturedExpenses([
+                { name: 'Receipt — supermarket', amount: '85500', due: '', status: 'Paid' }
+            ]);
+        }
+
+        function voiceOnly() {
+            setCaptureListening(true, 'Listening… list them however you want. One, or a bunch.');
+            document.getElementById('capture-idle-buttons').style.display = 'none';
+            setTimeout(() => {
+                addCapturedExpenses([
+                    { name: 'Rent', amount: '2200000', due: '', status: 'Unpaid' },
+                    { name: 'Electric', amount: '400000', due: '', status: 'Unpaid' },
+                    { name: 'Groceries', amount: '85500', due: '', status: 'Paid' }
+                ]);
+                document.getElementById('capture-idle-buttons').style.display = 'flex';
+                setCaptureListening(false);
+            }, 1100);
+        }
+
+        function addWishlistItem() {
+            alert('Item added to wishlist!');
+        }
+
+        function toggleReclassify(element) {
+            document.querySelectorAll('.reclassify-panel').forEach(panel => {
+                if (panel !== element.querySelector('.reclassify-panel')) {
+                    panel.classList.remove('show');
+                }
+            });
+            element.querySelector('.reclassify-panel').classList.toggle('show');
+        }
+
+        function saveReclassify(event, button) {
+            event.stopPropagation();
+            const item = button.closest('.activity-item');
+            const select = item.querySelector('.reclassify-select');
+            const tag = item.querySelector('.activity-category-tag');
+            tag.textContent = select.value;
+            item.querySelector('.reclassify-panel').classList.remove('show');
+        }
+
+        function exportReport() {
+            alert('Exporting categorized expense report for your accountant...');
+        }
+
+        // ---------- PLANNER: tabs ----------
+        function showPlannerPanel(name, tabEl) {
+            document.querySelectorAll('.planner-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.planner-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(name + '-panel').classList.add('active');
+            tabEl.classList.add('active');
+        }
+
+        // ---------- PLANNER: calendar ----------
+        let calYear, calMonth; // calMonth is 0-indexed
+        let selectedDateKey = null;
+        const plannerToday = new Date();
+
+        function loadNotes() {
+            return JSON.parse(localStorage.getItem('house-app-notes') || '{}');
+        }
+        function saveNotes(notes) {
+            localStorage.setItem('house-app-notes', JSON.stringify(notes));
+        }
+
+        function dateKey(y, m, d) {
+            return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        }
+
+        function renderCalendar() {
+            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            document.getElementById('cal-title').textContent = monthNames[calMonth] + ' ' + calYear;
+
+            const grid = document.getElementById('cal-grid');
+            grid.innerHTML = '';
+
+            ['S','M','T','W','T','F','S'].forEach(d => {
+                const el = document.createElement('div');
+                el.className = 'cal-dow';
+                el.textContent = d;
+                grid.appendChild(el);
+            });
+
+            const firstDay = new Date(calYear, calMonth, 1).getDay();
+            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+            const notes = loadNotes();
+
+            for (let i = 0; i < firstDay; i++) {
+                const el = document.createElement('div');
+                el.className = 'cal-day empty';
+                grid.appendChild(el);
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const el = document.createElement('div');
+                const key = dateKey(calYear, calMonth, d);
+                el.className = 'cal-day';
+                if (notes[key]) el.classList.add('has-note');
+                if (calYear === plannerToday.getFullYear() && calMonth === plannerToday.getMonth() && d === plannerToday.getDate()) {
+                    el.classList.add('today');
+                }
+                el.textContent = d;
+                el.onclick = () => openNoteEditor(key, d, calMonth, calYear);
+                grid.appendChild(el);
+            }
+        }
+
+        function changeCalMonth(delta) {
+            calMonth += delta;
+            if (calMonth < 0) { calMonth = 11; calYear--; }
+            if (calMonth > 11) { calMonth = 0; calYear++; }
+            closeNoteEditor();
+            renderCalendar();
+        }
+
+        function openNoteEditor(key, d, m, y) {
+            selectedDateKey = key;
+            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            document.getElementById('note-editor-title').textContent = monthNames[m] + ' ' + d + ', ' + y;
+            const notes = loadNotes();
+            document.getElementById('note-editor-textarea').value = notes[key] || '';
+            document.getElementById('note-editor').classList.add('show');
+        }
+
+        function closeNoteEditor() {
+            selectedDateKey = null;
+            document.getElementById('note-editor').classList.remove('show');
+        }
+
+        function saveNote() {
+            if (!selectedDateKey) return;
+            const notes = loadNotes();
+            const text = document.getElementById('note-editor-textarea').value.trim();
+            if (text) {
+                notes[selectedDateKey] = text;
+            } else {
+                delete notes[selectedDateKey];
+            }
+            saveNotes(notes);
+            closeNoteEditor();
+            renderCalendar();
+        }
+
+        // ---------- PLANNER: to-do ----------
+        function loadTodos() {
+            return JSON.parse(localStorage.getItem('house-app-todos') || '[]');
+        }
+        function saveTodos(todos) {
+            localStorage.setItem('house-app-todos', JSON.stringify(todos));
+        }
+
+        function renderTodos() {
+            const todos = loadTodos();
+            const list = document.getElementById('todo-list');
+            list.innerHTML = '';
+
+            if (todos.length === 0) {
+                list.innerHTML = '<div class="planner-empty">Nothing on your list yet</div>';
+                return;
+            }
+
+            todos.forEach((t, i) => {
+                const item = document.createElement('div');
+                item.className = 'todo-item' + (t.done ? ' done' : '');
+
+                const check = document.createElement('div');
+                check.className = 'todo-check';
+                check.textContent = t.done ? '✓' : '';
+                check.onclick = () => toggleTodo(i);
+
+                const text = document.createElement('div');
+                text.className = 'todo-text';
+                text.textContent = t.text;
+
+                const del = document.createElement('button');
+                del.className = 'todo-delete';
+                del.textContent = '✕';
+                del.onclick = () => deleteTodo(i);
+
+                item.appendChild(check);
+                item.appendChild(text);
+                item.appendChild(del);
+                list.appendChild(item);
+            });
+        }
+
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            const text = input.value.trim();
+            if (!text) return;
+            const todos = loadTodos();
+            todos.push({ text, done: false });
+            saveTodos(todos);
+            input.value = '';
+            renderTodos();
+        }
+
+        function toggleTodo(i) {
+            const todos = loadTodos();
+            todos[i].done = !todos[i].done;
+            saveTodos(todos);
+            renderTodos();
+        }
+
+        function deleteTodo(i) {
+            const todos = loadTodos();
+            todos.splice(i, 1);
+            saveTodos(todos);
+            renderTodos();
+        }
+
+        // ---------- PLANNER: init ----------
+        calYear = plannerToday.getFullYear();
+        calMonth = plannerToday.getMonth();
+        renderCalendar();
+        renderTodos();
+
+        function toggleActions(element) {
+            // Close other open action buttons
+            document.querySelectorAll('.action-buttons').forEach(btn => {
+                if (btn !== element.querySelector('.action-buttons')) {
+                    btn.classList.remove('show');
+                }
+            });
+
+            // Toggle this element's action buttons
+            const actionBtn = element.querySelector('.action-buttons');
+            actionBtn.classList.toggle('show');
+            element.classList.toggle('expanded');
+        }
+
+        function markAsPaid(event) {
+            event.stopPropagation();
+            const billItem = event.target.closest('.bill-item');
+            const statusBadge = billItem.querySelector('.status-badge');
+
+            if (statusBadge.textContent.includes('Paid')) {
+                statusBadge.textContent = '⏳ Pending';
+                statusBadge.className = 'status-badge status-pending';
+            } else {
+                statusBadge.textContent = '✓ Paid';
+                statusBadge.className = 'status-badge status-paid';
+            }
+        }
+
+        function editExpense(event) {
+            event.stopPropagation();
+            alert('Edit expense modal would open here!');
+        }
+
+        function createNewExpense() {
+            showScreen('create-expense');
+        }
+
+        function saveExpense() {
+            const count = capturedExpenses.length;
+            alert(count ? ('Saved ' + count + ' expense' + (count === 1 ? '' : 's') + '.') : 'Nothing in the list yet — add one or capture first.');
+            if (count) showScreen('home');
+        }
+    </script>
+</body>
+</html>
