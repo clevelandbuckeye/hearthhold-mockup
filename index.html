@@ -852,7 +852,7 @@
             justify-content: space-around;
             height: 58px;
             align-items: center;
-            font-size: 11px;
+            font-size: 9px;
             color: #999;
         }
 
@@ -872,7 +872,128 @@
         }
 
         .nav-icon {
-            font-size: 20px;
+            font-size: 16px;
+        }
+
+        .vault-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .vault-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            background: #eee;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .vault-tab.on {
+            background: #667eea;
+            color: white;
+        }
+
+        .vault-binders {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            margin-bottom: 12px;
+            padding-bottom: 2px;
+        }
+
+        .vault-chip {
+            flex-shrink: 0;
+            border: 1px solid #d0d5dd;
+            background: white;
+            border-radius: 16px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .vault-chip.on {
+            border-color: #667eea;
+            color: #667eea;
+            background: #eef0ff;
+        }
+
+        .vault-file {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .vault-file-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .vault-file-meta {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .vault-file-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .vault-file-row button {
+            flex: 1;
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .vault-share-btn {
+            background: #eef0ff;
+            color: #4c51bf;
+        }
+
+        .vault-open-btn {
+            background: #f3f4f6;
+            color: #333;
+        }
+
+        .vault-sheet {
+            display: none;
+            margin-top: 8px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .vault-sheet.show {
+            display: block;
+        }
+
+        .vault-share-list {
+            font-size: 12px;
+            color: #555;
+            margin: 8px 0;
+        }
+
+        .vault-share-list div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
         }
 
         .nav-reference.hidden {
@@ -1633,6 +1754,7 @@
                         <div class="empty-copy">Add a bill or snap a receipt. You can save it with nothing filled in and reconcile it later.</div>
                         <div class="empty-actions">
                             <button class="add-expense-btn" onclick="createNewExpense()">New</button>
+                            <button class="empty-secondary" onclick="showScreen('files')">Files</button>
                         </div>
                     </div>
                 </div>
@@ -2260,6 +2382,25 @@
                 </div>
             </div>
 
+            <!-- FILES / VAULT -->
+            <div class="screen-content" id="files">
+                <div class="month-header">Files</div>
+                <p class="capture-hint">Private to you. The rest of the household cannot see these unless you share a specific file.</p>
+
+                <div class="vault-tabs">
+                    <div class="vault-tab on" id="vault-tab-mine" onclick="showVaultPane('mine')">My files</div>
+                    <div class="vault-tab" id="vault-tab-shared" onclick="showVaultPane('shared')">Shared with me</div>
+                </div>
+
+                <div id="vault-pane-mine">
+                    <div class="vault-binders" id="vault-binders"></div>
+                    <div id="vault-file-list"></div>
+                    <button type="button" class="empty-secondary" style="margin-top: 8px;" onclick="mockUploadVault()">+ Add a file</button>
+                </div>
+
+                <div id="vault-pane-shared" style="display: none;"></div>
+            </div>
+
             <!-- CREATE EXPENSE SCREEN -->
             <div class="screen-content" id="create-expense">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -2333,6 +2474,10 @@
                     <div class="nav-icon">📹</div>
                     <div>Capture</div>
                 </div>
+                <div class="nav-item" onclick="showScreen('files')">
+                    <div class="nav-icon">📁</div>
+                    <div>Files</div>
+                </div>
                 <div class="nav-item" onclick="showScreen('wishlist')">
                     <div class="nav-icon">⭐</div>
                     <div>Wishlist</div>
@@ -2355,9 +2500,10 @@
             home: 0,
             activity: 1,
             'create-expense': 2,
-            wishlist: 3,
-            reports: 4,
-            planner: 5
+            files: 3,
+            wishlist: 4,
+            reports: 5,
+            planner: 6
         };
 
         function showOnboardingScreen(screenId) {
@@ -2382,6 +2528,7 @@
             if (idx !== undefined) {
                 document.querySelectorAll('.nav-item')[idx].classList.add('active');
             }
+            if (screenId === 'files') renderVault();
         }
 
         function continueWithEmail(event) {
@@ -2799,6 +2946,124 @@
 
         function createNewExpense() {
             showScreen('create-expense');
+        }
+
+        let vaultPane = 'mine';
+        let vaultBinder = 'all';
+        let vaultShareOpen = null;
+        const vaultFiles = [
+            { id: 'articles', binder: 'llc', title: 'Articles of Organization', file: 'articles.pdf', shares: [] },
+            { id: 'oa', binder: 'llc', title: 'Operating Agreement', file: 'OA-2024.pdf', shares: ['accountant@example.com'] },
+            { id: 'ein', binder: 'llc', title: 'EIN letter', file: 'ein-cp575.pdf', shares: [] },
+            { id: 'trust', binder: 'trust', title: 'Revocable living trust', file: 'trust.pdf', shares: ['lawyer@example.com'] },
+            { id: 'pour', binder: 'trust', title: 'Pour-over will', file: 'will.pdf', shares: [] }
+        ];
+        const vaultSharedIn = [
+            { title: 'Property deed — Medellín', from: 'Shared by Ana', file: 'deed.pdf' }
+        ];
+
+        function showVaultPane(pane) {
+            vaultPane = pane;
+            document.getElementById('vault-tab-mine').classList.toggle('on', pane === 'mine');
+            document.getElementById('vault-tab-shared').classList.toggle('on', pane === 'shared');
+            document.getElementById('vault-pane-mine').style.display = pane === 'mine' ? 'block' : 'none';
+            document.getElementById('vault-pane-shared').style.display = pane === 'shared' ? 'block' : 'none';
+            renderVault();
+        }
+
+        function renderVault() {
+            const binders = [
+                { id: 'all', label: 'All' },
+                { id: 'llc', label: 'LLC' },
+                { id: 'trust', label: 'Trust' },
+                { id: 'operating', label: 'Operating' }
+            ];
+            document.getElementById('vault-binders').innerHTML = binders.map(b =>
+                '<button type="button" class="vault-chip' + (vaultBinder === b.id ? ' on' : '') + '" data-id="' + b.id + '">' + b.label + '</button>'
+            ).join('');
+            document.querySelectorAll('#vault-binders .vault-chip').forEach(chip => {
+                chip.onclick = () => {
+                    vaultBinder = chip.getAttribute('data-id');
+                    vaultShareOpen = null;
+                    renderVault();
+                };
+            });
+
+            const list = document.getElementById('vault-file-list');
+            const rows = vaultFiles.filter(f => vaultBinder === 'all' || f.binder === vaultBinder);
+            list.innerHTML = rows.map(f => {
+                const n = f.shares.length;
+                const shareLabel = n ? ('Shared with ' + n) : 'Private';
+                const sheet = vaultShareOpen === f.id
+                    ? '<div class="vault-sheet show">' +
+                        '<div class="found-heading">Share this file only</div>' +
+                        '<p class="capture-hint" style="margin-bottom:8px;">They get this file. Not the binder. Not the rest of Files.</p>' +
+                        '<div class="vault-share-list">' +
+                            (f.shares.length
+                                ? f.shares.map((email, i) =>
+                                    '<div><span>' + email + '</span><button type="button" class="found-remove" data-revoke="' + f.id + '" data-i="' + i + '">✕</button></div>'
+                                  ).join('')
+                                : '<div style="color:#999;border:none;">Nobody yet</div>') +
+                        '</div>' +
+                        '<input class="field-input" id="vault-share-email" type="text" placeholder="email@example.com" value="cpa@example.com">' +
+                        '<button type="button" class="empty-secondary" style="margin-top:8px;" data-add="' + f.id + '">Share</button>' +
+                      '</div>'
+                    : '';
+                return '<div class="vault-file">' +
+                    '<div class="vault-file-title">' + f.title + '</div>' +
+                    '<div class="vault-file-meta">' + f.binder.toUpperCase() + ' · ' + f.file + ' · ' + shareLabel + '</div>' +
+                    '<div class="vault-file-row">' +
+                        '<button type="button" class="vault-open-btn" data-open="' + f.id + '">Open</button>' +
+                        '<button type="button" class="vault-share-btn" data-share="' + f.id + '">Share</button>' +
+                    '</div>' + sheet +
+                '</div>';
+            }).join('') || '<div class="found-empty">Nothing in this binder yet.</div>';
+
+            list.querySelectorAll('[data-share]').forEach(btn => {
+                btn.onclick = () => {
+                    const id = btn.getAttribute('data-share');
+                    vaultShareOpen = vaultShareOpen === id ? null : id;
+                    renderVault();
+                };
+            });
+            list.querySelectorAll('[data-open]').forEach(btn => {
+                btn.onclick = () => alert('Opens the file. In the real app this is a private signed URL.');
+            });
+            list.querySelectorAll('[data-add]').forEach(btn => {
+                btn.onclick = () => {
+                    const file = vaultFiles.find(x => x.id === btn.getAttribute('data-add'));
+                    const input = document.getElementById('vault-share-email');
+                    const email = ((input && input.value) || '').trim() || 'cpa@example.com';
+                    if (file && file.shares.indexOf(email) === -1) file.shares.push(email);
+                    renderVault();
+                };
+            });
+            list.querySelectorAll('[data-revoke]').forEach(btn => {
+                btn.onclick = () => {
+                    const file = vaultFiles.find(x => x.id === btn.getAttribute('data-revoke'));
+                    if (file) file.shares.splice(Number(btn.getAttribute('data-i')), 1);
+                    renderVault();
+                };
+            });
+
+            document.getElementById('vault-pane-shared').innerHTML = vaultSharedIn.map(f =>
+                '<div class="vault-file">' +
+                    '<div class="vault-file-title">' + f.title + '</div>' +
+                    '<div class="vault-file-meta">' + f.from + ' · ' + f.file + ' · view only</div>' +
+                    '<div class="vault-file-row"><button type="button" class="vault-open-btn" onclick="alert(\'Opens the shared file.\')">Open</button></div>' +
+                '</div>'
+            ).join('');
+        }
+
+        function mockUploadVault() {
+            vaultFiles.push({
+                id: 'new-' + Date.now(),
+                binder: vaultBinder === 'all' ? 'llc' : vaultBinder,
+                title: 'Scanned document',
+                file: 'scan.pdf',
+                shares: []
+            });
+            renderVault();
         }
 
         function saveExpense() {
