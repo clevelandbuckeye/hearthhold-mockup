@@ -884,10 +884,10 @@
         .vault-tab {
             flex: 1;
             text-align: center;
-            padding: 8px;
+            padding: 8px 4px;
             border-radius: 8px;
             background: #eee;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #666;
             cursor: pointer;
@@ -994,6 +994,87 @@
             align-items: center;
             padding: 6px 0;
             border-bottom: 1px solid #eee;
+        }
+
+        .prop-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .prop-top {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .prop-photo {
+            width: 72px;
+            height: 72px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+        }
+
+        .prop-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .prop-addr {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+            line-height: 1.35;
+        }
+
+        .prop-owner {
+            font-size: 11px;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .prop-body {
+            display: none;
+            padding: 0 10px 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .prop-card.open .prop-body {
+            display: block;
+        }
+
+        .prop-project {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 12px;
+        }
+
+        .prop-project:last-child {
+            border-bottom: none;
+        }
+
+        .prop-dot {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #b45309;
+        }
+
+        .prop-dot.done {
+            color: #6b7280;
         }
 
         .nav-reference.hidden {
@@ -2385,17 +2466,23 @@
             <!-- FILES / VAULT -->
             <div class="screen-content" id="files">
                 <div class="month-header">Files</div>
-                <p class="capture-hint">Private to you. The rest of the household cannot see these unless you share a specific file.</p>
+                <p class="capture-hint" id="vault-hint">Private to you. The rest of the household cannot see these unless you share a specific file.</p>
 
                 <div class="vault-tabs">
-                    <div class="vault-tab on" id="vault-tab-mine" onclick="showVaultPane('mine')">My files</div>
-                    <div class="vault-tab" id="vault-tab-shared" onclick="showVaultPane('shared')">Shared with me</div>
+                    <div class="vault-tab on" id="vault-tab-mine" onclick="showVaultPane('mine')">Docs</div>
+                    <div class="vault-tab" id="vault-tab-properties" onclick="showVaultPane('properties')">Properties</div>
+                    <div class="vault-tab" id="vault-tab-shared" onclick="showVaultPane('shared')">Shared</div>
                 </div>
 
                 <div id="vault-pane-mine">
                     <div class="vault-binders" id="vault-binders"></div>
                     <div id="vault-file-list"></div>
                     <button type="button" class="empty-secondary" style="margin-top: 8px;" onclick="mockUploadVault()">+ Add a file</button>
+                </div>
+
+                <div id="vault-pane-properties" style="display: none;">
+                    <div class="vault-binders" id="prop-entities"></div>
+                    <div id="prop-list"></div>
                 </div>
 
                 <div id="vault-pane-shared" style="display: none;"></div>
@@ -2951,27 +3038,149 @@
         let vaultPane = 'mine';
         let vaultBinder = 'all';
         let vaultShareOpen = null;
+        let vaultPropertyFilter = null;
+        let propEntity = 'all';
+        let propOpen = null;
         const vaultFiles = [
-            { id: 'articles', binder: 'llc', title: 'Articles of Organization', file: 'articles.pdf', shares: [] },
-            { id: 'oa', binder: 'llc', title: 'Operating Agreement', file: 'OA-2024.pdf', shares: ['accountant@example.com'] },
-            { id: 'ein', binder: 'llc', title: 'EIN letter', file: 'ein-cp575.pdf', shares: [] },
-            { id: 'trust', binder: 'trust', title: 'Revocable living trust', file: 'trust.pdf', shares: ['lawyer@example.com'] },
-            { id: 'pour', binder: 'trust', title: 'Pour-over will', file: 'will.pdf', shares: [] }
+            { id: 'articles', binder: 'llc', title: 'Articles of Organization', file: 'articles.pdf', shares: [], property: null },
+            { id: 'oa', binder: 'llc', title: 'Operating Agreement', file: 'OA-2024.pdf', shares: ['accountant@example.com'], property: null },
+            { id: 'ein', binder: 'llc', title: 'EIN letter', file: 'ein-cp575.pdf', shares: [], property: null },
+            { id: 'trust', binder: 'trust', title: 'Revocable living trust', file: 'trust.pdf', shares: ['lawyer@example.com'], property: null },
+            { id: 'pour', binder: 'trust', title: 'Pour-over will', file: 'will.pdf', shares: [], property: null },
+            { id: 'deed-med', binder: 'llc', title: 'Deed — Laureles apt', file: 'deed-laureles.pdf', shares: [], property: 'laureles' }
         ];
         const vaultSharedIn = [
             { title: 'Property deed — Medellín', from: 'Shared by Ana', file: 'deed.pdf' }
+        ];
+        const propEntities = [
+            { id: 'all', label: 'All' },
+            { id: 'llc', label: 'Hearthhold LLC' },
+            { id: 'trust', label: 'Family trust' }
+        ];
+        const properties = [
+            {
+                id: 'laureles',
+                name: 'Laureles apartment',
+                address: 'Cra. 70 #34-20, Laureles\nMedellín, Antioquia',
+                owner: 'Hearthhold LLC',
+                entity: 'llc',
+                photo: '#5b7c99',
+                emoji: '🏢',
+                projects: [
+                    { title: 'Roof leak over bedroom', status: 'active' },
+                    { title: 'Kitchen cabinets', status: 'active' },
+                    { title: 'Window seals 2025', status: 'done' }
+                ]
+            },
+            {
+                id: 'ohio',
+                name: 'Ohio house',
+                address: 'Rural Licking County\nOhio, USA',
+                owner: 'Family trust',
+                entity: 'trust',
+                photo: '#6b8f71',
+                emoji: '🏡',
+                projects: [
+                    { title: 'Fence on the east line', status: 'paused' }
+                ]
+            }
         ];
 
         function showVaultPane(pane) {
             vaultPane = pane;
             document.getElementById('vault-tab-mine').classList.toggle('on', pane === 'mine');
+            document.getElementById('vault-tab-properties').classList.toggle('on', pane === 'properties');
             document.getElementById('vault-tab-shared').classList.toggle('on', pane === 'shared');
             document.getElementById('vault-pane-mine').style.display = pane === 'mine' ? 'block' : 'none';
+            document.getElementById('vault-pane-properties').style.display = pane === 'properties' ? 'block' : 'none';
             document.getElementById('vault-pane-shared').style.display = pane === 'shared' ? 'block' : 'none';
+            const hint = document.getElementById('vault-hint');
+            if (pane === 'properties') {
+                hint.textContent = 'Who holds title (LLC or trust), the address, a photo, and what’s in progress.';
+            } else if (pane === 'shared') {
+                hint.textContent = 'Files someone sent you. You cannot see the rest of their cabinet.';
+            } else {
+                hint.textContent = 'Private to you. The rest of the household cannot see these unless you share a specific file.';
+            }
             renderVault();
         }
 
+        function openPropertyPapers(propertyId) {
+            vaultPropertyFilter = propertyId;
+            vaultBinder = 'all';
+            vaultShareOpen = null;
+            showVaultPane('mine');
+        }
+
+        function renderProperties() {
+            document.getElementById('prop-entities').innerHTML = propEntities.map(e =>
+                '<button type="button" class="vault-chip' + (propEntity === e.id ? ' on' : '') + '" data-ent="' + e.id + '">' + e.label + '</button>'
+            ).join('');
+            document.querySelectorAll('#prop-entities .vault-chip').forEach(chip => {
+                chip.onclick = () => {
+                    propEntity = chip.getAttribute('data-ent');
+                    propOpen = null;
+                    renderProperties();
+                };
+            });
+
+            const rows = properties.filter(p => propEntity === 'all' || p.entity === propEntity);
+            document.getElementById('prop-list').innerHTML = rows.map(p => {
+                const active = p.projects.filter(x => x.status === 'active');
+                const open = propOpen === p.id;
+                return '<div class="prop-card' + (open ? ' open' : '') + '">' +
+                    '<div class="prop-top" data-prop="' + p.id + '">' +
+                        '<div class="prop-photo" style="background:' + p.photo + '">' + p.emoji + '</div>' +
+                        '<div>' +
+                            '<div class="prop-name">' + p.name + '</div>' +
+                            '<div class="prop-addr">' + p.address.replace(/\n/g, '<br>') + '</div>' +
+                            '<div class="prop-owner">Owned by ' + p.owner + ' · ' + active.length + ' active</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="prop-body">' +
+                        '<div class="found-heading" style="margin-top:8px;">Active projects</div>' +
+                        p.projects.map(pr =>
+                            '<div class="prop-project"><span>' + pr.title + '</span><span class="prop-dot' + (pr.status === 'done' ? ' done' : '') + '">' + pr.status + '</span></div>'
+                        ).join('') +
+                        '<div class="vault-file-row" style="margin-top:8px;">' +
+                            '<button type="button" class="vault-open-btn" data-papers="' + p.id + '">Papers</button>' +
+                            '<button type="button" class="vault-share-btn" onclick="alert(\'Map pin. In the real app this is the saved lat/lng.\')">Map</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+
+            document.querySelectorAll('#prop-list .prop-top').forEach(el => {
+                el.onclick = () => {
+                    const id = el.getAttribute('data-prop');
+                    propOpen = propOpen === id ? null : id;
+                    renderProperties();
+                };
+            });
+            document.querySelectorAll('#prop-list [data-papers]').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    openPropertyPapers(btn.getAttribute('data-papers'));
+                };
+            });
+        }
+
         function renderVault() {
+            if (vaultPane === 'properties') {
+                renderProperties();
+                return;
+            }
+            if (vaultPane === 'shared') {
+                document.getElementById('vault-pane-shared').innerHTML = vaultSharedIn.map(f =>
+                    '<div class="vault-file">' +
+                        '<div class="vault-file-title">' + f.title + '</div>' +
+                        '<div class="vault-file-meta">' + f.from + ' · ' + f.file + ' · view only</div>' +
+                        '<div class="vault-file-row"><button type="button" class="vault-open-btn" onclick="alert(\'Opens the shared file.\')">Open</button></div>' +
+                    '</div>'
+                ).join('');
+                return;
+            }
+
             const binders = [
                 { id: 'all', label: 'All' },
                 { id: 'llc', label: 'LLC' },
@@ -2984,14 +3193,20 @@
             document.querySelectorAll('#vault-binders .vault-chip').forEach(chip => {
                 chip.onclick = () => {
                     vaultBinder = chip.getAttribute('data-id');
+                    vaultPropertyFilter = null;
                     vaultShareOpen = null;
                     renderVault();
                 };
             });
 
             const list = document.getElementById('vault-file-list');
-            const rows = vaultFiles.filter(f => vaultBinder === 'all' || f.binder === vaultBinder);
-            list.innerHTML = rows.map(f => {
+            const rows = vaultFiles.filter(f => {
+                if (vaultPropertyFilter && f.property !== vaultPropertyFilter) return false;
+                return vaultBinder === 'all' || f.binder === vaultBinder;
+            });
+            list.innerHTML = (vaultPropertyFilter
+                ? '<p class="capture-hint">Papers for this property. Tap All to see everything.</p>'
+                : '') + (rows.map(f => {
                 const n = f.shares.length;
                 const shareLabel = n ? ('Shared with ' + n) : 'Private';
                 const sheet = vaultShareOpen === f.id
@@ -3017,7 +3232,7 @@
                         '<button type="button" class="vault-share-btn" data-share="' + f.id + '">Share</button>' +
                     '</div>' + sheet +
                 '</div>';
-            }).join('') || '<div class="found-empty">Nothing in this binder yet.</div>';
+            }).join('') || '<div class="found-empty">Nothing in this binder yet.</div>');
 
             list.querySelectorAll('[data-share]').forEach(btn => {
                 btn.onclick = () => {
@@ -3045,14 +3260,6 @@
                     renderVault();
                 };
             });
-
-            document.getElementById('vault-pane-shared').innerHTML = vaultSharedIn.map(f =>
-                '<div class="vault-file">' +
-                    '<div class="vault-file-title">' + f.title + '</div>' +
-                    '<div class="vault-file-meta">' + f.from + ' · ' + f.file + ' · view only</div>' +
-                    '<div class="vault-file-row"><button type="button" class="vault-open-btn" onclick="alert(\'Opens the shared file.\')">Open</button></div>' +
-                '</div>'
-            ).join('');
         }
 
         function mockUploadVault() {
@@ -3061,7 +3268,8 @@
                 binder: vaultBinder === 'all' ? 'llc' : vaultBinder,
                 title: 'Scanned document',
                 file: 'scan.pdf',
-                shares: []
+                shares: [],
+                property: null
             });
             renderVault();
         }
