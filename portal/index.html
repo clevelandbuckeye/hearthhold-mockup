@@ -73,7 +73,7 @@
     .warn-note { font-size: 12px; color: var(--warn); margin-top: 8px; }
 
     .app { display: none; height: 100%; }
-    .app.on { display: grid; grid-template-columns: 228px 1fr; }
+    .app.on { display: grid; grid-template-columns: 228px 1fr; min-height: 0; overflow: hidden; }
 
     .side {
       background: var(--forest);
@@ -82,6 +82,7 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
+      overflow: auto;
     }
     .side .brand { color: #cfe3d6; padding: 0 8px 12px; }
     .side h2 { font-size: 18px; color: #fff; padding: 0 8px 14px; font-weight: 700; }
@@ -101,7 +102,7 @@
     .nav-item:hover, .nav-item.on { background: rgba(255,255,255,.1); color: #fff; }
     .badge { background: #d7a35a; color: #1a2a24; font-size: 10px; font-weight: 700; border-radius: 99px; padding: 1px 6px; }
 
-    .main { display: flex; flex-direction: column; min-width: 0; }
+    .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
     .ai-bar {
       display: flex;
       gap: 8px;
@@ -111,9 +112,34 @@
       align-items: center;
     }
     .ai-bar input { flex: 1; }
-    .icon-btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 10px; }
+    .icon-btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 10px; cursor: pointer; display: inline-block; }
     .icon-btn.on { background: var(--mist); }
-    .content { flex: 1; overflow: auto; padding: 22px 24px 40px; }
+    .content { flex: 1; overflow-y: auto; padding: 22px 24px 64px; }
+    .hero { width: 100%; height: 200px; border-radius: 12px; background-size: cover; background-position: center; margin-bottom: 12px; }
+    .dash-stack { display: flex; flex-direction: column; gap: 12px; }
+    .dash-sec { scroll-margin-top: 12px; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; margin-top: 10px; }
+    .gal-item {
+      border: none;
+      background: transparent;
+      padding: 0;
+      text-align: left;
+      width: 100%;
+    }
+    .gal-img {
+      display: block;
+      height: 112px;
+      border-radius: 8px;
+      background: #e7ebe8 center/cover;
+      border: 1px solid var(--line);
+    }
+    .gal-item.empty .gal-img {
+      background: var(--mist);
+      border: 2px dashed var(--line);
+    }
+    .gal-cap { display: block; font-size: 11px; color: var(--mute); margin-top: 4px; line-height: 1.3; }
+    .gal-pop { width: min(740px, 92vw); }
+    .gal-pop img { width: 100%; border-radius: 8px; display: block; margin-bottom: 10px; max-height: 70vh; object-fit: contain; background: #111; }
     .screen { display: none; }
     .screen.on { display: block; }
 
@@ -123,6 +149,7 @@
     .g-3 { grid-template-columns: repeat(3, 1fr); }
     .g-2 { grid-template-columns: 1fr 1fr; }
     .g-main { grid-template-columns: 1.4fr .8fr; }
+    .g-tree { grid-template-columns: 260px 1fr; }
     .card {
       background: var(--card);
       border-radius: 12px;
@@ -136,7 +163,6 @@
     .muted { color: var(--mute); font-size: 12px; }
     .row { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
     .thumb { width: 56px; height: 56px; border-radius: 10px; background-size: cover; background-position: center; flex-shrink: 0; }
-    .hero { width: 100%; height: 160px; border-radius: 12px; background-size: cover; background-position: center; margin-bottom: 12px; }
     .list { display: flex; flex-direction: column; gap: 8px; }
     .pill { display: inline-flex; border: 1px solid var(--line); background: #fff; border-radius: 99px; padding: 6px 10px; font-size: 12px; font-weight: 600; color: var(--mute); }
     .pill.on { background: var(--forest); color: #fff; border-color: var(--forest); }
@@ -172,14 +198,17 @@
       z-index: 20;
     }
     .overlay.on { display: flex; }
-    .overlay .card { width: 520px; }
+    .overlay { z-index: 50; }
+    .overlay .card { width: 520px; max-height: 80vh; overflow: auto; }
+    .dash-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; }
+    @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
     .check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--line); }
     .user-chip { font-size: 12px; background: var(--mist); border-radius: 99px; padding: 4px 8px; }
     .listen { color: var(--forest-2); font-weight: 600; font-size: 13px; }
     @media (max-width: 900px) {
       .app.on { grid-template-columns: 1fr; }
       .side { display: none; }
-      .g-3, .g-2, .g-main { grid-template-columns: 1fr; }
+      .g-3, .g-2, .g-main, .g-tree { grid-template-columns: 1fr; }
     }
 
     .fb-btn {
@@ -215,6 +244,44 @@
     .fb-panel textarea { min-height: 80px; resize: vertical; }
     .fb-kinds { display: flex; gap: 6px; margin: 8px 0; }
     .rec-dot { color: var(--bad); font-weight: 700; font-size: 12px; }
+    .drop {
+      border: 2px dashed var(--line);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      background: #fff;
+      margin-top: 12px;
+    }
+    .drop.on { border-color: var(--forest-2); background: var(--mist); }
+    .tree { font-size: 13px; }
+    .tree-node {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .tree-node:hover, .tree-node.on { background: var(--mist); }
+    .tree-kids { margin-left: 14px; border-left: 1px solid var(--line); padding-left: 6px; }
+    .count { background: var(--mist); border-radius: 99px; padding: 1px 7px; font-size: 11px; font-weight: 700; color: var(--forest); }
+    .doc-row { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+    .doc-thumb {
+      width: 40px;
+      height: 52px;
+      border-radius: 6px;
+      background: #e7ebe8 center/cover;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--forest);
+    }
+    .late { color: var(--bad); }
+    .ok { color: var(--forest-2); }
+    .line-card { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; }
   </style>
 </head>
 <body>
@@ -257,10 +324,6 @@
       <div class="nav-label">Work</div>
       <button class="nav-item" data-go="calendar">Calendar</button>
       <button class="nav-item" data-go="tasks">Tasks</button>
-      <div class="nav-label">Records</div>
-      <button class="nav-item" data-go="documents">Documents</button>
-      <button class="nav-item" data-go="expenses">Expenses</button>
-      <button class="nav-item" data-go="governance">Governance</button>
       <div class="nav-label">System</div>
       <button class="nav-item" data-go="audit">Audit</button>
       <button class="nav-item" data-go="settings">Settings</button>
@@ -328,13 +391,18 @@
           { name: 'Ana', email: 'ana@hearthhold.app', role: 'Editor' },
           { name: 'CPA', email: 'cpa@example.com', role: 'Tax only' }
         ],
+        image: 'thumbs/laureles.png',
         reminders: [
-          { title: 'Ohio annual report', due: 'Apr 15, 2027', done: false },
-          { title: 'Franchise tax', due: 'May 1, 2027', done: false }
+          { title: 'Ohio annual report', due: '2027-04-15', done: false },
+          { title: 'Franchise tax', due: '2027-05-01', done: false }
         ],
         tasks: [
-          { text: 'Send OA to accountant', done: true, due: 'Sep 8' },
-          { text: 'Update registered agent address', done: false, due: 'Sep 20' }
+          { text: 'Send OA to accountant', done: true, due: '2026-09-08', property: null },
+          { text: 'Update registered agent address', done: false, due: '2026-09-20', property: null }
+        ],
+        compliance: [
+          { title: 'Ohio annual report', due: '2027-04-15', kind: 'Corporate filing' },
+          { title: 'Franchise tax', due: '2027-05-01', kind: 'Tax' }
         ]
       },
       {
@@ -349,8 +417,12 @@
         users: [
           { name: 'Bryan', email: 'you@hearthhold.app', role: 'Owner' }
         ],
-        reminders: [{ title: 'Wyoming annual report', due: 'Jan 2, 2027', done: false }],
-        tasks: [{ text: 'Collect member consents', done: false, due: 'Sep 30' }]
+        image: 'thumbs/andes.png',
+        reminders: [{ title: 'Wyoming annual report', due: '2027-01-02', done: false }],
+        tasks: [{ text: 'Collect member consents', done: false, due: '2026-09-30', property: null }],
+        compliance: [
+          { title: 'Wyoming annual report', due: '2027-01-02', kind: 'Corporate filing' }
+        ]
       },
       {
         id: 'northstar',
@@ -365,8 +437,12 @@
           { name: 'Bryan', email: 'you@hearthhold.app', role: 'Trustee' },
           { name: 'Ana', email: 'ana@hearthhold.app', role: 'View' }
         ],
-        reminders: [{ title: 'Review beneficiaries', due: 'Dec 1, 2026', done: false }],
-        tasks: [{ text: 'Scan pour-over will', done: false, due: 'Sep 18' }]
+        image: 'thumbs/ohio.png',
+        reminders: [{ title: 'Review beneficiaries', due: '2026-12-01', done: false }],
+        tasks: [{ text: 'Scan pour-over will', done: false, due: '2026-09-18', property: null }],
+        compliance: [
+          { title: 'Trust instrument review', due: '2026-12-01', kind: 'Governance' }
+        ]
       }
     ];
 
@@ -381,7 +457,60 @@
         projects: [
           { id: 'kitchen', title: 'Kitchen remodel', status: 'active', budget: 12000000, spent: 3200000, currency: 'COP' },
           { id: 'roof', title: 'Roof leak', status: 'active', budget: 800000, spent: 420000, currency: 'COP' }
-        ]
+        ],
+        contacts: [
+          { name: 'Camila Restrepo', role: 'Tenant', phone: '+57 310 555 0144', email: 'camila@example.com' },
+          { name: 'Edificio admin', role: 'Building', phone: '+57 604 444 1200', email: 'admin@laureles.co' },
+          { name: 'Sura', role: 'Insurance', phone: '', email: 'claims@sura.com' },
+          { name: 'ClimaMed', role: 'HVAC', phone: '+57 304 220 1180', email: 'service@climamed.co' },
+          { name: 'Marisol Cárdenas', role: 'Inspector', phone: '+57 300 441 2290', email: 'marisol@inspect.co' }
+        ],
+        tenant: { name: 'Camila Restrepo', unit: 'Apt 501', status: 'active', onTime: true, rent: '2.200.000 COP' },
+        leases: [
+          { tenant: 'Camila Restrepo', start: '2025-03-01', end: '2027-03-01', status: 'active', signed: true },
+          { tenant: 'Prior tenant', start: '2023-03-01', end: '2025-02-28', status: 'ended', signed: true }
+        ],
+        payments: [
+          { month: 'Aug 2026', amount: '2.200.000 COP', onTime: true },
+          { month: 'Jul 2026', amount: '2.200.000 COP', onTime: true },
+          { month: 'Jun 2026', amount: '2.200.000 COP', onTime: true },
+          { month: 'May 2026', amount: '2.200.000 COP', onTime: true }
+        ],
+        gallery: [
+          { src: 'thumbs/laureles.png', caption: 'Facade' },
+          { src: 'thumbs/laureles-kitchen.png', caption: 'Kitchen' },
+          { src: 'thumbs/laureles-balcony.png', caption: 'Balcony' },
+          { src: 'thumbs/laureles-gate.png', caption: 'Building gate' }
+        ],
+        maintenance: [
+          { title: 'Minisplit / HVAC service', cadence: 'Every 6 months', last: '2026-04-12', next: '2026-10-15', who: 'ClimaMed', notes: 'Clean coils, replace filters, check condensate drain' },
+          { title: 'Building gate and motor', cadence: 'Quarterly', last: '2026-06-18', next: '2026-09-20', who: 'Portones López', notes: 'Lubricate track, test auto-close, log cycle count' },
+          { title: 'Pest control', cadence: 'Quarterly', last: '2026-07-02', next: '2026-10-02', who: 'Control Total', notes: 'Kitchen, balcony, and common hall' },
+          { title: 'Fire extinguisher check', cadence: 'Yearly', last: '2026-01-10', next: '2027-01-10', who: 'Edificio admin', notes: 'Hallway and kitchen' }
+        ],
+        inspection: {
+          last: {
+            date: '2026-06-04',
+            who: 'Marisol Cárdenas · property inspector',
+            notes: 'Walked the unit with Camila. Gate motor is noisy on close. Small rust on the balcony railing. HVAC drain was clear. No leaks in the wet wall.',
+            done: ['Replaced the hallway smoke detector battery', 'Photographed the balcony railing for paint', 'Logged gate motor hours with the building'],
+            photos: [
+              { src: 'thumbs/laureles-balcony.png', caption: 'Balcony railing rust' },
+              { src: 'thumbs/laureles-gate.png', caption: 'Gate motor on close' },
+              { src: 'thumbs/laureles-kitchen.png', caption: 'Kitchen after detector swap' }
+            ]
+          },
+          next: {
+            date: '2026-12-04',
+            who: 'Marisol Cárdenas',
+            tasks: ['Full unit walkthrough with the tenant', 'Re-check balcony railing after paint', 'Confirm the October HVAC filter change', 'Test building gate auto-reverse'],
+            photos: [
+              { caption: 'Balcony railing after paint' },
+              { caption: 'Gate auto-reverse test' },
+              { caption: 'HVAC filter sticker' }
+            ]
+          }
+        }
       },
       {
         id: 'ohio',
@@ -392,7 +521,48 @@
         image: 'thumbs/ohio.png',
         projects: [
           { id: 'fence', title: 'East fence', status: 'paused', budget: 2400, spent: 380, currency: 'USD' }
-        ]
+        ],
+        contacts: [
+          { name: 'Rural Mutual', role: 'Insurance', phone: '740-555-0199', email: 'ohio@ruralmutual.com' },
+          { name: 'Hank Miller', role: 'Caretaker', phone: '740-555-0110', email: 'hank@example.com' }
+        ],
+        tenant: { name: 'Owner occupied', unit: 'House', status: 'vacant', onTime: true, rent: '—' },
+        leases: [],
+        payments: [],
+        gallery: [
+          { src: 'thumbs/ohio.png', caption: 'House' },
+          { src: 'thumbs/ohio-gate.png', caption: 'Drive gate' },
+          { src: 'thumbs/ohio-well.png', caption: 'Well house' },
+          { src: 'thumbs/home.png', caption: 'Yard / east line' }
+        ],
+        maintenance: [
+          { title: 'Furnace, filter, and CO test', cadence: 'Seasonal (spring / fall)', last: '2026-04-20', next: '2026-10-05', who: 'Licking County Heat', notes: 'Fall heat check before first freeze' },
+          { title: 'Drive gate and latch', cadence: 'Quarterly', last: '2026-06-01', next: '2026-09-08', who: 'Hank Miller', notes: 'Hinge pin was loose in June' },
+          { title: 'Gutters and downspouts', cadence: 'Twice a year', last: '2026-04-22', next: '2026-10-20', who: 'Hank Miller', notes: 'East side clogs with maple seed' },
+          { title: 'Well pressure and septic lid', cadence: 'Yearly', last: '2026-03-11', next: '2027-03-11', who: 'Hank Miller', notes: 'Visual only unless pressure drops' }
+        ],
+        inspection: {
+          last: {
+            date: '2026-05-16',
+            who: 'Hank Miller · caretaker',
+            notes: 'Spring walk. East fence still paused. No freeze damage in the well house. Gutters were dirty after pollen. Garage GFCI had tripped.',
+            done: ['Replaced the furnace filter', 'Cut back the east fence line', 'Reset the garage GFCI'],
+            photos: [
+              { src: 'thumbs/ohio-gate.png', caption: 'Drive gate hinge' },
+              { src: 'thumbs/ohio-well.png', caption: 'Well house after spring walk' }
+            ]
+          },
+          next: {
+            date: '2026-11-15',
+            who: 'Hank Miller',
+            tasks: ['Winterize hose bibs', 'Heat check with the furnace tech', 'Walk the east fence after the quote', 'Check the driveway culvert before freeze'],
+            photos: [
+              { caption: 'Hose bibs winterized' },
+              { caption: 'East fence after quote' },
+              { caption: 'Culvert before freeze' }
+            ]
+          }
+        }
       },
       {
         id: 'envigado',
@@ -403,8 +573,64 @@
         image: 'thumbs/andes.png',
         projects: [
           { id: 'fitout', title: 'Tenant fit-out', status: 'active', budget: 45000000, spent: 0, currency: 'COP' }
-        ]
+        ],
+        contacts: [
+          { name: 'Taller Norte SAS', role: 'Tenant', phone: '+57 312 400 8890', email: 'ops@tallernorte.co' },
+          { name: 'Notaría 18', role: 'Notary', phone: '', email: '' },
+          { name: 'Andrés Mejía', role: 'Property manager', phone: '+57 311 800 2211', email: 'andres@andeshold.co' },
+          { name: 'Frío Andino', role: 'HVAC', phone: '+57 304 900 4411', email: 'ops@frioandino.co' }
+        ],
+        tenant: { name: 'Taller Norte SAS', unit: 'Retail', status: 'expiring', onTime: false, rent: '8.400.000 COP' },
+        leases: [
+          { tenant: 'Taller Norte SAS', start: '2025-01-01', end: '2026-12-31', status: 'expiring', signed: true },
+          { title: 'Renewal 2027', tenant: 'Taller Norte SAS', start: '2027-01-01', end: '2028-12-31', status: 'to-sign', signed: false }
+        ],
+        payments: [
+          { month: 'Aug 2026', amount: '8.400.000 COP', onTime: false },
+          { month: 'Jul 2026', amount: '8.400.000 COP', onTime: true },
+          { month: 'Jun 2026', amount: '8.400.000 COP', onTime: false }
+        ],
+        gallery: [
+          { src: 'thumbs/andes.png', caption: 'Storefront' },
+          { src: 'thumbs/envigado-door.png', caption: 'Roll-up door' },
+          { src: 'thumbs/envigado-hvac.png', caption: 'Rooftop HVAC' }
+        ],
+        maintenance: [
+          { title: 'Rooftop HVAC / condenser', cadence: 'Every 6 months', last: '2026-03-20', next: '2026-09-18', who: 'Frío Andino', notes: 'Service before open. Clean fins, check refrigerant' },
+          { title: 'Roll-up gate and motor', cadence: 'Quarterly', last: '2026-05-30', next: '2026-08-30', who: 'Portones del Sur', notes: 'Spring tension and safety edge' },
+          { title: 'Parking lot lights', cadence: 'Quarterly', last: '2026-07-12', next: '2026-10-12', who: 'Eléctrico Ríos', notes: 'Lamps and photocell' },
+          { title: 'Roof drains', cadence: 'Twice a year', last: '2026-04-02', next: '2026-10-15', who: 'Roof tech', notes: 'Before the October rains' }
+        ],
+        inspection: {
+          last: {
+            date: '2026-07-09',
+            who: 'Andrés Mejía · property manager',
+            notes: 'Tenant fit-out in progress. Roll-up door safety edge failed. Condenser fins were dirty. One parking lamp out at the back. Fire exit was blocked by boxes — tenant moved them.',
+            done: ['Tagged the roll-up door until the spring is replaced', 'Scheduled the HVAC coil clean', 'Told the tenant to keep the fire exit clear'],
+            photos: [
+              { src: 'thumbs/envigado-door.png', caption: 'Safety edge failed' },
+              { src: 'thumbs/envigado-hvac.png', caption: 'Dirty condenser fins' }
+            ]
+          },
+          next: {
+            date: '2026-10-09',
+            who: 'Andrés Mejía',
+            tasks: ['Re-test the roll-up gate after motor service', 'Walk the fit-out against the lease drawings', 'Check roof drains before October rains', 'Photograph parking lights at night'],
+            photos: [
+              { caption: 'Roll-up after motor service' },
+              { caption: 'Fit-out vs drawings' },
+              { caption: 'Parking lights at night' }
+            ]
+          }
+        }
       }
+    ];
+
+    const extraTasks = [
+      { text: 'Confirm Camila September rent', done: false, due: '2026-09-12', company: 'hearthhold', property: 'laureles' },
+      { text: 'Roof contractor callback', done: false, due: '2026-09-05', company: 'hearthhold', property: 'laureles' },
+      { text: 'Fit-out permit', done: false, due: '2026-09-22', company: 'andes', property: 'envigado' },
+      { text: 'Fence quote', done: false, due: '2026-10-01', company: 'northstar', property: 'ohio' }
     ];
 
     let inbox = [
@@ -414,12 +640,14 @@
     ];
 
     const documents = [
-      { title: 'Operating Agreement', company: 'hearthhold', property: null, kind: 'operating', scope: 'company', when: 'Mar 2024' },
-      { title: 'EIN letter', company: 'hearthhold', property: null, kind: 'tax', scope: 'company', when: 'Mar 2024' },
-      { title: 'Deed — Laureles', company: 'hearthhold', property: 'laureles', kind: 'deed', scope: 'property', when: 'Jun 2024' },
-      { title: 'Andes OA', company: 'andes', property: null, kind: 'operating', scope: 'company', when: 'Jan 2025' },
-      { title: 'Trust instrument', company: 'northstar', property: null, kind: 'other', scope: 'company', when: '2019' },
-      { title: 'Portfolio insurance binder', company: null, property: null, kind: 'other', scope: 'global', when: 'Jan 2026' }
+      { title: 'Operating Agreement', company: 'hearthhold', property: null, kind: 'operating', scope: 'company', when: 'Mar 2024', thumb: 'thumbs/laureles.png' },
+      { title: 'EIN letter', company: 'hearthhold', property: null, kind: 'tax', scope: 'company', when: 'Mar 2024', thumb: 'thumbs/laureles.png' },
+      { title: 'Deed — Laureles', company: 'hearthhold', property: 'laureles', kind: 'deed', scope: 'property', when: 'Jun 2024', thumb: 'thumbs/laureles.png' },
+      { title: 'Lease — Camila', company: 'hearthhold', property: 'laureles', kind: 'lease', scope: 'property', when: 'Mar 2025', thumb: 'thumbs/laureles.png' },
+      { title: 'Andes OA', company: 'andes', property: null, kind: 'operating', scope: 'company', when: 'Jan 2025', thumb: 'thumbs/andes.png' },
+      { title: 'Envigado lease', company: 'andes', property: 'envigado', kind: 'lease', scope: 'property', when: 'Jan 2025', thumb: 'thumbs/andes.png' },
+      { title: 'Trust instrument', company: 'northstar', property: null, kind: 'other', scope: 'company', when: '2019', thumb: 'thumbs/ohio.png' },
+      { title: 'Portfolio insurance binder', company: null, property: null, kind: 'other', scope: 'global', when: 'Jan 2026', thumb: 'thumbs/home.png' }
     ];
 
     const expenses = [
@@ -437,10 +665,12 @@
     ];
 
     const activity = [
-      { who: 'Bryan', what: 'Uploaded deed — Laureles', when: '2h ago', company: 'Hearthhold LLC' },
+      { who: 'Bryan', what: 'Uploaded deed — Laureles', when: '2h ago', company: 'Hearthhold LLC', property: 'laureles' },
       { who: 'Bryan', what: 'Voice capture — gas bill', when: 'Yesterday', company: 'Inbox' },
-      { who: 'Ana', what: 'Filed kitchen receipt to Laureles', when: 'Sep 8', company: 'Hearthhold LLC' },
-      { who: 'CPA', what: 'Viewed EIN letter', when: 'Sep 7', company: 'Hearthhold LLC' }
+      { who: 'Ana', what: 'Filed kitchen receipt to Laureles', when: 'Sep 8', company: 'Hearthhold LLC', property: 'laureles' },
+      { who: 'CPA', what: 'Viewed EIN letter', when: 'Sep 7', company: 'Hearthhold LLC' },
+      { who: 'Bryan', what: 'Opened Envigado lease for renewal', when: 'Sep 4', company: 'Andes Holdings LLC', property: 'envigado' },
+      { who: 'Bryan', what: 'Paused east fence', when: 'Jul 2', company: 'Northstar Trust', property: 'ohio' }
     ];
 
     const audit = [
@@ -462,21 +692,185 @@
     let screen = 'home';
     let companyId = 'hearthhold';
     let propertyId = 'laureles';
-    let companyTab = 'overview';
-    let propertyTab = 'overview';
-    let docFilter = 'all';
-    let taskCompany = 'all';
-    let calCompany = 'all';
-    let expFilter = 'all';
-    let mapObj = null;
-    let captured = [];
-    let folders = [{ name: '2026 taxes', company: 'hearthhold' }];
+    let companyTab = 'dashboard';
+        let propertyTab = 'dashboard';
+        let docKind = 'all';
+        let docCompany = 'all';
+        let docNode = 'all';
+        let taskNode = 'all';
+        let calCompany = 'all';
+        let expFilter = 'all';
+        let mapCompany = 'all';
+        let mapSort = 'company';
+        let mapObj = null;
+        let captured = [];
+        let clouds = { google: false, dropbox: false };
+        const TODAY = '2026-09-11';
+        let folders = [{ name: '2026 taxes', company: 'hearthhold' }];
 
     function companyBy(id) { return companies.find(c => c.id === id); }
     function propertyBy(id) { return properties.find(p => p.id === id); }
     function money(n, c) {
       if (c === 'USD') return '$' + n.toLocaleString('en-US');
       return n.toLocaleString('es-CO') + ' ' + c;
+    }
+    function allTasks() {
+      const fromCo = companies.flatMap(c => c.tasks.map(t => Object.assign({ company: c.id }, t)));
+      return fromCo.concat(extraTasks).map(t => {
+        const due = t.due || '';
+        const overdue = !t.done && due && due < TODAY;
+        const upcoming = !t.done && due && due >= TODAY;
+        const co = companyBy(t.company);
+        const pr = t.property ? propertyBy(t.property) : null;
+        return Object.assign({}, t, {
+          overdue: overdue,
+          upcoming: upcoming,
+          companyName: co ? co.name : '',
+          propertyName: pr ? pr.name : 'Company-level'
+        });
+      });
+    }
+    function taskMatches(t, node) {
+      if (node === 'all') return true;
+      if (node.indexOf(':') === -1) return t.company === node;
+      const parts = node.split(':');
+      if (parts[1] === 'company') return t.company === parts[0] && !t.property;
+      return t.company === parts[0] && t.property === parts[1];
+    }
+    function docMatches(d, node) {
+      if (node === 'all') return true;
+      if (node === 'global') return d.scope === 'global' || !d.company;
+      if (node.indexOf(':') === -1) return d.company === node;
+      const parts = node.split(':');
+      if (parts[1] === 'company') return d.company === parts[0] && !d.property;
+      return d.company === parts[0] && d.property === parts[1];
+    }
+    function treeHtml(kind) {
+      const isTask = kind === 'task';
+      const items = isTask
+        ? allTasks()
+        : documents.filter(d => (docKind === 'all' || d.kind === docKind) && (docCompany === 'all' || d.company === docCompany));
+      const current = isTask ? taskNode : docNode;
+      const attr = isTask ? 'data-tnode' : 'data-dnode';
+      function count(pred) { return items.filter(pred).length; }
+      function node(id, label, n) {
+        return '<div class="tree-node' + (current === id ? ' on' : '') + '" ' + attr + '="' + id + '"><span>' + label + '</span><span class="count">' + n + '</span></div>';
+      }
+      let html = '<div class="tree card">';
+      html += node('all', 'All', items.length);
+      if (!isTask) html += node('global', 'Global / unassigned', count(d => !d.company));
+      companies.forEach(c => {
+        html += node(c.id, c.name, count(x => x.company === c.id));
+        html += '<div class="tree-kids">';
+        html += node(c.id + ':company', 'Company-level', count(x => x.company === c.id && !x.property));
+        properties.filter(p => p.company === c.id).forEach(p => {
+          html += node(c.id + ':' + p.id, p.name, count(x => x.property === p.id));
+        });
+        html += '</div>';
+      });
+      return html + '</div>';
+    }
+    function remainLease(end) {
+      if (!end) return '—';
+      const a = new Date(TODAY);
+      const b = new Date(end);
+      const months = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+      if (months < 0) return 'Ended';
+      if (months === 0) return '< 1 month';
+      return months + ' mo left';
+    }
+    function tenantLabel(p) {
+      if (!p.tenant) return 'No tenant';
+      if (p.tenant.status === 'vacant') return 'Owner occupied';
+      if (p.tenant.status === 'expiring') return p.tenant.name + ' · lease ending';
+      return p.tenant.name + (p.tenant.onTime ? ' · on time' : ' · late');
+    }
+    function jumpTo(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function contactBlock(p) {
+      return (p.contacts || []).map(ct =>
+        '<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line);"><div><b>' + ct.name + '</b><div class="muted">' + ct.role + (ct.phone ? ' · ' + ct.phone : '') + (ct.email ? ' · ' + ct.email : '') + '</div></div></div>'
+      ).join('') || '<p class="empty">No contacts yet.</p>';
+    }
+    function tenantBlock(p) {
+      const t = p.tenant;
+      const active = (p.leases || []).find(l => l.status === 'active' || l.status === 'expiring');
+      if (!t) return '<p class="empty">No tenant on this property.</p>';
+      return '<div class="kv"><span>Name</span><span>' + t.name + '</span><span>Unit</span><span>' + t.unit + '</span><span>Status</span><span>' + t.status + '</span><span>Rent</span><span>' + t.rent + '</span><span>Payments</span><span class="' + (t.onTime ? 'ok' : 'late') + '">' + (t.onTime ? 'On time' : 'Late') + '</span>' + (active ? '<span>Lease remaining</span><span>' + remainLease(active.end) + '</span>' : '') + '</div>' +
+        '<div class="kicker" style="margin-top:14px;">Payment history</div>' +
+        ((p.payments || []).length ? '<table><tr><th>Month</th><th>Amount</th><th>On time</th></tr>' + p.payments.map(pay => '<tr><td>' + pay.month + '</td><td>' + pay.amount + '</td><td class="' + (pay.onTime ? 'ok' : 'late') + '">' + (pay.onTime ? 'On time' : 'Late') + '</td></tr>').join('') + '</table>' : '<p class="empty">No rent history.</p>');
+    }
+    function leaseBlock(p) {
+      if (!(p.leases || []).length) return '<p class="empty">No lease on file. Owner occupied or vacant.</p>';
+      return p.leases.map(l => '<div class="card" style="margin-bottom:8px;box-shadow:none;border:1px solid var(--line);"><div class="row"><b>' + (l.title || l.tenant) + '</b><span class="status ' + (l.signed ? 'paid' : 'due') + '">' + l.status + '</span></div><div class="muted">' + l.tenant + ' · ' + l.start + ' → ' + l.end + ' · ' + remainLease(l.end) + (l.signed ? '' : ' · needs signature') + '</div></div>').join('') +
+        '<p class="muted">History is every lease on this house, including ended ones. Upcoming signatures show as to-sign.</p>';
+    }
+    function maintState(next) {
+      if (!next) return { key: 'ok', label: 'Scheduled' };
+      if (next < TODAY) return { key: 'overdue', label: 'Overdue' };
+      const d = new Date(TODAY);
+      d.setDate(d.getDate() + 30);
+      const soon = d.toISOString().slice(0, 10);
+      if (next <= soon) return { key: 'due-soon', label: 'Due soon' };
+      return { key: 'ok', label: 'On schedule' };
+    }
+    function nextMaint(p) {
+      return (p.maintenance || []).slice().sort((a, b) => (a.next || '9999').localeCompare(b.next || '9999'))[0] || null;
+    }
+    function maintBlock(p) {
+      const rows = (p.maintenance || []).slice().sort((a, b) => (a.next || '').localeCompare(b.next || ''));
+      if (!rows.length) return '<p class="empty">No maintenance schedule yet.</p>';
+      return '<table><tr><th>Task</th><th>Cadence</th><th>Last done</th><th>Next</th><th>Who</th><th></th></tr>' +
+        rows.map(m => {
+          const st = maintState(m.next);
+          const cls = st.key === 'overdue' ? 'late' : (st.key === 'due-soon' ? 'due' : 'ok');
+          return '<tr><td><b>' + m.title + '</b><div class="muted">' + (m.notes || '') + '</div></td><td>' + m.cadence + '</td><td>' + (m.last || '—') + '</td><td>' + m.next + '</td><td>' + m.who + '</td><td class="' + cls + '">' + st.label + '</td></tr>';
+        }).join('') + '</table>';
+    }
+    function inspectBlock(p) {
+      const last = p.inspection && p.inspection.last;
+      const next = p.inspection && p.inspection.next;
+      if (!last && !next) return '<p class="empty">No inspections on file.</p>';
+      let html = '<div class="dash-grid">';
+      if (last) {
+        html += '<div><div class="kicker">Last inspection</div><div class="kv" style="margin-top:8px;"><span>When</span><span>' + last.date + '</span><span>Who</span><span>' + last.who + '</span></div>' +
+          '<p style="font-size:13px;line-height:1.5;margin:10px 0;">' + last.notes + '</p>' +
+          '<div class="muted" style="margin-bottom:6px;">What was done</div>' +
+          last.done.map(x => '<div class="check"><div>' + x + '</div></div>').join('') +
+          '<div class="muted" style="margin:12px 0 0;">Photos from that visit</div>' +
+          galleryBlock(last.photos, 'No photos from this visit.') +
+          '</div>';
+      }
+      if (next) {
+        html += '<div><div class="kicker">Next inspection</div><div class="kv" style="margin-top:8px;"><span>When</span><span>' + next.date + '</span><span>Who</span><span>' + next.who + '</span></div>' +
+          '<div class="muted" style="margin:10px 0 6px;">Tasks on that visit</div>' +
+          next.tasks.map(x => '<div class="check"><div>' + x + '</div></div>').join('') +
+          '<div class="muted" style="margin:12px 0 0;">Shots to take</div>' +
+          galleryBlock(next.photos, 'No shot list yet.') +
+          '</div>';
+      }
+      return html + '</div>';
+    }
+    function galleryBlock(photos, empty) {
+      if (!photos || !photos.length) return '<p class="empty">' + (empty || 'No photos yet.') + '</p>';
+      return '<div class="gallery">' + photos.map(ph => {
+        const src = ph.src || '';
+        const cap = (ph.caption || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        return '<button type="button" class="gal-item' + (src ? '' : ' empty') + '" data-src="' + src + '" data-cap="' + cap + '">' +
+          '<span class="gal-img"' + (src ? ' style="background-image:url(\'' + src + '\')"' : '') + '></span>' +
+          '<span class="gal-cap">' + (ph.caption || (src ? 'Photo' : 'To photograph')) + '</span>' +
+        '</button>';
+      }).join('') + '</div>';
+    }
+    function openPhoto(src, caption) {
+      const o = document.getElementById('overlay');
+      o.classList.add('on');
+      o.innerHTML = '<div class="card gal-pop" onclick="event.stopPropagation()">' +
+        (src ? '<img src="' + src + '" alt="">' : '<p class="empty">No photo yet. This is on the next visit list.</p>') +
+        '<div class="row"><span>' + (caption || '') + '</span><button class="btn btn-ghost" type="button" onclick="hideOverlay()">Close</button></div>' +
+      '</div>';
     }
 
     function connectDb() {
@@ -498,9 +892,14 @@
     }
 
     function go(name, extra) {
+      if (name === 'documents' || name === 'expenses' || name === 'governance') {
+        companyTab = name;
+        name = 'company';
+        extra = undefined;
+      }
       screen = name;
-      if (name === 'company' && extra) { companyId = extra; companyTab = 'overview'; }
-      if (name === 'property' && extra) { propertyId = extra; propertyTab = 'overview'; }
+      if (name === 'company' && extra) { companyId = extra; companyTab = 'dashboard'; }
+      if (name === 'property' && extra) { propertyId = extra; propertyTab = 'dashboard'; }
       if (name === 'project' && extra) { propertyId = extra.property; window._projectId = extra.project; }
       document.querySelectorAll('.nav-item').forEach(b => {
         const g = b.getAttribute('data-go');
@@ -539,7 +938,7 @@
           tax: { year: '2026', status: 'New', accountant: '', method: 'Cash' },
           registration: { agent: 'TBD', number: '—', goodStanding: 'Pending' },
           users: [{ name: 'Bryan', email: 'you@hearthhold.app', role: 'Owner' }],
-          reminders: [], tasks: []
+          reminders: [], tasks: [], compliance: [], image: 'thumbs/andes.png'
         });
         document.getElementById('ask').value = '';
         go('company', id);
@@ -569,7 +968,8 @@
       document.getElementById('content').innerHTML = fn();
       bind();
       if (screen === 'map') initMap();
-      if (screen === 'property' && propertyTab === 'overview') initPropMap();
+      if (screen === 'property' && (propertyTab === 'dashboard' || propertyTab === 'overview' || propertyTab === 'map')) initPropMap();
+      if (screen === 'capture') setupDrop();
     }
 
     function bind() {
@@ -592,6 +992,15 @@
       document.querySelectorAll('[data-project]').forEach(el => {
         el.onclick = () => go('project', { property: el.getAttribute('data-prop'), project: el.getAttribute('data-project') });
       });
+      document.querySelectorAll('[data-tnode]').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); taskNode = el.getAttribute('data-tnode'); render(); };
+      });
+      document.querySelectorAll('[data-dnode]').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); docNode = el.getAttribute('data-dnode'); render(); };
+      });
+      document.querySelectorAll('.gal-item').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); openPhoto(el.getAttribute('data-src'), el.getAttribute('data-cap')); };
+      });
     }
 
     const screens = {
@@ -599,16 +1008,15 @@
         return '<h1 class="page">Sitemap</h1><p class="sub">Web portal for running a property portfolio. Left nav is the map of the app. The bar at the top is how you run it: voice, photo, or a sentence.</p>' +
           '<div class="grid g-2">' +
             card('Get in', '<b>Connect</b> — paste your Supabase URL and anon key.<br><b>Home</b> — today’s inbox, money, and what to do.') +
-            card('Capture', '<b>Capture</b> — voice, photo, files. AI files them.<br><b>Inbox</b> — anything not indexed yet. You correct it.<br><b>Activity</b> — recent uploads.') +
-            card('Portfolio', '<b>Companies</b> — many companies, each with tax, registration, users, reminders, tasks.<br><b>Company</b> — one company, all of that plus its properties.<br><b>Properties</b> — the places.<br><b>Property</b> — map, projects, expenses, papers.<br><b>Map</b> — every pin. Click one.') +
-            card('Work', '<b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — same. Complete view, or by company.') +
-            card('Records', '<b>Documents</b> — global, or tied to a company or property.<br><b>Expenses</b> — paid and upcoming, tied to a property.<br><b>Governance</b> — minutes and decision records.<br><b>Project</b> — a remodel with a budget.') +
+            card('Capture', '<b>Capture</b> — voice, photo, files, a folder from the desktop, or Google Drive / Dropbox.<br><b>Inbox</b> — anything not indexed yet. You correct it.<br><b>Activity</b> — recent uploads.') +
+            card('Portfolio', '<b>Companies</b> — one row each, with a thumbnail. Click for a dashboard.<br><b>Company</b> — dashboard, plus records for that company only: documents, expenses, board notes. Also tax, filings, users, tasks, properties.<br><b>Properties</b> — scrolling dashboard: tenant, lease, maintenance schedule, inspections, contacts, money.<br><b>Map</b> — filter or sort by company.') +
+            card('Work', '<b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
             card('System', '<b>Audit</b> — who did what.<br><b>Settings</b> — your database keys, how to get them.<br><b>Feedback</b> — button in the corner. Screenshot plus text, voice, video, or a photo.') +
           '</div>';
       },
       home() {
         const due = expenses.filter(e => e.status === 'upcoming');
-        const openTasks = companies.flatMap(c => c.tasks.filter(t => !t.done).map(t => t.text + ' · ' + c.name));
+        const openTasks = allTasks().filter(t => !t.done).map(t => t.text + ' · ' + t.companyName);
         return '<h1 class="page">Home</h1><p class="sub">Say it, shoot it, or drop it. The harness files it to a company or property. You only touch the leftovers.</p>' +
           '<div class="grid g-3" style="margin-bottom:12px;">' +
             stat('Inbox', inbox.length, 'to index', 'inbox') +
@@ -628,12 +1036,21 @@
           '</div>';
       },
       capture() {
-        return '<h1 class="page">Capture</h1><p class="sub">Same idea as the phone: talk, photograph, or drop files. AI proposes company, property, and type. If it is unsure, it lands in Inbox.</p>' +
+        return '<h1 class="page">Capture</h1><p class="sub">Talk, photograph, drop files or a whole folder from the desktop, or pull from Google Drive / Dropbox. AI proposes company, property, and type. If it is unsure, it lands in Inbox.</p>' +
           '<div class="card">' +
             '<div class="btn-row">' +
               '<button class="btn btn-primary" type="button" onclick="mockCapture(\'voice\')">🎤 Voice</button>' +
               '<button class="btn btn-primary" type="button" onclick="mockCapture(\'photo\')">📷 Photo</button>' +
-              '<button class="icon-btn" type="button" onclick="mockCapture(\'file\')">Drop PDF</button>' +
+              '<label class="icon-btn" style="margin:0;">Files<input id="file-input" type="file" multiple hidden></label>' +
+              '<label class="icon-btn" style="margin:0;">Folder<input id="dir-input" type="file" webkitdirectory multiple hidden></label>' +
+            '</div>' +
+            '<div class="drop" id="drop-zone">' +
+              '<b>Drop a folder or files here</b>' +
+              '<div class="muted" style="margin-top:6px;">From the desktop. Nested folders are walked and each file is queued.</div>' +
+            '</div>' +
+            '<div class="btn-row" style="margin-top:12px;">' +
+              '<button class="icon-btn" type="button" onclick="showCloud(\'google\')">' + (clouds.google ? 'Google Drive · connected' : 'Connect Google Drive') + '</button>' +
+              '<button class="icon-btn" type="button" onclick="showCloud(\'dropbox\')">' + (clouds.dropbox ? 'Dropbox · connected' : 'Connect Dropbox') + '</button>' +
             '</div>' +
             '<div id="capture-out">' + (captured.length ? foundBlock() : '<p class="empty">Nothing in this batch yet.</p>') + '</div>' +
           '</div>';
@@ -660,72 +1077,196 @@
           ).join('') + '</div>';
       },
       companies() {
-        return '<h1 class="page">Companies</h1><p class="sub">Each company is a wall. Users only see the companies you assign. Properties sit under the company that holds title.</p>' +
+        return '<h1 class="page">Companies</h1><p class="sub">One row per company. Click for the dashboard: activity, money, tasks, tenants, filings, board notes, and operating agreements.</p>' +
           '<div class="chips"><button class="btn btn-primary" type="button" onclick="document.getElementById(\'ask\').value=\'new company \';document.getElementById(\'ask\').focus()">+ Company by voice or text</button></div>' +
-          '<div class="grid g-3">' + companies.map(c => {
+          '<div class="list">' + companies.map(c => {
             const n = properties.filter(p => p.company === c.id).length;
-            return '<div class="card click" data-company="' + c.id + '"><div class="kicker">' + c.jurisdiction + '</div><h3>' + c.name + '</h3><div class="muted">EIN ' + c.ein + ' · ' + n + ' properties · ' + c.users.length + ' users</div></div>';
+            const overdue = allTasks().filter(t => t.company === c.id && t.overdue).length;
+            return '<div class="card click line-card" data-company="' + c.id + '">' +
+              '<div class="thumb" style="background-image:url(\'' + (c.image || 'thumbs/andes.png') + '\')"></div>' +
+              '<div style="flex:1;"><b>' + c.name + '</b><div class="muted">' + c.jurisdiction + ' · EIN ' + c.ein + ' · ' + n + ' properties · ' + c.users.length + ' users</div></div>' +
+              (overdue ? '<span class="late">' + overdue + ' overdue</span>' : '<span class="ok">On track</span>') +
+            '</div>';
           }).join('') + '</div>';
       },
       company() {
         const c = companyBy(companyId);
         if (!c) return '';
-        const tabs = ['overview', 'tax', 'registration', 'users', 'reminders', 'tasks', 'properties', 'documents'];
+        const tabs = ['dashboard', 'tax', 'registration', 'users', 'reminders', 'tasks', 'properties', 'documents', 'expenses', 'governance'];
+        const props = properties.filter(p => p.company === c.id);
+        const tasks = allTasks().filter(t => t.company === c.id);
+        const overdue = tasks.filter(t => t.overdue);
+        const upcoming = tasks.filter(t => t.upcoming);
+        const feed = activity.filter(a => a.company === c.name);
+        const bills = expenses.filter(e => e.company === c.id);
+        const notes = governance.filter(g => g.company === c.id);
+        const oas = documents.filter(d => d.company === c.id && (d.kind === 'operating' || /agreement/i.test(d.title)));
+        const toSign = props.flatMap(p => (p.leases || []).filter(l => l.status === 'to-sign' || !l.signed).map(l => Object.assign({ property: p.name }, l)));
         let body = '';
-        if (companyTab === 'overview') {
-          body = '<div class="kv"><span>Legal name</span><span>' + c.legal + '</span><span>EIN</span><span>' + c.ein + '</span><span>Jurisdiction</span><span>' + c.jurisdiction + '</span><span>Formed</span><span>' + c.formed + '</span></div>';
+        if (companyTab === 'dashboard' || companyTab === 'overview') {
+          body =
+            '<div class="kv" style="margin-bottom:12px;"><span>Legal name</span><span>' + c.legal + '</span><span>EIN</span><span>' + c.ein + '</span><span>Jurisdiction</span><span>' + c.jurisdiction + '</span><span>Formed</span><span>' + c.formed + '</span></div>' +
+            '<div class="dash-grid">' +
+              '<div>' +
+                '<div class="kicker">Activity</div>' +
+                (feed.length ? feed.map(a => '<div class="check"><div><b>' + a.what + '</b><div class="muted">' + a.who + ' · ' + a.when + '</div></div></div>').join('') : '<p class="empty">No recent activity.</p>') +
+                '<div class="kicker" style="margin-top:16px;">Expenses</div>' +
+                expenseTable(bills) +
+                '<div class="kicker" style="margin-top:16px;">Upcoming tasks</div>' +
+                (upcoming.length ? upcoming.map(t => '<div class="check"><div>' + t.text + '<div class="muted">' + t.propertyName + ' · ' + t.due + '</div></div></div>').join('') : '<p class="empty">Nothing upcoming.</p>') +
+                '<div class="kicker" style="margin-top:16px;">Overdue tasks</div>' +
+                (overdue.length ? overdue.map(t => '<div class="check"><div>' + t.text + '<div class="muted late">' + t.propertyName + ' · ' + t.due + '</div></div></div>').join('') : '<p class="empty">Nothing overdue.</p>') +
+              '</div>' +
+              '<div>' +
+                '<div class="kicker">Properties and tenants</div>' +
+                (props.length ? props.map(p => '<div class="row card click" data-property="' + p.id + '" style="margin-bottom:8px;"><div class="thumb" style="background-image:url(\'' + p.image + '\')"></div><div style="flex:1;"><b>' + p.name + '</b><div class="muted">' + tenantLabel(p) + '</div></div></div>').join('') : '<p class="empty">No properties.</p>') +
+                (toSign.length ? '<div class="kicker" style="margin-top:16px;">Contracts to sign</div>' + toSign.map(l => '<div class="check"><div><b>' + (l.title || 'Lease') + '</b><div class="muted">' + l.property + ' · ' + l.tenant + ' · starts ' + l.start + '</div></div></div>').join('') : '') +
+                '<div class="kicker" style="margin-top:16px;">Compliance / filings</div>' +
+                (c.compliance || []).map(r => '<div class="check"><div><b>' + r.title + '</b><div class="muted">' + r.kind + ' · due ' + r.due + '</div></div></div>').join('') +
+                '<div class="kicker" style="margin-top:16px;">Recent board notes</div>' +
+                (notes.length ? notes.map(g => '<div class="check"><div><b>' + g.title + '</b><div class="muted">' + g.when + '</div></div></div>').join('') : '<p class="empty">No notes yet.</p>') +
+                '<div class="kicker" style="margin-top:16px;">Operating agreements</div>' +
+                (oas.length ? oas.map(d => '<div class="doc-row"><div class="doc-thumb" style="background-image:url(\'' + d.thumb + '\')"></div><div><b>' + d.title + '</b><div class="muted">' + d.when + '</div></div></div>').join('') : '<p class="empty">No OA on file.</p>') +
+              '</div>' +
+            '</div>';
         } else if (companyTab === 'tax') {
           body = '<div class="kv"><span>Year</span><span>' + c.tax.year + '</span><span>Status</span><span>' + c.tax.status + '</span><span>Accountant</span><span>' + c.tax.accountant + '</span><span>Method</span><span>' + c.tax.method + '</span></div>';
         } else if (companyTab === 'registration') {
-          body = '<div class="kv"><span>Agent</span><span>' + c.registration.agent + '</span><span>Number</span><span>' + c.registration.number + '</span><span>Good standing</span><span>' + c.registration.goodStanding + '</span></div>';
+          body = '<div class="kv"><span>Agent</span><span>' + c.registration.agent + '</span><span>Number</span><span>' + c.registration.number + '</span><span>Good standing</span><span>' + c.registration.goodStanding + '</span></div>' +
+            '<div class="kicker" style="margin-top:12px;">Filings due</div>' +
+            (c.compliance || []).map(r => '<div class="check"><div><b>' + r.title + '</b><div class="muted">' + r.kind + ' · ' + r.due + '</div></div></div>').join('');
         } else if (companyTab === 'users') {
           body = c.users.map(u => '<div class="row" style="padding:6px 0;"><span>' + u.name + ' · ' + u.email + '</span><span class="user-chip">' + u.role + '</span></div>').join('') +
             '<div class="btn-row"><input type="email" placeholder="email@ to invite" id="invite"><button class="btn btn-primary" type="button" onclick="inviteUser()">Invite</button></div>';
         } else if (companyTab === 'reminders') {
           body = c.reminders.map((r, i) => '<div class="check"><input type="checkbox"' + (r.done ? ' checked' : '') + ' onchange="companies.find(x=>x.id===\'' + c.id + '\').reminders[' + i + '].done=this.checked"><div><b>' + r.title + '</b><div class="muted">Due ' + r.due + '</div></div></div>').join('');
         } else if (companyTab === 'tasks') {
-          body = c.tasks.map((t, i) => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + ' onchange="companies.find(x=>x.id===\'' + c.id + '\').tasks[' + i + '].done=this.checked"><div>' + t.text + ' <span class="muted">' + t.due + '</span></div></div>').join('');
+          body = tasks.map(t => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + ' onchange="toggleTask(\'' + t.company + '\',\'' + t.text.replace(/'/g, '\\\'') + '\')"><div>' + t.text + ' <span class="muted">' + t.propertyName + ' · ' + t.due + (t.overdue ? ' · overdue' : '') + '</span></div></div>').join('');
         } else if (companyTab === 'properties') {
-          body = properties.filter(p => p.company === c.id).map(p => propRow(p)).join('') || '<p class="empty">No properties yet.</p>';
+          body = props.map(p => '<div class="row card click" data-property="' + p.id + '" style="margin-bottom:8px;"><div class="thumb" style="background-image:url(\'' + p.image + '\')"></div><div style="flex:1;"><b>' + p.name + '</b><div class="muted">' + tenantLabel(p) + '</div></div></div>').join('') || '<p class="empty">No properties yet.</p>';
+        } else if (companyTab === 'documents') {
+          body = documents.filter(d => d.company === c.id).map(d => '<div class="doc-row"><div class="doc-thumb" style="background-image:url(\'' + (d.thumb || '') + '\')"></div><div><b>' + d.title + '</b><div class="muted">' + d.kind + ' · ' + d.when + '</div></div></div>').join('') || '<p class="empty">No documents.</p>';
+          body += '<div class="btn-row"><button class="pill" type="button" onclick="go(\'inbox\')">Inbox / unindexed</button></div>';
+        } else if (companyTab === 'expenses') {
+          body = expenseTable(bills) || '<p class="empty">No expenses for this company.</p>';
+        } else if (companyTab === 'governance') {
+          body = notes.length ? notes.map(g => '<div class="check"><div><b>' + g.title + '</b><div class="muted">' + g.kind + ' · ' + g.when + '</div></div></div>').join('') : '<p class="empty">No board notes yet.</p>';
         } else {
-          body = documents.filter(d => d.company === c.id).map(d => '<div class="row"><span>' + d.title + '</span><span class="muted">' + d.kind + ' · ' + d.when + '</span></div>').join('') || '<p class="empty">No documents.</p>';
+          body = '<p class="empty">Nothing here.</p>';
         }
         return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'companies\')">← Companies</button></div>' +
-          '<h1 class="page">' + c.name + '</h1><p class="sub">Company info, tax, registration, who can see it, reminders, tasks, and the properties it holds.</p>' +
+          '<div class="line-card" style="margin-bottom:8px;"><div class="thumb" style="background-image:url(\'' + (c.image || '') + '\')"></div><div><h1 class="page" style="margin:0;">' + c.name + '</h1><p class="sub" style="margin:4px 0 0;">Dashboard, filings, tenants, and records for this company.</p></div></div>' +
           '<div class="tabs">' + tabs.map(t => '<button class="pill' + (companyTab === t ? ' on' : '') + '" data-ctab="' + t + '">' + t + '</button>').join('') + '</div>' +
           '<div class="card">' + body + '</div>';
       },
       properties() {
-        return '<h1 class="page">Properties</h1><p class="sub">Held by a company. Tap one for the map, projects, and expenses.</p>' +
+        return '<h1 class="page">Properties</h1><p class="sub">Held by a company. Contacts, tenants, and lease status live on each house.</p>' +
           '<div class="grid g-3">' + properties.map(p => {
             const c = companyBy(p.company);
-            return '<div class="card click" data-property="' + p.id + '"><div class="hero" style="background-image:url(\'' + p.image + '\')"></div><b>' + p.name + '</b><div class="muted">' + p.address + '<br>Owned by ' + c.name + '</div></div>';
+            return '<div class="card click" data-property="' + p.id + '"><div class="hero" style="background-image:url(\'' + p.image + '\')"></div><b>' + p.name + '</b><div class="muted">' + p.address + '<br>' + c.name + '<br>' + tenantLabel(p) + '</div></div>';
           }).join('') + '</div>';
       },
       property() {
         const p = propertyBy(propertyId);
         if (!p) return '';
         const c = companyBy(p.company);
-        const tabs = ['overview', 'projects', 'expenses', 'documents'];
+        const tabs = ['dashboard', 'gallery', 'map', 'contacts', 'tenant', 'leases', 'maintenance', 'inspection', 'projects', 'expenses', 'documents'];
+        const tasks = allTasks().filter(t => t.property === p.id);
+        const overdue = tasks.filter(t => t.overdue);
+        const upcoming = tasks.filter(t => t.upcoming);
+        const bills = expenses.filter(e => e.property === p.id);
+        const docs = documents.filter(d => d.property === p.id);
+        const notes = governance.filter(g => g.property === p.id);
+        const feed = activity.filter(a => a.property === p.id);
+        const toSign = (p.leases || []).filter(l => l.status === 'to-sign' || !l.signed);
+        const active = (p.leases || []).find(l => l.status === 'active' || l.status === 'expiring');
+        const nextM = nextMaint(p);
+        const nextSt = nextM ? maintState(nextM.next) : null;
+        const lastInsp = p.inspection && p.inspection.last;
+        const nextInsp = p.inspection && p.inspection.next;
+        const maintDue = (p.maintenance || []).filter(m => maintState(m.next).key !== 'ok').length;
         let body = '';
-        if (propertyTab === 'overview') {
+        if (propertyTab === 'dashboard' || propertyTab === 'overview') {
+          body =
+            '<div class="chips">' +
+              [['prop-gallery','Gallery'],['prop-map-sec','Map'],['prop-tenant','Tenant'],['prop-maint','Maintenance'],['prop-inspect','Inspection'],['prop-leases','Leases'],['prop-contacts','Contacts'],['prop-tasks','Tasks'],['prop-expenses','Expenses'],['prop-projects','Projects'],['prop-docs','Documents']].map(x =>
+                '<button class="pill" type="button" onclick="jumpTo(\'' + x[0] + '\')">' + x[1] + '</button>'
+              ).join('') +
+            '</div>' +
+            '<div class="dash-stack">' +
+              '<div class="grid g-2">' +
+                '<div class="card"><div class="kicker">Tenant</div><div style="font-weight:700;margin-top:4px;">' + tenantLabel(p) + '</div><div class="muted">' + (p.tenant ? p.tenant.rent : '—') + '</div></div>' +
+                '<div class="card"><div class="kicker">Lease</div><div style="font-weight:700;margin-top:4px;">' + (active ? remainLease(active.end) : 'No active lease') + '</div><div class="muted">' + (toSign.length ? toSign.length + ' to sign' : (active ? active.start + ' → ' + active.end : '—')) + '</div></div>' +
+                '<div class="card"><div class="kicker">Next inspection</div><div style="font-weight:700;margin-top:4px;">' + (nextInsp ? nextInsp.date : 'Not scheduled') + '</div><div class="muted">' + (lastInsp ? 'Last ' + lastInsp.date + ' · ' + lastInsp.who.split('·')[0] : 'No prior inspection') + '</div></div>' +
+                '<div class="card"><div class="kicker">Maintenance</div><div style="font-weight:700;margin-top:4px;" class="' + (nextSt && nextSt.key === 'overdue' ? 'late' : '') + '">' + (nextM ? nextM.title : 'None scheduled') + '</div><div class="muted">' + (nextM ? nextM.next + ' · ' + nextSt.label + (maintDue ? ' · ' + maintDue + ' need attention' : '') : '—') + '</div></div>' +
+              '</div>' +
+              '<div class="card dash-sec" id="prop-gallery"><div class="kicker">Gallery</div><p class="muted" style="margin:6px 0 0;">Photos of the place. Inspection visits have their own set below.</p>' + galleryBlock(p.gallery) + '</div>' +
+              '<div class="dash-grid">' +
+                '<div class="card dash-sec" id="prop-map-sec"><div class="kicker">Map</div><div id="prop-map"></div><div class="kv" style="margin-top:12px;"><span>Address</span><span>' + p.address + '</span><span>Owner</span><span><button class="btn btn-ghost" type="button" data-company="' + c.id + '">' + c.name + '</button></span><span>Lat/lng</span><span>' + p.lat + ', ' + p.lng + '</span></div></div>' +
+                '<div class="card dash-sec" id="prop-tenant"><div class="kicker">Tenant</div>' + tenantBlock(p) + '</div>' +
+              '</div>' +
+              '<div class="card dash-sec" id="prop-maint"><div class="kicker">Maintenance schedule</div><p class="muted" style="margin:6px 0 8px;">Recurring work a maintenance person runs on this building.</p>' + maintBlock(p) + '</div>' +
+              '<div class="card dash-sec" id="prop-inspect"><div class="kicker">Inspections</div>' + inspectBlock(p) + '</div>' +
+              (toSign.length ? '<div class="card dash-sec"><div class="kicker">Contracts to sign</div>' + toSign.map(l => '<div class="check"><div><b>' + (l.title || 'Lease') + '</b><div class="muted">' + l.tenant + ' · starts ' + l.start + '</div></div></div>').join('') + '</div>' : '') +
+              '<div class="card dash-sec" id="prop-leases"><div class="kicker">Lease history</div>' + leaseBlock(p) + '</div>' +
+              '<div class="card dash-sec" id="prop-contacts"><div class="kicker">Contacts</div>' + contactBlock(p) + '</div>' +
+              '<div class="dash-grid">' +
+                '<div class="card dash-sec" id="prop-tasks">' +
+                  '<div class="kicker">Upcoming tasks</div>' +
+                  (upcoming.length ? upcoming.map(t => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + ' onchange="toggleTask(\'' + t.company + '\',\'' + t.text.replace(/'/g, '\\\'') + '\')"><div>' + t.text + '<div class="muted">' + t.due + '</div></div></div>').join('') : '<p class="empty">Nothing upcoming.</p>') +
+                  '<div class="kicker" style="margin-top:16px;">Overdue</div>' +
+                  (overdue.length ? overdue.map(t => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + ' onchange="toggleTask(\'' + t.company + '\',\'' + t.text.replace(/'/g, '\\\'') + '\')"><div>' + t.text + '<div class="muted late">' + t.due + '</div></div></div>').join('') : '<p class="empty">Nothing overdue.</p>') +
+                '</div>' +
+                '<div class="card dash-sec" id="prop-expenses"><div class="kicker">Expenses</div>' + expenseTable(bills) + '</div>' +
+              '</div>' +
+              '<div class="card dash-sec" id="prop-projects"><div class="kicker">Projects</div>' + (p.projects.length ? p.projects.map(pr => projectCard(p, pr)).join('') : '<p class="empty">No projects.</p>') + '</div>' +
+              '<div class="dash-grid">' +
+                '<div class="card dash-sec" id="prop-docs"><div class="kicker">Documents</div>' + (docs.length ? docs.map(d => '<div class="doc-row"><div class="doc-thumb" style="background-image:url(\'' + (d.thumb || p.image) + '\')"></div><div><b>' + d.title + '</b><div class="muted">' + d.kind + ' · ' + d.when + '</div></div></div>').join('') : '<p class="empty">No papers on this property.</p>') + '</div>' +
+                '<div class="card dash-sec" id="prop-activity">' +
+                  '<div class="kicker">Activity</div>' +
+                  (feed.length ? feed.map(a => '<div class="check"><div><b>' + a.what + '</b><div class="muted">' + a.who + ' · ' + a.when + '</div></div></div>').join('') : '<p class="empty">No recent activity.</p>') +
+                  '<div class="kicker" style="margin-top:16px;">Board notes</div>' +
+                  (notes.length ? notes.map(g => '<div class="check"><div><b>' + g.title + '</b><div class="muted">' + g.when + '</div></div></div>').join('') : '<p class="empty">No notes on this property.</p>') +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        } else if (propertyTab === 'map') {
           body = '<div id="prop-map"></div><div class="kv" style="margin-top:12px;"><span>Address</span><span>' + p.address + '</span><span>Owner</span><span>' + c.name + '</span><span>Lat/lng</span><span>' + p.lat + ', ' + p.lng + '</span></div>';
+        } else if (propertyTab === 'gallery') {
+          body = galleryBlock(p.gallery);
+        } else if (propertyTab === 'contacts') {
+          body = contactBlock(p);
+        } else if (propertyTab === 'tenant') {
+          body = tenantBlock(p);
+        } else if (propertyTab === 'leases') {
+          body = leaseBlock(p);
+        } else if (propertyTab === 'maintenance') {
+          body = maintBlock(p);
+        } else if (propertyTab === 'inspection') {
+          body = inspectBlock(p);
         } else if (propertyTab === 'projects') {
-          body = p.projects.map(pr => projectCard(p, pr)).join('');
+          body = p.projects.map(pr => projectCard(p, pr)).join('') || '<p class="empty">No projects.</p>';
         } else if (propertyTab === 'expenses') {
-          body = expenseTable(expenses.filter(e => e.property === p.id));
+          body = expenseTable(bills);
         } else {
-          body = documents.filter(d => d.property === p.id).map(d => '<div class="row"><span>' + d.title + '</span><span class="muted">' + d.kind + '</span></div>').join('') || '<p class="empty">No papers on this property.</p>';
+          body = docs.map(d => '<div class="doc-row"><div class="doc-thumb" style="background-image:url(\'' + (d.thumb || p.image) + '\')"></div><div><b>' + d.title + '</b><div class="muted">' + d.kind + '</div></div></div>').join('') || '<p class="empty">No papers on this property.</p>';
         }
         return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'properties\')">← Properties</button></div>' +
           '<div class="hero" style="background-image:url(\'' + p.image + '\')"></div>' +
           '<h1 class="page">' + p.name + '</h1><p class="sub">' + c.name + ' · ' + p.address + '</p>' +
           '<div class="tabs">' + tabs.map(t => '<button class="pill' + (propertyTab === t ? ' on' : '') + '" data-ptab="' + t + '">' + t + '</button>').join('') + '</div>' +
-          '<div class="card">' + body + '</div>';
+          (propertyTab === 'dashboard' || propertyTab === 'overview' ? body : '<div class="card">' + body + '</div>');
       },
       map() {
-        return '<h1 class="page">Map</h1><p class="sub">Every property. Click a pin or a row.</p>' +
-          '<div class="grid g-main"><div id="map-root"></div><div class="list">' + properties.map(p => propRow(p)).join('') + '</div></div>';
+        const list = properties.filter(p => mapCompany === 'all' || p.company === mapCompany).slice();
+        if (mapSort === 'company') list.sort((a, b) => (companyBy(a.company).name + a.name).localeCompare(companyBy(b.company).name + b.name));
+        else list.sort((a, b) => a.name.localeCompare(b.name));
+        return '<h1 class="page">Map</h1><p class="sub">Filter by company. Sort the list by company or property name. Click a pin or a row.</p>' +
+          '<div class="chips"><button class="pill' + (mapCompany === 'all' ? ' on' : '') + '" onclick="mapCompany=\'all\';render()">All</button>' +
+          companies.map(c => '<button class="pill' + (mapCompany === c.id ? ' on' : '') + '" onclick="mapCompany=\'' + c.id + '\';render()">' + c.name + '</button>').join('') +
+          '<button class="pill' + (mapSort === 'company' ? ' on' : '') + '" onclick="mapSort=\'company\';render()">Sort: company</button>' +
+          '<button class="pill' + (mapSort === 'name' ? ' on' : '') + '" onclick="mapSort=\'name\';render()">Sort: property</button></div>' +
+          '<div class="grid g-main"><div id="map-root"></div><div class="list">' + list.map(p => propRow(p)).join('') + '</div></div>';
       },
       calendar() {
         const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -743,33 +1284,42 @@
         return html + '</div>';
       },
       tasks() {
-        const rows = companies.flatMap(c => c.tasks.map(t => Object.assign({ company: c.name, cid: c.id }, t)))
-          .filter(t => taskCompany === 'all' || t.cid === taskCompany);
-        return '<h1 class="page">Tasks</h1><p class="sub">Complete view, or slice by company.</p>' +
-          '<div class="chips"><button class="pill' + (taskCompany === 'all' ? ' on' : '') + '" onclick="taskCompany=\'all\';render()">All</button>' +
-          companies.map(c => '<button class="pill' + (taskCompany === c.id ? ' on' : '') + '" onclick="taskCompany=\'' + c.id + '\';render()">' + c.name + '</button>').join('') + '</div>' +
-          '<div class="card">' + rows.map(t => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + '><div>' + t.text + '<div class="muted">' + t.company + ' · ' + t.due + '</div></div></div>').join('') + '</div>';
+        const rows = allTasks().filter(t => taskMatches(t, taskNode));
+        return '<h1 class="page">Tasks</h1><p class="sub">Tree by company, then property. The number on each node is how many tasks sit there.</p>' +
+          '<div class="grid g-tree">' +
+            treeHtml('task') +
+            '<div class="card">' +
+              (rows.length ? rows.map(t => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + ' onchange="toggleTask(\'' + t.company + '\',\'' + t.text.replace(/'/g, '\\\'') + '\')"><div>' + t.text + '<div class="muted">' + t.companyName + ' · ' + t.propertyName + ' · ' + t.due + (t.overdue ? ' · <span class="late">overdue</span>' : '') + '</div></div></div>').join('') : '<p class="empty">No tasks in this branch.</p>') +
+            '</div>' +
+          '</div>';
       },
       documents() {
+        const kinds = ['all', 'operating', 'tax', 'deed', 'lease', 'other'];
         const rows = documents.filter(d => {
-          if (docFilter === 'all') return true;
-          if (docFilter === 'global') return d.scope === 'global';
-          if (docFilter === 'company') return d.scope === 'company';
-          if (docFilter === 'property') return d.scope === 'property';
-          return true;
+          if (docKind !== 'all' && d.kind !== docKind) return false;
+          if (docCompany !== 'all' && d.company !== docCompany) return false;
+          return docMatches(d, docNode);
         });
-        return '<h1 class="page">Documents</h1><p class="sub">Global papers, or assigned to a company or a property. Unindexed items live in Inbox.</p>' +
+        return '<h1 class="page">Documents</h1><p class="sub">Thumbnail per file. Filter by type and company, or walk the same company → property tree.</p>' +
           '<div class="chips">' +
-            ['all','global','company','property'].map(f => '<button class="pill' + (docFilter === f ? ' on' : '') + '" onclick="docFilter=\'' + f + '\';render()">' + f + '</button>').join('') +
+            kinds.map(f => '<button class="pill' + (docKind === f ? ' on' : '') + '" onclick="docKind=\'' + f + '\';render()">' + f + '</button>').join('') +
+          '</div>' +
+          '<div class="chips">' +
+            '<button class="pill' + (docCompany === 'all' ? ' on' : '') + '" onclick="docCompany=\'all\';docNode=\'all\';render()">All companies</button>' +
+            companies.map(c => '<button class="pill' + (docCompany === c.id ? ' on' : '') + '" onclick="docCompany=\'' + c.id + '\';docNode=\'' + c.id + '\';render()">' + c.name + '</button>').join('') +
             '<button class="pill" onclick="go(\'inbox\')">Unindexed (' + inbox.length + ')</button>' +
           '</div>' +
           '<p class="muted" style="margin-bottom:8px;">Folders: ' + folders.map(f => f.name).join(', ') + '</p>' +
-          '<div class="card"><table><tr><th>Title</th><th>Scope</th><th>Company</th><th>Property</th><th>When</th></tr>' +
-          rows.map(d => {
-            const c = d.company ? (companyBy(d.company) || {}).name : '—';
-            const p = d.property ? (propertyBy(d.property) || {}).name : '—';
-            return '<tr><td>' + d.title + '</td><td>' + d.scope + '</td><td>' + c + '</td><td>' + p + '</td><td>' + d.when + '</td></tr>';
-          }).join('') + '</table></div>';
+          '<div class="grid g-tree">' +
+            treeHtml('doc') +
+            '<div class="card">' +
+              (rows.length ? rows.map(d => {
+                const c = d.company ? (companyBy(d.company) || {}).name : 'Global';
+                const p = d.property ? (propertyBy(d.property) || {}).name : '—';
+                return '<div class="doc-row"><div class="doc-thumb" style="background-image:url(\'' + (d.thumb || '') + '\')"></div><div style="flex:1;"><b>' + d.title + '</b><div class="muted">' + d.kind + ' · ' + c + ' · ' + p + ' · ' + d.when + '</div></div></div>';
+              }).join('') : '<p class="empty">No documents in this filter.</p>') +
+            '</div>' +
+          '</div>';
       },
       expenses() {
         const rows = expenses.filter(e => expFilter === 'all' || e.status === expFilter);
@@ -834,7 +1384,7 @@
     }
     function propRow(p) {
       const c = companyBy(p.company);
-      return '<div class="row card click" data-property="' + p.id + '" style="margin-bottom:8px;"><div class="thumb" style="background-image:url(\'' + p.image + '\')"></div><div style="flex:1;"><b>' + p.name + '</b><div class="muted">' + c.name + '</div></div></div>';
+      return '<div class="row card click" data-property="' + p.id + '" style="margin-bottom:8px;"><div class="thumb" style="background-image:url(\'' + p.image + '\')"></div><div style="flex:1;"><b>' + p.name + '</b><div class="muted">' + c.name + ' · ' + tenantLabel(p) + '</div></div></div>';
     }
     function projectCard(p, pr) {
       const pct = pr.budget ? Math.min(100, Math.round(pr.spent / pr.budget * 100)) : 0;
@@ -873,15 +1423,19 @@
       const item = inbox.find(x => x.id === id);
       if (!item) return;
       if (company === 'global') {
-        documents.unshift({ title: item.title, company: null, property: null, kind: 'other', scope: 'global', when: 'Sep 2026' });
+        documents.unshift({ title: item.title, company: null, property: null, kind: 'other', scope: 'global', when: 'Sep 2026', thumb: 'thumbs/home.png' });
       } else {
+        const thumb = (property && propertyBy(property) && propertyBy(property).image)
+          || (companyBy(company) && companyBy(company).image)
+          || 'thumbs/home.png';
         documents.unshift({
           title: item.title,
           company: company,
           property: property,
           kind: 'other',
           scope: property ? 'property' : 'company',
-          when: 'Sep 2026'
+          when: 'Sep 2026',
+          thumb: thumb
         });
       }
       item.company = company === 'global' ? 'global' : company;
@@ -902,17 +1456,100 @@
       localStorage.setItem('hh_sb_key', document.getElementById('set-key').value.trim());
       alert('Saved in this browser. The real app uses these as EXPO_PUBLIC_ / VITE_ URL + anon key only.');
     }
-    function hideOverlay() { document.getElementById('overlay').classList.remove('on'); }
+    function hideOverlay() {
+      const o = document.getElementById('overlay');
+      o.classList.remove('on');
+      o.innerHTML = '';
+    }
+    function toggleTask(company, text) {
+      const c = companyBy(company);
+      let t = c && c.tasks.find(x => x.text === text);
+      if (!t) t = extraTasks.find(x => x.company === company && x.text === text);
+      if (t) t.done = !t.done;
+      render();
+    }
+    let dropTimer = null;
+    function queueCaptured(title, meta) {
+      captured.push({ title: title, meta: meta });
+      clearTimeout(dropTimer);
+      dropTimer = setTimeout(render, 80);
+    }
+    function addFiles(list) {
+      Array.from(list || []).forEach(f => {
+        const path = f.webkitRelativePath || f.name;
+        captured.push({ title: f.name, meta: path + ' · ' + Math.round(f.size / 1024) + ' KB' });
+      });
+      render();
+    }
+    function walkEntry(entry) {
+      if (!entry) return;
+      if (entry.isFile) entry.file(f => queueCaptured(f.name, entry.fullPath || f.name));
+      if (entry.isDirectory) {
+        const reader = entry.createReader();
+        reader.readEntries(ents => ents.forEach(walkEntry));
+      }
+    }
+    function setupDrop() {
+      const zone = document.getElementById('drop-zone');
+      const dir = document.getElementById('dir-input');
+      const files = document.getElementById('file-input');
+      if (!zone) return;
+      ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('on'); }));
+      zone.addEventListener('dragleave', e => { e.preventDefault(); zone.classList.remove('on'); });
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('on');
+        const items = e.dataTransfer.items;
+        if (items && items.length && items[0].webkitGetAsEntry) {
+          Array.from(items).forEach(it => walkEntry(it.webkitGetAsEntry()));
+        } else addFiles(e.dataTransfer.files);
+      });
+      if (dir) dir.onchange = () => addFiles(dir.files);
+      if (files) files.onchange = () => addFiles(files.files);
+    }
+    function showCloud(which) {
+      const o = document.getElementById('overlay');
+      const google = which === 'google';
+      o.classList.add('on');
+      o.innerHTML = '<div class="card" onclick="event.stopPropagation()">' +
+        '<div class="row"><b>' + (google ? 'Connect Google Drive' : 'Connect Dropbox') + '</b><button class="btn btn-ghost" type="button" onclick="hideOverlay()">Close</button></div>' +
+        (google
+          ? '<div class="steps"><b>Google Drive</b>1. Google Cloud Console → APIs & Services → Enable Google Drive API<br>2. Create an OAuth client (Web application)<br>3. Add this page as an authorized redirect<br>4. Paste the client ID below</div>'
+          : '<div class="steps"><b>Dropbox</b>1. dropbox.com/developers → App Console → Create app<br>2. Scoped access, files.content.read<br>3. Copy the app key<br>4. Paste it below</div>') +
+        '<label>' + (google ? 'OAuth client ID' : 'Dropbox app key') + '</label>' +
+        '<input id="cloud-key" type="text" placeholder="' + (google ? 'xxxxx.apps.googleusercontent.com' : 'app key') + '">' +
+        '<p class="muted">Demo mode stores the key in this browser and imports a sample folder. Real OAuth comes later.</p>' +
+        '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="connectCloud(\'' + which + '\')">Save and connect</button></div>' +
+      '</div>';
+    }
+    function connectCloud(which) {
+      const key = (document.getElementById('cloud-key') || {}).value || '';
+      localStorage.setItem('hh_cloud_' + which, key);
+      clouds[which] = true;
+      if (which === 'google') {
+        captured.push({ title: 'Receipts/gas-ago.jpg', meta: 'Google Drive / Receipts' });
+        captured.push({ title: 'Laureles/lease-camila.pdf', meta: 'Google Drive / Laureles' });
+      } else {
+        captured.push({ title: 'Envigado/lease-2025.pdf', meta: 'Dropbox / Andes' });
+        captured.push({ title: 'Taxes/2025-franchise.pdf', meta: 'Dropbox / Taxes' });
+      }
+      hideOverlay();
+      render();
+    }
 
     function initMap() {
       const el = document.getElementById('map-root');
       if (!el || typeof L === 'undefined') return;
       if (mapObj) { mapObj.remove(); mapObj = null; }
-      mapObj = L.map(el).setView([20, -78], 3);
+      const pins = properties.filter(p => mapCompany === 'all' || p.company === mapCompany);
+      mapObj = L.map(el).setView(pins[0] ? [pins[0].lat, pins[0].lng] : [20, -78], pins.length === 1 ? 12 : 3);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(mapObj);
-      properties.forEach(p => {
-        L.marker([p.lat, p.lng]).addTo(mapObj).bindPopup(p.name).on('click', () => go('property', p.id));
+      pins.forEach(p => {
+        L.marker([p.lat, p.lng]).addTo(mapObj).bindPopup(p.name + '<br>' + tenantLabel(p)).on('click', () => go('property', p.id));
       });
+      if (pins.length > 1) {
+        mapObj.fitBounds(L.latLngBounds(pins.map(p => [p.lat, p.lng])).pad(0.25));
+      }
       setTimeout(() => mapObj.invalidateSize(), 80);
     }
     function initPropMap() {
