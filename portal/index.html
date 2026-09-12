@@ -285,31 +285,7 @@
   </style>
 </head>
 <body>
-  <div class="connect" id="connect">
-    <div class="connect-card">
-      <div class="brand">Hearthhold Portfolio</div>
-      <h1>Your books. Your database.</h1>
-      <p>Point this portal at your own Supabase project. Nothing is shared with anyone else’s companies.</p>
-      <div class="steps">
-        <b>Get the keys</b>
-        1. Create an account at supabase.com → New project<br>
-        2. Project Settings → API<br>
-        3. Copy Project URL and the anon public key<br>
-        Do not paste the service_role key.
-      </div>
-      <label for="sb-url">Project URL</label>
-      <input id="sb-url" type="text" placeholder="https://xxxx.supabase.co" value="https://your-project.supabase.co">
-      <label for="sb-key">anon public key</label>
-      <input id="sb-key" type="password" placeholder="eyJhbGciOi…">
-      <p class="warn-note">Demo mode uses sample companies. Keys stay in this browser only.</p>
-      <div class="btn-row">
-        <button class="btn btn-primary" type="button" onclick="connectDb()">Connect</button>
-        <button class="btn btn-ghost" type="button" onclick="enterApp()">Skip — use demo data</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="app" id="app">
+  <div class="app on" id="app">
     <aside class="side">
       <div class="brand">Hearthhold</div>
       <h2>Portfolio</h2>
@@ -873,20 +849,7 @@
       '</div>';
     }
 
-    function connectDb() {
-      const url = document.getElementById('sb-url').value.trim();
-      const key = document.getElementById('sb-key').value.trim();
-      if (!url || !key) {
-        alert('Paste the Project URL and anon key, or skip to demo.');
-        return;
-      }
-      localStorage.setItem('hh_sb_url', url);
-      localStorage.setItem('hh_sb_key', key);
-      enterApp();
-    }
-
     function enterApp() {
-      document.getElementById('connect').style.display = 'none';
       document.getElementById('app').classList.add('on');
       go('home');
     }
@@ -1007,7 +970,7 @@
       sitemap() {
         return '<h1 class="page">Sitemap</h1><p class="sub">Web portal for running a property portfolio. Left nav is the map of the app. The bar at the top is how you run it: voice, photo, or a sentence.</p>' +
           '<div class="grid g-2">' +
-            card('Get in', '<b>Connect</b> — paste your Supabase URL and anon key.<br><b>Home</b> — today’s inbox, money, and what to do.') +
+            card('Get in', '<b>Home</b> — opens on demo data. No keys needed.<br><b>Settings</b> — paste a Supabase URL and anon key later, if you want your own project.') +
             card('Capture', '<b>Capture</b> — voice, photo, files, a folder from the desktop, or Google Drive / Dropbox.<br><b>Inbox</b> — anything not indexed yet. You correct it.<br><b>Activity</b> — recent uploads.') +
             card('Portfolio', '<b>Companies</b> — one row each, with a thumbnail. Click for a dashboard.<br><b>Company</b> — dashboard, plus records for that company only: documents, expenses, board notes. Also tax, filings, users, tasks, properties.<br><b>Properties</b> — scrolling dashboard: tenant, lease, maintenance schedule, inspections, contacts, money.<br><b>Map</b> — filter or sort by company.') +
             card('Work', '<b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
@@ -1359,12 +1322,14 @@
       },
       settings() {
         const url = localStorage.getItem('hh_sb_url') || '';
-        return '<h1 class="page">Settings</h1><p class="sub">Your database. This portal never ships a service_role key.</p>' +
+        const hasKey = !!localStorage.getItem('hh_sb_key');
+        return '<h1 class="page">Settings</h1><p class="sub">This demo runs on sample companies. Keys are optional and stay in this browser. Never paste a service_role key.</p>' +
           '<div class="grid g-2">' +
-            '<div class="card"><div class="kicker">Supabase</div>' +
+            '<div class="card"><div class="kicker">Supabase (optional)</div>' +
+              '<p class="muted" style="margin-bottom:10px;">Leave this blank for the demo. When you want your own books, paste a Project URL and the anon public key.</p>' +
               '<div class="steps"><b>Get keys</b>1. supabase.com → New project<br>2. Project Settings → API<br>3. Copy Project URL + anon public key</div>' +
-              '<label>Project URL</label><input id="set-url" type="text" value="' + (url || 'https://your-project.supabase.co') + '">' +
-              '<label>anon public key</label><input id="set-key" type="password" placeholder="eyJhbGciOi…">' +
+              '<label>Project URL</label><input id="set-url" type="text" value="' + (url || '') + '" placeholder="https://xxxx.supabase.co">' +
+              '<label>anon public key</label><input id="set-key" type="password" placeholder="' + (hasKey ? 'Key saved in this browser' : 'eyJhbGciOi…') + '">' +
               '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="saveKeys()">Save keys</button></div>' +
               '<p class="warn-note">Never paste service_role. That key can read every table.</p>' +
             '</div>' +
@@ -1738,6 +1703,7 @@
       sendBtn.disabled = false;
     }
 
+    enterApp();
   </script>
 </body>
 </html>
