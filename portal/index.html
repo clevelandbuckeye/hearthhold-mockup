@@ -659,7 +659,12 @@
       { text: 'Confirm Camila September rent', done: false, due: '2026-09-12', company: 'hearthhold', property: 'laureles' },
       { text: 'Roof contractor callback', done: false, due: '2026-09-05', company: 'hearthhold', property: 'laureles' },
       { text: 'Fit-out permit', done: false, due: '2026-09-22', company: 'andes', property: 'envigado' },
-      { text: 'Fence quote', done: false, due: '2026-10-01', company: 'northstar', property: 'ohio' }
+      { text: 'Fence quote', done: false, due: '2026-10-01', company: 'northstar', property: 'ohio' },
+      { text: 'Collected August rent', done: true, due: '2026-09-01', completed: '2026-09-02', company: 'hearthhold', property: 'laureles' },
+      { text: 'Lubricated roll-up door', done: true, due: '2026-08-28', completed: '2026-08-28', company: 'andes', property: 'envigado' },
+      { text: 'Replaced hallway smoke detector battery', done: true, due: '2026-06-04', completed: '2026-06-04', company: 'hearthhold', property: 'laureles' },
+      { text: 'Spring furnace filter swap', done: true, due: '2026-05-16', completed: '2026-05-16', company: 'northstar', property: 'ohio' },
+      { text: 'Pest control — kitchen and balcony', done: true, due: '2026-07-02', completed: '2026-07-02', company: 'hearthhold', property: 'laureles' }
     ];
 
     let inbox = [
@@ -745,10 +750,12 @@
 
     const calEvents = [
       { day: 11, title: 'Today', company: 'all' },
-      { day: 15, title: 'Laureles HOA', company: 'hearthhold' },
-      { day: 18, title: 'Board call', company: 'hearthhold' },
-      { day: 20, title: 'Envigado fee', company: 'andes' },
-      { day: 30, title: 'Member consents', company: 'andes' }
+      { day: 12, title: 'Tenant check-in', company: 'hearthhold', time: '9:30', property: 'laureles' },
+      { day: 15, title: 'Laureles HOA', company: 'hearthhold', time: '10:00', property: 'laureles' },
+      { day: 18, title: 'Board call', company: 'hearthhold', time: '14:00' },
+      { day: 20, title: 'Envigado fee', company: 'andes', time: '—', property: 'envigado' },
+      { day: 22, title: 'Fit-out walkthrough', company: 'andes', time: '11:00', property: 'envigado' },
+      { day: 30, title: 'Member consents', company: 'andes', time: '16:00' }
     ];
 
     let screen = 'home';
@@ -787,6 +794,7 @@
         return Object.assign({}, t, {
           overdue: overdue,
           upcoming: upcoming,
+          completed: t.completed || (t.done ? due : ''),
           companyName: co ? co.name : '',
           propertyName: pr ? pr.name : 'Company-level'
         });
@@ -1056,7 +1064,7 @@
       sitemap() {
         return '<h1 class="page">Sitemap</h1><p class="sub">Web portal for running a property portfolio. Left nav is the map of the app. The bar at the top is how you run it: voice, photo, or a sentence.</p>' +
           '<div class="grid g-2">' +
-            card('Get in', '<b>Home</b> — opens on demo data. No keys needed.<br><b>Settings</b> — paste a Supabase URL and anon key later, if you want your own project.') +
+            card('Get in', '<b>Home</b> — companies, upcoming appointments, and recently completed property tasks. Opens on demo data. No keys needed.<br><b>Settings</b> — paste a Supabase URL and anon key later, if you want your own project.') +
             card('Capture', '<b>Capture</b> — voice, photo, files, a folder from the desktop, or Google Drive / Dropbox.<br><b>Inbox</b> — thumbnail and file, then company, property, type (task / note / document), and text. AI fills what it can.<br><b>Activity</b> — recent uploads.') +
             card('Portfolio', '<b>Companies</b> — one row each, with a thumbnail. Click for a dashboard.<br><b>Company</b> — dashboard, plus records for that company only: documents, expenses, board notes. Also tax, filings, users, tasks, properties.<br><b>Properties</b> — scrolling dashboard: tenant, lease, maintenance schedule, inspections, contacts, money.<br><b>Map</b> — filter or sort by company.') +
             card('Work', '<b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
@@ -1065,21 +1073,66 @@
       },
       home() {
         const due = expenses.filter(e => e.status === 'upcoming');
-        const openTasks = allTasks().filter(t => !t.done).map(t => t.text + ' · ' + t.companyName);
+        const tasks = allTasks();
+        const openTasks = tasks.filter(t => !t.done);
+        const todayDay = 11;
+        const upcomingCal = calEvents
+          .filter(e => e.day >= todayDay && e.title !== 'Today')
+          .slice()
+          .sort((a, b) => a.day - b.day);
+        const donePm = tasks
+          .filter(t => t.done && t.property)
+          .sort((a, b) => String(b.completed || b.due).localeCompare(String(a.completed || a.due)))
+          .slice(0, 6);
+        function calWhen(e) {
+          return 'Sep ' + e.day + (e.time && e.time !== '—' ? ' · ' + e.time : '');
+        }
+        function prettyDate(iso) {
+          if (!iso) return '';
+          const parts = String(iso).split('-');
+          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          return months[+parts[1] - 1] + ' ' + (+parts[2]);
+        }
         return '<h1 class="page">Home</h1><p class="sub">Say it, shoot it, or drop it. The harness files it to a company or property. You only touch the leftovers.</p>' +
           '<div class="grid g-3" style="margin-bottom:12px;">' +
             stat('Inbox', inbox.length, 'to index', 'inbox') +
             stat('Upcoming', due.length, 'property bills', 'expenses') +
             stat('Open tasks', openTasks.length, 'across companies', 'tasks') +
           '</div>' +
-          '<div class="grid g-main">' +
+          '<div class="grid g-main" style="margin-bottom:12px;">' +
             '<div class="card">' +
-              '<div class="kicker">Do next</div>' +
-              openTasks.map(t => '<div class="check"><input type="checkbox"><div>' + t + '</div></div>').join('') +
-              '<div style="margin-top:10px;"><button class="btn btn-primary" onclick="go(\'capture\')">Capture something</button></div>' +
+              '<div class="row" style="margin-bottom:8px;"><div class="kicker">Companies</div><button class="pill" type="button" onclick="go(\'companies\')">All</button></div>' +
+              companies.map(c => {
+                const n = properties.filter(p => p.company === c.id).length;
+                const overdue = tasks.filter(t => t.company === c.id && t.overdue).length;
+                return '<div class="row click" data-company="' + c.id + '" style="padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;">' +
+                  '<div class="thumb" style="background-image:url(\'' + (c.image || 'thumbs/andes.png') + '\')"></div>' +
+                  '<div style="flex:1;"><b>' + c.name + '</b><div class="muted">' + c.jurisdiction + ' · ' + n + ' properties</div></div>' +
+                  (overdue ? '<span class="late">' + overdue + ' overdue</span>' : '<span class="ok">On track</span>') +
+                '</div>';
+              }).join('') +
+              '<div style="margin-top:12px;"><button class="btn btn-primary" type="button" onclick="go(\'capture\')">Capture something</button></div>' +
             '</div>' +
             '<div class="card">' +
-              '<div class="kicker">Properties</div>' +
+              '<div class="row" style="margin-bottom:8px;"><div class="kicker">Upcoming</div><button class="pill" type="button" onclick="go(\'calendar\')">Calendar</button></div>' +
+              (upcomingCal.length ? upcomingCal.map(e => {
+                const co = e.company && e.company !== 'all' ? companyBy(e.company) : null;
+                const pr = e.property ? propertyBy(e.property) : null;
+                const extra = [co && co.name, pr && pr.name].filter(Boolean).join(' · ');
+                const attr = pr ? ' data-property="' + pr.id + '"' : (co ? ' data-company="' + co.id + '"' : ' data-go="calendar"');
+                return '<div class="check click"' + attr + ' style="cursor:pointer;"><div><b>' + e.title + '</b><div class="muted">' + calWhen(e) + (extra ? ' · ' + extra : '') + '</div></div></div>';
+              }).join('') : '<p class="empty">Nothing on the calendar.</p>') +
+            '</div>' +
+          '</div>' +
+          '<div class="grid g-main">' +
+            '<div class="card">' +
+              '<div class="row" style="margin-bottom:8px;"><div class="kicker">Recently completed</div><button class="pill" type="button" onclick="go(\'tasks\')">Tasks</button></div>' +
+              (donePm.length ? donePm.map(t =>
+                '<div class="check"><input type="checkbox" checked onchange="toggleTask(\'' + t.company + '\',\'' + t.text.replace(/'/g, '\\\'') + '\')"><div>' + t.text + '<div class="muted">' + t.propertyName + ' · ' + t.companyName + ' · ' + prettyDate(t.completed || t.due) + '</div></div></div>'
+              ).join('') : '<p class="empty">No completed property tasks yet.</p>') +
+            '</div>' +
+            '<div class="card">' +
+              '<div class="row" style="margin-bottom:8px;"><div class="kicker">Properties</div><button class="pill" type="button" onclick="go(\'properties\')">All</button></div>' +
               properties.map(p => propRow(p)).join('') +
             '</div>' +
           '</div>';
