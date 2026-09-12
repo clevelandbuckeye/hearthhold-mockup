@@ -282,6 +282,59 @@
     .late { color: var(--bad); }
     .ok { color: var(--forest-2); }
     .line-card { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; }
+    .inbox-card {
+      display: grid;
+      grid-template-columns: 148px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .inbox-media { min-width: 0; }
+    .inbox-preview {
+      display: block;
+      width: 100%;
+      height: 148px;
+      border: none;
+      border-radius: 10px;
+      background: #e7ebe8 center/cover;
+      border: 1px solid var(--line);
+      cursor: pointer;
+      padding: 0;
+    }
+    .inbox-preview.audio, .inbox-preview.file {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--mist);
+      color: var(--forest);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: default;
+    }
+    .inbox-preview .big { font-size: 28px; line-height: 1; }
+    .inbox-file {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      word-break: break-all;
+      background: var(--mist);
+      border-radius: 8px;
+      padding: 6px 8px;
+    }
+    .inbox-form .ai-guess {
+      font-size: 12px;
+      color: var(--mute);
+      background: var(--mist);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+    }
+    .inbox-form textarea { min-height: 72px; resize: vertical; }
+    .inbox-form .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    @media (max-width: 900px) {
+      .inbox-card, .inbox-form .fields { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -610,9 +663,42 @@
     ];
 
     let inbox = [
-      { id: 'u1', title: 'Scan — receipt', guess: 'Hardware store · 186.000 COP', file: 'scan.jpg', company: null, property: null },
-      { id: 'u2', title: 'Voice note', guess: '“Pay the gas bill twenty-four thousand”', file: 'note.m4a', company: null, property: null },
-      { id: 'u3', title: 'Photo — document', guess: 'Looks like board minutes · Hearthhold LLC?', file: 'photo.jpg', company: null, property: null }
+      {
+        id: 'u1',
+        title: 'Scan — receipt',
+        guess: 'Hardware store · 186.000 COP · Laureles kitchen',
+        file: 'scan.jpg',
+        thumb: 'thumbs/laureles-kitchen.png',
+        kind: 'photo',
+        company: 'hearthhold',
+        property: 'laureles',
+        type: 'document',
+        text: 'Hardware store receipt, 186.000 COP. Looks like kitchen materials for Laureles.'
+      },
+      {
+        id: 'u2',
+        title: 'Voice note',
+        guess: 'Pay the gas bill twenty-four thousand · utilities · Hearthhold',
+        file: 'note.m4a',
+        thumb: '',
+        kind: 'voice',
+        company: 'hearthhold',
+        property: '',
+        type: 'task',
+        text: 'Pay the gas bill 24.000'
+      },
+      {
+        id: 'u3',
+        title: 'Photo — document',
+        guess: 'Board minutes · Hearthhold LLC',
+        file: 'photo.jpg',
+        thumb: 'thumbs/laureles.png',
+        kind: 'photo',
+        company: 'hearthhold',
+        property: '',
+        type: 'note',
+        text: 'Board minutes. Looks like Hearthhold LLC. Confirm the date and file it with the company notes.'
+      }
     ];
 
     const documents = [
@@ -971,7 +1057,7 @@
         return '<h1 class="page">Sitemap</h1><p class="sub">Web portal for running a property portfolio. Left nav is the map of the app. The bar at the top is how you run it: voice, photo, or a sentence.</p>' +
           '<div class="grid g-2">' +
             card('Get in', '<b>Home</b> — opens on demo data. No keys needed.<br><b>Settings</b> — paste a Supabase URL and anon key later, if you want your own project.') +
-            card('Capture', '<b>Capture</b> — voice, photo, files, a folder from the desktop, or Google Drive / Dropbox.<br><b>Inbox</b> — anything not indexed yet. You correct it.<br><b>Activity</b> — recent uploads.') +
+            card('Capture', '<b>Capture</b> — voice, photo, files, a folder from the desktop, or Google Drive / Dropbox.<br><b>Inbox</b> — thumbnail and file, then company, property, type (task / note / document), and text. AI fills what it can.<br><b>Activity</b> — recent uploads.') +
             card('Portfolio', '<b>Companies</b> — one row each, with a thumbnail. Click for a dashboard.<br><b>Company</b> — dashboard, plus records for that company only: documents, expenses, board notes. Also tax, filings, users, tasks, properties.<br><b>Properties</b> — scrolling dashboard: tenant, lease, maintenance schedule, inspections, contacts, money.<br><b>Map</b> — filter or sort by company.') +
             card('Work', '<b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
             card('System', '<b>Audit</b> — who did what.<br><b>Settings</b> — your database keys, how to get them.<br><b>Feedback</b> — button in the corner. Screenshot plus text, voice, video, or a photo.') +
@@ -1020,18 +1106,47 @@
       },
       inbox() {
         const rows = inbox.filter(i => !i.filed);
-        return '<h1 class="page">Inbox</h1><p class="sub">Captured but not indexed. This is the correction queue. File it to a company, a property, or mark it global.</p>' +
-          '<div class="list">' + rows.map(i =>
-            '<div class="card">' +
-              '<div class="row"><div><b>' + i.title + '</b></div><span class="muted">' + i.file + '</span></div>' +
-              '<div class="muted" style="margin:6px 0;">AI guess: ' + i.guess + '</div>' +
-              '<div class="chips">' +
-                companies.map(c => '<button class="pill" type="button" onclick="fileInbox(\'' + i.id + '\',\'' + c.id + '\',null)">' + c.name + '</button>').join('') +
-                properties.map(p => '<button class="pill" type="button" onclick="fileInbox(\'' + i.id + '\',\'' + p.company + '\',\'' + p.id + '\')">' + p.name + '</button>').join('') +
-                '<button class="pill" type="button" onclick="fileInbox(\'' + i.id + '\',\'global\',null)">Global</button>' +
+        const types = [
+          { id: 'task', label: 'Task' },
+          { id: 'note', label: 'Note' },
+          { id: 'document', label: 'Document' }
+        ];
+        return '<h1 class="page">Inbox</h1><p class="sub">Review what was captured. Thumbnail and file on the left. Company, property, type, and text are filled from the AI guess — correct anything that is wrong, then file it.</p>' +
+          '<div class="list">' + rows.map(i => {
+            const props = properties.filter(p => i.company && i.company !== 'global' && p.company === i.company);
+            const preview = i.thumb
+              ? '<button type="button" class="inbox-preview" style="background-image:url(\'' + i.thumb + '\')" onclick="openPhoto(\'' + i.thumb + '\',\'' + esc(i.file) + '\')"></button>'
+              : '<div class="inbox-preview ' + (i.kind === 'voice' ? 'audio' : 'file') + '"><span class="big">' + (i.kind === 'voice' ? '🎤' : '📄') + '</span>' + (i.kind === 'voice' ? 'Voice' : 'File') + '</div>';
+            return '<div class="card inbox-card">' +
+              '<div class="inbox-media">' +
+                preview +
+                '<div class="inbox-file">' + esc(i.file) + '</div>' +
               '</div>' +
-            '</div>'
-          ).join('') + (rows.length ? '' : '<p class="empty">Inbox is clear.</p>') + '</div>';
+              '<div class="inbox-form">' +
+                '<div class="ai-guess">AI guess: ' + esc(i.guess) + '</div>' +
+                '<div class="fields">' +
+                  '<div><label>Company</label>' +
+                    '<select onchange="inboxPatch(\'' + i.id + '\',\'company\',this.value)">' +
+                      '<option value="">Select company</option>' +
+                      companies.map(c => '<option value="' + c.id + '"' + (i.company === c.id ? ' selected' : '') + '>' + esc(c.name) + '</option>').join('') +
+                      '<option value="global"' + (i.company === 'global' ? ' selected' : '') + '>Global</option>' +
+                    '</select></div>' +
+                  '<div><label>Property</label>' +
+                    '<select onchange="inboxPatch(\'' + i.id + '\',\'property\',this.value)"' + (i.company && i.company !== 'global' ? '' : ' disabled') + '>' +
+                      '<option value="">' + (i.company && i.company !== 'global' ? 'Select property' : 'Pick a company first') + '</option>' +
+                      props.map(p => '<option value="' + p.id + '"' + (i.property === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>').join('') +
+                    '</select></div>' +
+                  '<div><label>Type</label>' +
+                    '<select onchange="inboxPatch(\'' + i.id + '\',\'type\',this.value)">' +
+                      types.map(t => '<option value="' + t.id + '"' + (i.type === t.id ? ' selected' : '') + '>' + t.label + '</option>').join('') +
+                    '</select></div>' +
+                '</div>' +
+                '<label>Text</label>' +
+                '<textarea id="inbox-text-' + i.id + '">' + esc(i.text) + '</textarea>' +
+                '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="fileInbox(\'' + i.id + '\')">File it</button></div>' +
+              '</div>' +
+            '</div>';
+          }).join('') + (rows.length ? '' : '<p class="empty">Inbox is clear.</p>') + '</div>';
       },
       activity() {
         return '<h1 class="page">Activity</h1><p class="sub">Documents and captures that just landed. Whole portfolio.</p>' +
@@ -1364,49 +1479,130 @@
           return '<tr><td>' + e.title + '</td><td>' + e.amount + '</td><td><button class="btn btn-ghost" type="button" data-property="' + e.property + '">' + (p ? p.name : '') + '</button></td><td class="status ' + (e.status === 'paid' ? 'paid' : 'due') + '">' + e.status + '</td><td>' + e.when + '</td></tr>';
         }).join('') + '</table>';
     }
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
     function foundBlock() {
-      return '<div class="found"><b>Found ' + captured.length + '</b>' + captured.map(x => '<div class="row" style="margin-top:6px;"><span>' + x.title + '</span><span class="muted">' + x.meta + '</span></div>').join('') +
+      return '<div class="found"><b>Found ' + captured.length + '</b>' + captured.map(x =>
+        '<div class="row" style="margin-top:8px;align-items:center;">' +
+          (x.thumb
+            ? '<div class="thumb" style="background-image:url(\'' + x.thumb + '\')"></div>'
+            : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;background:var(--mist)">' + (x.kind === 'voice' ? '🎤' : '📄') + '</div>') +
+          '<div style="flex:1;min-width:0;"><b>' + esc(x.title) + '</b><div class="muted">' + esc(x.file || x.title) + ' · ' + esc(x.meta) + '</div></div>' +
+        '</div>'
+      ).join('') +
         '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="saveCapture()">Send to Inbox</button></div></div>';
+    }
+    function guessCapture(c) {
+      const blob = ((c.title || '') + ' ' + (c.meta || '')).toLowerCase();
+      let company = '';
+      let property = '';
+      let type = 'document';
+      let text = (c.meta || c.title || '').replace(/[“”]/g, '').trim();
+      if (/laureles|hardware|kitchen|camila|hoa/.test(blob)) {
+        company = 'hearthhold';
+        property = 'laureles';
+      } else if (/envigado|andes|taller/.test(blob)) {
+        company = 'andes';
+        property = 'envigado';
+      } else if (/ohio|northstar|fence/.test(blob)) {
+        company = 'northstar';
+        property = 'ohio';
+      } else if (/hearthhold|gas|utilities|home\//.test(blob)) {
+        company = 'hearthhold';
+      }
+      if (c.kind === 'voice' || /pay |bill|due |callback|quote/.test(blob)) type = 'task';
+      if (/minutes|note|decision|board/.test(blob)) type = 'note';
+      if (/receipt|invoice|lease|deed|\.pdf/.test(blob) && c.kind !== 'voice' && type === 'task') type = 'document';
+      if (!text) text = c.title || '';
+      return { company: company, property: property, type: type, text: text, guess: c.meta || 'AI is still reading this file' };
     }
     function mockCapture(kind) {
       captured.push(
         kind === 'voice'
-          ? { title: 'Gas bill', meta: '24.000 COP · utilities · Home/Hearthhold?' }
+          ? { title: 'Gas bill', meta: 'Pay the gas bill 24.000 COP · utilities · Hearthhold', file: 'note.m4a', kind: 'voice', thumb: '' }
           : kind === 'photo'
-            ? { title: 'Receipt photo', meta: 'Hardware · 186.000 COP · Laureles?' }
-            : { title: 'Minutes.pdf', meta: 'Governance · Hearthhold LLC?' }
+            ? { title: 'Receipt photo', meta: 'Hardware store · 186.000 COP · Laureles', file: 'photo.jpg', kind: 'photo', thumb: 'thumbs/laureles-kitchen.png' }
+            : { title: 'Minutes.pdf', meta: 'Board minutes · Hearthhold LLC', file: 'Minutes.pdf', kind: 'file', thumb: '' }
       );
       activity.unshift({ who: 'Bryan', what: 'Captured ' + captured[captured.length - 1].title, when: 'Just now', company: 'Inbox' });
       render();
     }
     function saveCapture() {
-      captured.forEach(c => inbox.unshift({ id: 'u' + Date.now() + Math.random(), title: c.title, guess: c.meta, file: 'capture', company: null, property: null }));
+      captured.forEach(c => {
+        const g = guessCapture(c);
+        inbox.unshift({
+          id: 'u' + Date.now() + Math.random().toString(16).slice(2),
+          title: c.title,
+          file: c.file || c.title,
+          thumb: c.thumb || '',
+          kind: c.kind || 'file',
+          guess: g.guess,
+          company: g.company,
+          property: g.property,
+          type: g.type,
+          text: g.text
+        });
+      });
       captured = [];
       go('inbox');
     }
-    function fileInbox(id, company, property) {
+    function inboxPatch(id, field, value) {
       const item = inbox.find(x => x.id === id);
       if (!item) return;
-      if (company === 'global') {
-        documents.unshift({ title: item.title, company: null, property: null, kind: 'other', scope: 'global', when: 'Sep 2026', thumb: 'thumbs/home.png' });
+      const textEl = document.getElementById('inbox-text-' + id);
+      if (textEl) item.text = textEl.value;
+      item[field] = value;
+      if (field === 'company') {
+        const ok = properties.some(p => p.company === value && p.id === item.property);
+        if (!ok) item.property = '';
+      }
+      render();
+    }
+    function fileInbox(id) {
+      const item = inbox.find(x => x.id === id);
+      if (!item) return;
+      const textEl = document.getElementById('inbox-text-' + id);
+      if (textEl) item.text = textEl.value;
+      const company = item.company;
+      const property = item.property || null;
+      const type = item.type || 'document';
+      const text = (item.text || item.title || '').trim();
+      if (!company) {
+        alert('Pick a company, or Global.');
+        return;
+      }
+      const isGlobal = company === 'global';
+      const co = isGlobal ? null : company;
+      const thumb = item.thumb
+        || (property && propertyBy(property) && propertyBy(property).image)
+        || (co && companyBy(co) && companyBy(co).image)
+        || 'thumbs/home.png';
+      if (type === 'task') {
+        if (isGlobal) {
+          alert('Tasks need a company.');
+          return;
+        }
+        extraTasks.unshift({ text: text, done: false, due: TODAY, company: co, property: property });
+      } else if (type === 'note') {
+        governance.unshift({ title: text, company: co, property: property, kind: 'note', when: 'Sep 11, 2026' });
       } else {
-        const thumb = (property && propertyBy(property) && propertyBy(property).image)
-          || (companyBy(company) && companyBy(company).image)
-          || 'thumbs/home.png';
         documents.unshift({
-          title: item.title,
-          company: company,
+          title: item.title || text,
+          company: co,
           property: property,
           kind: 'other',
-          scope: property ? 'property' : 'company',
+          scope: isGlobal ? 'global' : (property ? 'property' : 'company'),
           when: 'Sep 2026',
           thumb: thumb
         });
       }
-      item.company = company === 'global' ? 'global' : company;
-      item.filed = true;
       inbox = inbox.filter(x => x.id !== id);
-      audit.unshift({ who: 'Bryan', action: 'Indexed', target: item.title, where: company === 'global' ? 'Global' : (companyBy(company) || {}).name, at: 'Just now' });
+      audit.unshift({ who: 'Bryan', action: 'Filed ' + type, target: item.title, where: isGlobal ? 'Global' : (companyBy(co) || {}).name, at: 'Just now' });
       render();
     }
     function inviteUser() {
@@ -1434,21 +1630,36 @@
       render();
     }
     let dropTimer = null;
-    function queueCaptured(title, meta) {
-      captured.push({ title: title, meta: meta });
+    function captureExtras(f, path) {
+      const isImg = /^image\//.test(f.type);
+      const isAud = /^audio\//.test(f.type);
+      return {
+        file: f.name,
+        kind: isImg ? 'photo' : (isAud ? 'voice' : 'file'),
+        thumb: isImg ? URL.createObjectURL(f) : ''
+      };
+    }
+    function queueCaptured(title, meta, extra) {
+      captured.push(Object.assign({ title: title, meta: meta, file: title, kind: 'file', thumb: '' }, extra || {}));
       clearTimeout(dropTimer);
       dropTimer = setTimeout(render, 80);
     }
     function addFiles(list) {
       Array.from(list || []).forEach(f => {
         const path = f.webkitRelativePath || f.name;
-        captured.push({ title: f.name, meta: path + ' · ' + Math.round(f.size / 1024) + ' KB' });
+        captured.push(Object.assign({
+          title: f.name,
+          meta: path + ' · ' + Math.round(f.size / 1024) + ' KB'
+        }, captureExtras(f, path)));
       });
       render();
     }
     function walkEntry(entry) {
       if (!entry) return;
-      if (entry.isFile) entry.file(f => queueCaptured(f.name, entry.fullPath || f.name));
+      if (entry.isFile) entry.file(f => {
+        const extra = captureExtras(f);
+        queueCaptured(f.name, (entry.fullPath || f.name) + ' · ' + Math.round(f.size / 1024) + ' KB', extra);
+      });
       if (entry.isDirectory) {
         const reader = entry.createReader();
         reader.readEntries(ents => ents.forEach(walkEntry));
@@ -1492,11 +1703,11 @@
       localStorage.setItem('hh_cloud_' + which, key);
       clouds[which] = true;
       if (which === 'google') {
-        captured.push({ title: 'Receipts/gas-ago.jpg', meta: 'Google Drive / Receipts' });
-        captured.push({ title: 'Laureles/lease-camila.pdf', meta: 'Google Drive / Laureles' });
+        captured.push({ title: 'gas-ago.jpg', file: 'gas-ago.jpg', meta: 'Google Drive / Receipts · utilities · Hearthhold', thumb: 'thumbs/home.png', kind: 'photo' });
+        captured.push({ title: 'lease-camila.pdf', file: 'lease-camila.pdf', meta: 'Google Drive / Laureles · lease', thumb: 'thumbs/laureles.png', kind: 'file' });
       } else {
-        captured.push({ title: 'Envigado/lease-2025.pdf', meta: 'Dropbox / Andes' });
-        captured.push({ title: 'Taxes/2025-franchise.pdf', meta: 'Dropbox / Taxes' });
+        captured.push({ title: 'lease-2025.pdf', file: 'lease-2025.pdf', meta: 'Dropbox / Andes · Envigado lease', thumb: 'thumbs/andes.png', kind: 'file' });
+        captured.push({ title: '2025-franchise.pdf', file: '2025-franchise.pdf', meta: 'Dropbox / Taxes · Andes franchise', thumb: 'thumbs/andes.png', kind: 'file' });
       }
       hideOverlay();
       render();
