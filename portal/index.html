@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Hearthhold Portfolio</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
@@ -202,19 +202,36 @@
     }
     .overlay.on { display: flex; }
     .overlay { z-index: 50; }
-    .overlay .card { width: 520px; max-height: 80vh; overflow: auto; }
+    .overlay .card { width: min(520px, calc(100vw - 24px)); max-height: 80vh; overflow: auto; }
     .dash-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; }
     @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
     .check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--line); }
     .user-chip { font-size: 12px; background: var(--mist); border-radius: 99px; padding: 4px 8px; }
     .listen { color: var(--forest-2); font-weight: 600; font-size: 13px; }
+    .cal-list { display: none; }
     @media (max-width: 900px) {
-      .app.on { grid-template-columns: 1fr; }
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: clip;
+        -webkit-text-size-adjust: 100%;
+      }
+      .app.on {
+        display: block;
+        height: auto;
+        min-height: 100dvh;
+        overflow: visible;
+      }
+      .main {
+        overflow: visible;
+        min-height: 100dvh;
+      }
       .icon-btn.menu-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 42px;
+        min-width: 44px;
+        min-height: 44px;
         flex-shrink: 0;
       }
       .side-head {
@@ -234,6 +251,8 @@
         border-radius: 8px;
         padding: 8px 10px;
         flex-shrink: 0;
+        min-height: 44px;
+        align-items: center;
       }
       .side {
         display: flex;
@@ -246,7 +265,9 @@
         transform: translateX(-105%);
         transition: transform .2s ease;
         box-shadow: 8px 0 32px rgba(16,28,22,.25);
+        padding-top: max(18px, env(safe-area-inset-top));
       }
+      body.nav-open { overflow: hidden; }
       body.nav-open .side { transform: none; }
       .nav-scrim {
         display: none;
@@ -257,11 +278,62 @@
       }
       body.nav-open .nav-scrim { display: block; }
       .nav-item { min-height: 44px; }
-      .ai-bar { padding: 10px 12px; gap: 6px; }
-      .ai-bar input { min-width: 0; flex: 1 1 120px; }
-      .content { padding: 16px 14px 80px; }
+      .ai-bar {
+        position: sticky;
+        top: 0;
+        z-index: 45;
+        padding: 10px 12px;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .ai-bar input {
+        flex: 1 1 100%;
+        width: 100%;
+        min-width: 0;
+        order: 10;
+        font-size: 16px;
+      }
+      .content {
+        overflow: visible;
+        padding: 16px 14px calc(96px + env(safe-area-inset-bottom, 0px));
+      }
       .g-3, .g-2, .g-main, .g-tree { grid-template-columns: 1fr; }
-      .fb-panel { left: 12px; right: 12px; width: auto; }
+      .fb-panel {
+        left: 12px;
+        right: 12px;
+        width: auto;
+        bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+      }
+      .fb-btn {
+        right: max(12px, env(safe-area-inset-right, 0px));
+        bottom: max(12px, env(safe-area-inset-bottom, 0px));
+      }
+      h1.page { font-size: 22px; }
+      .hero { height: 160px; }
+      #map-root { height: 280px; }
+      .kv { grid-template-columns: 108px 1fr; }
+      .btn-row { flex-wrap: wrap; }
+      .icon-btn, .btn { min-height: 44px; }
+      input[type="text"], input[type="password"], input[type="email"], textarea, select { font-size: 16px; }
+      .cal-list { display: block; margin-bottom: 12px; }
+      .cal { gap: 3px; }
+      .cal div {
+        min-height: 48px;
+        padding: 4px;
+        font-size: 11px;
+        overflow: hidden;
+      }
+      .dot {
+        font-size: 9px;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .card:has(table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .overlay { padding: 8vh 12px 24px; }
+      button, .pill, .nav-item { touch-action: manipulation; }
     }
 
     .fb-btn {
@@ -387,6 +459,17 @@
     .inbox-form .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     @media (max-width: 900px) {
       .inbox-card, .inbox-form .fields { grid-template-columns: 1fr; }
+      .fb-btn {
+        right: max(12px, env(safe-area-inset-right, 0px));
+        bottom: max(12px, env(safe-area-inset-bottom, 0px));
+      }
+      .fb-panel {
+        left: 12px;
+        right: 12px;
+        width: auto;
+        bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+      }
+      .cal-list { display: block; margin-bottom: 12px; }
     }
   </style>
 </head>
@@ -1477,9 +1560,21 @@
       calendar() {
         const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         const start = new Date(2026, 8, 1).getDay();
+        const upcoming = calEvents
+          .filter(e => e.title !== 'Today' && (calCompany === 'all' || e.company === calCompany || e.company === 'all'))
+          .slice()
+          .sort((a, b) => a.day - b.day);
         let html = '<h1 class="page">Calendar</h1><p class="sub">September 2026. Complete view, or one company.</p>' +
           '<div class="chips"><button class="pill' + (calCompany === 'all' ? ' on' : '') + '" onclick="calCompany=\'all\';render()">All</button>' +
           companies.map(c => '<button class="pill' + (calCompany === c.id ? ' on' : '') + '" onclick="calCompany=\'' + c.id + '\';render()">' + c.name + '</button>').join('') + '</div>' +
+          '<div class="cal-list card">' +
+            (upcoming.length ? upcoming.map(e => {
+              const co = e.company && e.company !== 'all' ? companyBy(e.company) : null;
+              const pr = e.property ? propertyBy(e.property) : null;
+              const extra = [co && co.name, pr && pr.name].filter(Boolean).join(' · ');
+              return '<div class="check"><div><b>' + e.title + '</b><div class="muted">Sep ' + e.day + (e.time && e.time !== '—' ? ' · ' + e.time : '') + (extra ? ' · ' + extra : '') + '</div></div></div>';
+            }).join('') : '<p class="empty">Nothing this month.</p>') +
+          '</div>' +
           '<div class="cal">';
         labels.forEach(d => { html += '<div class="dow">' + d + '</div>'; });
         for (let i = 0; i < start; i++) html += '<div></div>';
