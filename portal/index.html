@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hearthhold Portfolio</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --forest: #1e4d3a;
+      --forest-2: #2f6a4a;
+      --river: #2c5f78;
+      --earth: #8b6240;
+      --mist: #eef2ef;
+      --paper: #f6f4ef;
+      --ink: #1a2a24;
+      --mute: #5c6b64;
+      --line: #d7dfd9;
+      --card: #fff;
+      --warn: #9a5b1f;
+      --bad: #9b3a2a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+
+    .connect {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background:
+        linear-gradient(180deg, rgba(30,77,58,.55), rgba(27,48,42,.7)),
+        url("thumbs/ohio.png") center/cover;
+    }
+    .connect-card {
+      width: 440px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    }
+    .brand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--forest-2); font-weight: 700; }
+    .connect h1 { font-size: 28px; margin: 8px 0 8px; }
+    .connect p { color: var(--mute); font-size: 14px; line-height: 1.45; margin-bottom: 16px; }
+    .steps { font-size: 13px; color: var(--ink); line-height: 1.55; background: var(--mist); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; }
+    .steps b { display: block; margin-bottom: 4px; }
+    label { display: block; font-size: 12px; font-weight: 600; margin: 10px 0 4px; }
+    input[type="text"], input[type="password"], input[type="email"], textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: #fff;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 650;
+    }
+    .btn-primary { background: var(--forest); color: #fff; }
+    .btn-ghost { background: transparent; color: var(--forest); }
+    .btn-row { display: flex; gap: 8px; margin-top: 14px; }
+    .warn-note { font-size: 12px; color: var(--warn); margin-top: 8px; }
+
+    .app { display: none; height: 100%; }
+    .app.on { display: grid; grid-template-columns: 228px 1fr; }
+
+    .side {
+      background: var(--forest);
+      color: #e7efe9;
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .side .brand { color: #cfe3d6; padding: 0 8px 12px; }
+    .side h2 { font-size: 18px; color: #fff; padding: 0 8px 14px; font-weight: 700; }
+    .nav-label { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #9cb8a8; padding: 12px 8px 4px; }
+    .nav-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: none;
+      background: transparent;
+      color: #dce8e2;
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+    .nav-item:hover, .nav-item.on { background: rgba(255,255,255,.1); color: #fff; }
+    .badge { background: #d7a35a; color: #1a2a24; font-size: 10px; font-weight: 700; border-radius: 99px; padding: 1px 6px; }
+
+    .main { display: flex; flex-direction: column; min-width: 0; }
+    .ai-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      align-items: center;
+    }
+    .ai-bar input { flex: 1; }
+    .icon-btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 10px; }
+    .icon-btn.on { background: var(--mist); }
+    .content { flex: 1; overflow: auto; padding: 22px 24px 40px; }
+    .screen { display: none; }
+    .screen.on { display: block; }
+
+    h1.page { font-size: 26px; margin-bottom: 4px; }
+    .sub { color: var(--mute); font-size: 13px; margin-bottom: 18px; }
+    .grid { display: grid; gap: 12px; }
+    .g-3 { grid-template-columns: repeat(3, 1fr); }
+    .g-2 { grid-template-columns: 1fr 1fr; }
+    .g-main { grid-template-columns: 1.4fr .8fr; }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 1px 0 rgba(26,42,36,.04), 0 8px 24px rgba(26,42,36,.04);
+    }
+    .card.click { cursor: pointer; }
+    .card.click:hover { outline: 1px solid var(--forest-2); }
+    .kicker { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--forest-2); }
+    .stat { font-size: 28px; font-weight: 700; }
+    .muted { color: var(--mute); font-size: 12px; }
+    .row { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .thumb { width: 56px; height: 56px; border-radius: 10px; background-size: cover; background-position: center; flex-shrink: 0; }
+    .hero { width: 100%; height: 160px; border-radius: 12px; background-size: cover; background-position: center; margin-bottom: 12px; }
+    .list { display: flex; flex-direction: column; gap: 8px; }
+    .pill { display: inline-flex; border: 1px solid var(--line); background: #fff; border-radius: 99px; padding: 6px 10px; font-size: 12px; font-weight: 600; color: var(--mute); }
+    .pill.on { background: var(--forest); color: #fff; border-color: var(--forest); }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; font-size: 13px; }
+    .kv span:first-child { color: var(--mute); }
+    .tabs { display: flex; gap: 6px; margin: 10px 0 14px; flex-wrap: wrap; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+    th { font-size: 11px; color: var(--mute); font-weight: 600; }
+    .status { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .paid { color: var(--forest-2); }
+    .due { color: var(--warn); }
+    .open { color: var(--river); }
+    #map-root, #prop-map { height: 420px; border-radius: 12px; }
+    #prop-map { height: 220px; }
+    .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal div { background: #fff; min-height: 78px; border-radius: 8px; padding: 6px; font-size: 12px; }
+    .cal .dow { min-height: 0; background: transparent; color: var(--mute); font-weight: 600; }
+    .dot { display: block; font-size: 10px; margin-top: 4px; color: var(--forest); cursor: pointer; }
+    .bar { height: 8px; background: var(--mist); border-radius: 99px; overflow: hidden; }
+    .bar > span { display: block; height: 100%; background: var(--forest-2); }
+    .empty { color: var(--mute); font-size: 13px; padding: 12px 0; }
+    .found { background: var(--mist); border-radius: 10px; padding: 10px; margin-top: 8px; }
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(16,28,22,.45);
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 12vh;
+      z-index: 20;
+    }
+    .overlay.on { display: flex; }
+    .overlay .card { width: 520px; }
+    .check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .user-chip { font-size: 12px; background: var(--mist); border-radius: 99px; padding: 4px 8px; }
+    .listen { color: var(--forest-2); font-weight: 600; font-size: 13px; }
+    @media (max-width: 900px) {
+      .app.on { grid-template-columns: 1fr; }
+      .side { display: none; }
+      .g-3, .g-2, .g-main { grid-template-columns: 1fr; }
+    }
+
+    .fb-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 40;
+      background: var(--earth);
+      color: #fff;
+      border: none;
+      border-radius: 99px;
+      padding: 12px 16px;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(26,42,36,.2);
+    }
+    .fb-panel {
+      display: none;
+      position: fixed;
+      right: 18px;
+      bottom: 70px;
+      width: 380px;
+      max-height: calc(100vh - 100px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 16px 50px rgba(26,42,36,.22);
+      z-index: 41;
+      padding: 16px;
+    }
+    .fb-panel.on { display: block; }
+    .fb-shot { width: 100%; border-radius: 8px; border: 1px solid var(--line); margin: 8px 0; }
+    .fb-media { font-size: 12px; color: var(--mute); margin-top: 6px; }
+    .fb-panel textarea { min-height: 80px; resize: vertical; }
+    .fb-kinds { display: flex; gap: 6px; margin: 8px 0; }
+    .rec-dot { color: var(--bad); font-weight: 700; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="connect" id="connect">
+    <div class="connect-card">
+      <div class="brand">Hearthhold Portfolio</div>
+      <h1>Your books. Your database.</h1>
+      <p>Point this portal at your own Supabase project. Nothing is shared with anyone else’s companies.</p>
+      <div class="steps">
+        <b>Get the keys</b>
+        1. Create an account at supabase.com → New project<br>
+        2. Project Settings → API<br>
+        3. Copy Project URL and the anon public key<br>
+        Do not paste the service_role key.
+      </div>
+      <label for="sb-url">Project URL</label>
+      <input id="sb-url" type="text" placeholder="https://xxxx.supabase.co" value="https://your-project.supabase.co">
+      <label for="sb-key">anon public key</label>
+      <input id="sb-key" type="password" placeholder="eyJhbGciOi…">
+      <p class="warn-note">Demo mode uses sample companies. Keys stay in this browser only.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="button" onclick="connectDb()">Connect</button>
+        <button class="btn btn-ghost" type="button" onclick="enterApp()">Skip — use demo data</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app" id="app">
+    <aside class="side">
+      <div class="brand">Hearthhold</div>
+      <h2>Portfolio</h2>
+      <button class="nav-item" data-go="home">Home</button>
+      <button class="nav-item" data-go="capture">Capture</button>
+      <button class="nav-item" data-go="inbox">Inbox <span class="badge" id="inbox-count">3</span></button>
+      <button class="nav-item" data-go="activity">Activity</button>
+      <div class="nav-label">Portfolio</div>
+      <button class="nav-item" data-go="companies">Companies</button>
+      <button class="nav-item" data-go="properties">Properties</button>
+      <button class="nav-item" data-go="map">Map</button>
+      <div class="nav-label">Work</div>
+      <button class="nav-item" data-go="calendar">Calendar</button>
+      <button class="nav-item" data-go="tasks">Tasks</button>
+      <div class="nav-label">Records</div>
+      <button class="nav-item" data-go="documents">Documents</button>
+      <button class="nav-item" data-go="expenses">Expenses</button>
+      <button class="nav-item" data-go="governance">Governance</button>
+      <div class="nav-label">System</div>
+      <button class="nav-item" data-go="audit">Audit</button>
+      <button class="nav-item" data-go="settings">Settings</button>
+      <button class="nav-item" data-go="sitemap">Sitemap</button>
+    </aside>
+
+    <div class="main">
+      <div class="ai-bar">
+        <button class="icon-btn" id="voice-btn" type="button" onclick="voice()">🎤 Voice</button>
+        <button class="icon-btn" type="button" onclick="go('capture')">📷 Photo</button>
+        <input id="ask" type="text" placeholder="Ask, or say: new company, new project, new folder…" onkeydown="if(event.key==='Enter') runAsk()">
+        <button class="btn btn-primary" type="button" onclick="runAsk()">Run</button>
+      </div>
+      <div class="listen" id="listen" style="display:none;padding:0 20px;">Listening… try “new company Andes Holdings in Wyoming”</div>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="if(event.target.id==='overlay') hideOverlay()"></div>
+
+  <button class="fb-btn no-shot" type="button" onclick="openFeedback()">Feedback</button>
+  <div class="fb-panel no-shot" id="fb-panel">
+    <div class="row">
+      <b>Send a note</b>
+      <button class="btn btn-ghost" type="button" onclick="closeFeedback()">Close</button>
+    </div>
+    <p class="muted">Support, a bug, or an idea. We grab a screenshot of what you’re looking at. Add text, a voice note, a short video, or a photo.</p>
+    <div class="fb-kinds">
+      <button class="pill on" type="button" data-kind="feedback" onclick="setFbKind(this)">Feedback</button>
+      <button class="pill" type="button" data-kind="support" onclick="setFbKind(this)">Support</button>
+      <button class="pill" type="button" data-kind="improvement" onclick="setFbKind(this)">Improvement</button>
+    </div>
+    <img class="fb-shot" id="fb-shot" alt="Screenshot" hidden>
+    <button class="btn btn-ghost" type="button" onclick="captureShot()">Retake screenshot</button>
+    <label for="fb-msg">What’s going on</label>
+    <textarea id="fb-msg" placeholder="What should change, or what’s broken."></textarea>
+    <div class="btn-row">
+      <button class="icon-btn" type="button" id="fb-voice" onclick="toggleVoice()">🎤 Voice</button>
+      <button class="icon-btn" type="button" id="fb-video" onclick="toggleVideo()">🎥 Video</button>
+      <label class="icon-btn" style="margin:0;">📷 Photo<input id="fb-photo" type="file" accept="image/*" hidden></label>
+    </div>
+    <div class="rec-dot" id="fb-rec" style="display:none;">Recording… tap again to stop</div>
+    <div class="fb-media" id="fb-media">No extra clip yet. Screenshot is included.</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" type="button" id="fb-send" onclick="sendFeedback()">Send</button>
+    </div>
+    <p class="muted" id="fb-status"></p>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    const companies = [
+      {
+        id: 'hearthhold',
+        name: 'Hearthhold LLC',
+        legal: 'Hearthhold LLC',
+        ein: '12-3456789',
+        jurisdiction: 'Ohio',
+        formed: 'Mar 2024',
+        tax: { year: '2025', status: 'Open', accountant: 'cpa@example.com', method: 'Cash' },
+        registration: { agent: 'Northwest Registered Agent', number: 'OH-449201', goodStanding: 'Yes' },
+        users: [
+          { name: 'Bryan', email: 'you@hearthhold.app', role: 'Owner' },
+          { name: 'Ana', email: 'ana@hearthhold.app', role: 'Editor' },
+          { name: 'CPA', email: 'cpa@example.com', role: 'Tax only' }
+        ],
+        reminders: [
+          { title: 'Ohio annual report', due: 'Apr 15, 2027', done: false },
+          { title: 'Franchise tax', due: 'May 1, 2027', done: false }
+        ],
+        tasks: [
+          { text: 'Send OA to accountant', done: true, due: 'Sep 8' },
+          { text: 'Update registered agent address', done: false, due: 'Sep 20' }
+        ]
+      },
+      {
+        id: 'andes',
+        name: 'Andes Holdings LLC',
+        legal: 'Andes Holdings LLC',
+        ein: '98-7654321',
+        jurisdiction: 'Wyoming',
+        formed: 'Jan 2025',
+        tax: { year: '2025', status: 'Filed', accountant: 'cpa@example.com', method: 'Cash' },
+        registration: { agent: 'Wyoming Registered Agent', number: 'WY-2025-441', goodStanding: 'Yes' },
+        users: [
+          { name: 'Bryan', email: 'you@hearthhold.app', role: 'Owner' }
+        ],
+        reminders: [{ title: 'Wyoming annual report', due: 'Jan 2, 2027', done: false }],
+        tasks: [{ text: 'Collect member consents', done: false, due: 'Sep 30' }]
+      },
+      {
+        id: 'northstar',
+        name: 'Northstar Trust',
+        legal: 'Northstar Revocable Trust',
+        ein: '—',
+        jurisdiction: 'Ohio',
+        formed: '2019',
+        tax: { year: '2025', status: 'Grantor', accountant: 'cpa@example.com', method: 'Grantor' },
+        registration: { agent: 'You', number: 'Trust instrument', goodStanding: 'Yes' },
+        users: [
+          { name: 'Bryan', email: 'you@hearthhold.app', role: 'Trustee' },
+          { name: 'Ana', email: 'ana@hearthhold.app', role: 'View' }
+        ],
+        reminders: [{ title: 'Review beneficiaries', due: 'Dec 1, 2026', done: false }],
+        tasks: [{ text: 'Scan pour-over will', done: false, due: 'Sep 18' }]
+      }
+    ];
+
+    const properties = [
+      {
+        id: 'laureles',
+        company: 'hearthhold',
+        name: 'Laureles apartment',
+        address: 'Cra. 70 #34-20, Laureles, Medellín',
+        lat: 6.249, lng: -75.589,
+        image: 'thumbs/laureles.png',
+        projects: [
+          { id: 'kitchen', title: 'Kitchen remodel', status: 'active', budget: 12000000, spent: 3200000, currency: 'COP' },
+          { id: 'roof', title: 'Roof leak', status: 'active', budget: 800000, spent: 420000, currency: 'COP' }
+        ]
+      },
+      {
+        id: 'ohio',
+        company: 'northstar',
+        name: 'Ohio house',
+        address: 'Rural Licking County, Ohio',
+        lat: 40.06, lng: -82.41,
+        image: 'thumbs/ohio.png',
+        projects: [
+          { id: 'fence', title: 'East fence', status: 'paused', budget: 2400, spent: 380, currency: 'USD' }
+        ]
+      },
+      {
+        id: 'envigado',
+        company: 'andes',
+        name: 'Envigado retail',
+        address: 'Calle 37 Sur, Envigado, Antioquia',
+        lat: 6.169, lng: -75.586,
+        image: 'thumbs/andes.png',
+        projects: [
+          { id: 'fitout', title: 'Tenant fit-out', status: 'active', budget: 45000000, spent: 0, currency: 'COP' }
+        ]
+      }
+    ];
+
+    let inbox = [
+      { id: 'u1', title: 'Scan — receipt', guess: 'Hardware store · 186.000 COP', file: 'scan.jpg', company: null, property: null },
+      { id: 'u2', title: 'Voice note', guess: '“Pay the gas bill twenty-four thousand”', file: 'note.m4a', company: null, property: null },
+      { id: 'u3', title: 'Photo — document', guess: 'Looks like board minutes · Hearthhold LLC?', file: 'photo.jpg', company: null, property: null }
+    ];
+
+    const documents = [
+      { title: 'Operating Agreement', company: 'hearthhold', property: null, kind: 'operating', scope: 'company', when: 'Mar 2024' },
+      { title: 'EIN letter', company: 'hearthhold', property: null, kind: 'tax', scope: 'company', when: 'Mar 2024' },
+      { title: 'Deed — Laureles', company: 'hearthhold', property: 'laureles', kind: 'deed', scope: 'property', when: 'Jun 2024' },
+      { title: 'Andes OA', company: 'andes', property: null, kind: 'operating', scope: 'company', when: 'Jan 2025' },
+      { title: 'Trust instrument', company: 'northstar', property: null, kind: 'other', scope: 'company', when: '2019' },
+      { title: 'Portfolio insurance binder', company: null, property: null, kind: 'other', scope: 'global', when: 'Jan 2026' }
+    ];
+
+    const expenses = [
+      { title: 'Kitchen cabinets', amount: '3.200.000 COP', property: 'laureles', company: 'hearthhold', status: 'paid', when: 'Aug 28' },
+      { title: 'Plumber — roof', amount: '420.000 COP', property: 'laureles', company: 'hearthhold', status: 'paid', when: 'Aug 10' },
+      { title: 'Admin fee Envigado', amount: '1.100.000 COP', property: 'envigado', company: 'andes', status: 'upcoming', when: 'Sep 20' },
+      { title: 'Fence materials', amount: '380 USD', property: 'ohio', company: 'northstar', status: 'paid', when: 'Jul 19' },
+      { title: 'HOA Laureles', amount: '450.000 COP', property: 'laureles', company: 'hearthhold', status: 'upcoming', when: 'Oct 1' }
+    ];
+
+    const governance = [
+      { title: 'Board minutes — cabinet approval', company: 'hearthhold', property: 'laureles', kind: 'minutes', when: 'Aug 20, 2026' },
+      { title: 'Decision record — tenant fit-out', company: 'andes', property: 'envigado', kind: 'decision', when: 'Sep 4, 2026' },
+      { title: 'Trustee note — fence pause', company: 'northstar', property: 'ohio', kind: 'decision', when: 'Jul 2, 2026' }
+    ];
+
+    const activity = [
+      { who: 'Bryan', what: 'Uploaded deed — Laureles', when: '2h ago', company: 'Hearthhold LLC' },
+      { who: 'Bryan', what: 'Voice capture — gas bill', when: 'Yesterday', company: 'Inbox' },
+      { who: 'Ana', what: 'Filed kitchen receipt to Laureles', when: 'Sep 8', company: 'Hearthhold LLC' },
+      { who: 'CPA', what: 'Viewed EIN letter', when: 'Sep 7', company: 'Hearthhold LLC' }
+    ];
+
+    const audit = [
+      { who: 'Bryan', action: 'Uploaded', target: 'scan.jpg', where: 'Inbox', at: 'Today 18:02' },
+      { who: 'Bryan', action: 'Created company', target: 'Andes Holdings LLC', where: 'Companies', at: 'Jan 2025' },
+      { who: 'Ana', action: 'Edited task', target: 'Send OA to accountant', where: 'Hearthhold LLC', at: 'Sep 8 09:11' },
+      { who: 'CPA', action: 'Downloaded', target: 'EIN letter', where: 'Hearthhold LLC', at: 'Sep 7 11:40' },
+      { who: 'Bryan', action: 'Assigned user', target: 'ana@hearthhold.app', where: 'Hearthhold LLC', at: 'Mar 2024' }
+    ];
+
+    const calEvents = [
+      { day: 11, title: 'Today', company: 'all' },
+      { day: 15, title: 'Laureles HOA', company: 'hearthhold' },
+      { day: 18, title: 'Board call', company: 'hearthhold' },
+      { day: 20, title: 'Envigado fee', company: 'andes' },
+      { day: 30, title: 'Member consents', company: 'andes' }
+    ];
+
+    let screen = 'home';
+    let companyId = 'hearthhold';
+    let propertyId = 'laureles';
+    let companyTab = 'overview';
+    let propertyTab = 'overview';
+    let docFilter = 'all';
+    let taskCompany = 'all';
+    let calCompany = 'all';
+    let expFilter = 'all';
+    let mapObj = null;
+    let captured = [];
+    let folders = [{ name: '2026 taxes', company: 'hearthhold' }];
+
+    function companyBy(id) { return companies.find(c => c.id === id); }
+    function propertyBy(id) { return properties.find(p => p.id === id); }
+    function money(n, c) {
+      if (c === 'USD') return '$' + n.toLocaleString('en-US');
+      return n.toLocaleString('es-CO') + ' ' + c;
+    }
+
+    function connectDb() {
+      const url = document.getElementById('sb-url').value.trim();
+      const key = document.getElementById('sb-key').value.trim();
+      if (!url || !key) {
+        alert('Paste the Project URL and anon key, or skip to demo.');
+        return;
+      }
+      localStorage.setItem('hh_sb_url', url);
+      localStorage.setItem('hh_sb_key', key);
+      enterApp();
+    }
+
+    function enterApp() {
+      document.getElementById('connect').style.display = 'none';
+      document.getElementById('app').classList.add('on');
+      go('home');
+    }
+
+    function go(name, extra) {
+      screen = name;
+      if (name === 'company' && extra) { companyId = extra; companyTab = 'overview'; }
+      if (name === 'property' && extra) { propertyId = extra; propertyTab = 'overview'; }
+      if (name === 'project' && extra) { propertyId = extra.property; window._projectId = extra.project; }
+      document.querySelectorAll('.nav-item').forEach(b => {
+        const g = b.getAttribute('data-go');
+        const on = g === name || (name === 'company' && g === 'companies') || (name === 'property' && g === 'properties') || (name === 'project' && g === 'properties');
+        b.classList.toggle('on', on);
+      });
+      render();
+    }
+
+    document.querySelectorAll('.nav-item').forEach(b => {
+      b.onclick = () => go(b.getAttribute('data-go'));
+    });
+
+    function voice() {
+      const el = document.getElementById('listen');
+      const btn = document.getElementById('voice-btn');
+      el.style.display = 'block';
+      btn.classList.add('on');
+      setTimeout(() => {
+        el.style.display = 'none';
+        btn.classList.remove('on');
+        document.getElementById('ask').value = 'new company Cedar Row LLC in Ohio';
+        runAsk();
+      }, 700);
+    }
+
+    function runAsk() {
+      const q = (document.getElementById('ask').value || '').trim().toLowerCase();
+      if (!q) { go('capture'); return; }
+      if (q.indexOf('new company') !== -1 || q.indexOf('new llc') !== -1) {
+        const name = q.replace(/new company|new llc|in ohio|in wyoming|in colombia/gi, '').trim() || 'New LLC';
+        const pretty = name.replace(/\b\w/g, c => c.toUpperCase());
+        const id = 'c' + Date.now();
+        companies.push({
+          id, name: pretty, legal: pretty, ein: '—', jurisdiction: 'Ohio', formed: 'Sep 2026',
+          tax: { year: '2026', status: 'New', accountant: '', method: 'Cash' },
+          registration: { agent: 'TBD', number: '—', goodStanding: 'Pending' },
+          users: [{ name: 'Bryan', email: 'you@hearthhold.app', role: 'Owner' }],
+          reminders: [], tasks: []
+        });
+        document.getElementById('ask').value = '';
+        go('company', id);
+        return;
+      }
+      if (q.indexOf('new project') !== -1 || q.indexOf('remodel') !== -1) {
+        const p = propertyBy(propertyId);
+        p.projects.push({ id: 'p' + Date.now(), title: 'New remodel', status: 'active', budget: 0, spent: 0, currency: 'COP' });
+        document.getElementById('ask').value = '';
+        go('property', p.id);
+        propertyTab = 'projects';
+        render();
+        return;
+      }
+      if (q.indexOf('new folder') !== -1 || q.indexOf('folder') !== -1) {
+        folders.push({ name: q.replace(/new folder|folder/g, '').trim() || 'New folder', company: companyId });
+        document.getElementById('ask').value = '';
+        go('documents');
+        return;
+      }
+      go('capture');
+    }
+
+    function render() {
+      document.getElementById('inbox-count').textContent = inbox.length;
+      const fn = screens[screen] || screens.home;
+      document.getElementById('content').innerHTML = fn();
+      bind();
+      if (screen === 'map') initMap();
+      if (screen === 'property' && propertyTab === 'overview') initPropMap();
+    }
+
+    function bind() {
+      document.querySelectorAll('[data-go]').forEach(el => {
+        if (el.classList.contains('nav-item')) return;
+        el.onclick = () => go(el.getAttribute('data-go'), el.getAttribute('data-id') || undefined);
+      });
+      document.querySelectorAll('[data-company]').forEach(el => {
+        el.onclick = () => go('company', el.getAttribute('data-company'));
+      });
+      document.querySelectorAll('[data-property]').forEach(el => {
+        el.onclick = () => go('property', el.getAttribute('data-property'));
+      });
+      document.querySelectorAll('[data-ctab]').forEach(el => {
+        el.onclick = () => { companyTab = el.getAttribute('data-ctab'); render(); };
+      });
+      document.querySelectorAll('[data-ptab]').forEach(el => {
+        el.onclick = () => { propertyTab = el.getAttribute('data-ptab'); render(); };
+      });
+      document.querySelectorAll('[data-project]').forEach(el => {
+        el.onclick = () => go('project', { property: el.getAttribute('data-prop'), project: el.getAttribute('data-project') });
+      });
+    }
+
+    const screens = {
+      sitemap() {
+        return '<h1 class="page">Sitemap</h1><p class="sub">Web portal for running a property portfolio. Left nav is the map of the app. The bar at the top is how you run it: voice, photo, or a sentence.</p>' +
+          '<div class="grid g-2">' +
+            card('Get in', '<b>Connect</b> — paste your Supabase URL and anon key.<br><b>Home</b> — today’s inbox, money, and what to do.') +
+            card('Capture', '<b>Capture</b> — voice, photo, files. AI files them.<br><b>Inbox</b> — anything not indexed yet. You correct it.<br><b>Activity</b> — recent uploads.') +
+            card('Portfolio', '<b>Companies</b> — many companies, each with tax, registration, users, reminders, tasks.<br><b>Company</b> — one company, all of that plus its properties.<br><b>Properties</b> — the places.<br><b>Property</b> — map, projects, expenses, papers.<br><b>Map</b> — every pin. Click one.') +
+            card('Work', '<b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — same. Complete view, or by company.') +
+            card('Records', '<b>Documents</b> — global, or tied to a company or property.<br><b>Expenses</b> — paid and upcoming, tied to a property.<br><b>Governance</b> — minutes and decision records.<br><b>Project</b> — a remodel with a budget.') +
+            card('System', '<b>Audit</b> — who did what.<br><b>Settings</b> — your database keys, how to get them.<br><b>Feedback</b> — button in the corner. Screenshot plus text, voice, video, or a photo.') +
+          '</div>';
+      },
+      home() {
+        const due = expenses.filter(e => e.status === 'upcoming');
+        const openTasks = companies.flatMap(c => c.tasks.filter(t => !t.done).map(t => t.text + ' · ' + c.name));
+        return '<h1 class="page">Home</h1><p class="sub">Say it, shoot it, or drop it. The harness files it to a company or property. You only touch the leftovers.</p>' +
+          '<div class="grid g-3" style="margin-bottom:12px;">' +
+            stat('Inbox', inbox.length, 'to index', 'inbox') +
+            stat('Upcoming', due.length, 'property bills', 'expenses') +
+            stat('Open tasks', openTasks.length, 'across companies', 'tasks') +
+          '</div>' +
+          '<div class="grid g-main">' +
+            '<div class="card">' +
+              '<div class="kicker">Do next</div>' +
+              openTasks.map(t => '<div class="check"><input type="checkbox"><div>' + t + '</div></div>').join('') +
+              '<div style="margin-top:10px;"><button class="btn btn-primary" onclick="go(\'capture\')">Capture something</button></div>' +
+            '</div>' +
+            '<div class="card">' +
+              '<div class="kicker">Properties</div>' +
+              properties.map(p => propRow(p)).join('') +
+            '</div>' +
+          '</div>';
+      },
+      capture() {
+        return '<h1 class="page">Capture</h1><p class="sub">Same idea as the phone: talk, photograph, or drop files. AI proposes company, property, and type. If it is unsure, it lands in Inbox.</p>' +
+          '<div class="card">' +
+            '<div class="btn-row">' +
+              '<button class="btn btn-primary" type="button" onclick="mockCapture(\'voice\')">🎤 Voice</button>' +
+              '<button class="btn btn-primary" type="button" onclick="mockCapture(\'photo\')">📷 Photo</button>' +
+              '<button class="icon-btn" type="button" onclick="mockCapture(\'file\')">Drop PDF</button>' +
+            '</div>' +
+            '<div id="capture-out">' + (captured.length ? foundBlock() : '<p class="empty">Nothing in this batch yet.</p>') + '</div>' +
+          '</div>';
+      },
+      inbox() {
+        const rows = inbox.filter(i => !i.filed);
+        return '<h1 class="page">Inbox</h1><p class="sub">Captured but not indexed. This is the correction queue. File it to a company, a property, or mark it global.</p>' +
+          '<div class="list">' + rows.map(i =>
+            '<div class="card">' +
+              '<div class="row"><div><b>' + i.title + '</b></div><span class="muted">' + i.file + '</span></div>' +
+              '<div class="muted" style="margin:6px 0;">AI guess: ' + i.guess + '</div>' +
+              '<div class="chips">' +
+                companies.map(c => '<button class="pill" type="button" onclick="fileInbox(\'' + i.id + '\',\'' + c.id + '\',null)">' + c.name + '</button>').join('') +
+                properties.map(p => '<button class="pill" type="button" onclick="fileInbox(\'' + i.id + '\',\'' + p.company + '\',\'' + p.id + '\')">' + p.name + '</button>').join('') +
+                '<button class="pill" type="button" onclick="fileInbox(\'' + i.id + '\',\'global\',null)">Global</button>' +
+              '</div>' +
+            '</div>'
+          ).join('') + (rows.length ? '' : '<p class="empty">Inbox is clear.</p>') + '</div>';
+      },
+      activity() {
+        return '<h1 class="page">Activity</h1><p class="sub">Documents and captures that just landed. Whole portfolio.</p>' +
+          '<div class="list">' + activity.map(a =>
+            '<div class="card"><div class="row"><b>' + a.what + '</b><span class="muted">' + a.when + '</span></div><div class="muted">' + a.who + ' · ' + a.company + '</div></div>'
+          ).join('') + '</div>';
+      },
+      companies() {
+        return '<h1 class="page">Companies</h1><p class="sub">Each company is a wall. Users only see the companies you assign. Properties sit under the company that holds title.</p>' +
+          '<div class="chips"><button class="btn btn-primary" type="button" onclick="document.getElementById(\'ask\').value=\'new company \';document.getElementById(\'ask\').focus()">+ Company by voice or text</button></div>' +
+          '<div class="grid g-3">' + companies.map(c => {
+            const n = properties.filter(p => p.company === c.id).length;
+            return '<div class="card click" data-company="' + c.id + '"><div class="kicker">' + c.jurisdiction + '</div><h3>' + c.name + '</h3><div class="muted">EIN ' + c.ein + ' · ' + n + ' properties · ' + c.users.length + ' users</div></div>';
+          }).join('') + '</div>';
+      },
+      company() {
+        const c = companyBy(companyId);
+        if (!c) return '';
+        const tabs = ['overview', 'tax', 'registration', 'users', 'reminders', 'tasks', 'properties', 'documents'];
+        let body = '';
+        if (companyTab === 'overview') {
+          body = '<div class="kv"><span>Legal name</span><span>' + c.legal + '</span><span>EIN</span><span>' + c.ein + '</span><span>Jurisdiction</span><span>' + c.jurisdiction + '</span><span>Formed</span><span>' + c.formed + '</span></div>';
+        } else if (companyTab === 'tax') {
+          body = '<div class="kv"><span>Year</span><span>' + c.tax.year + '</span><span>Status</span><span>' + c.tax.status + '</span><span>Accountant</span><span>' + c.tax.accountant + '</span><span>Method</span><span>' + c.tax.method + '</span></div>';
+        } else if (companyTab === 'registration') {
+          body = '<div class="kv"><span>Agent</span><span>' + c.registration.agent + '</span><span>Number</span><span>' + c.registration.number + '</span><span>Good standing</span><span>' + c.registration.goodStanding + '</span></div>';
+        } else if (companyTab === 'users') {
+          body = c.users.map(u => '<div class="row" style="padding:6px 0;"><span>' + u.name + ' · ' + u.email + '</span><span class="user-chip">' + u.role + '</span></div>').join('') +
+            '<div class="btn-row"><input type="email" placeholder="email@ to invite" id="invite"><button class="btn btn-primary" type="button" onclick="inviteUser()">Invite</button></div>';
+        } else if (companyTab === 'reminders') {
+          body = c.reminders.map((r, i) => '<div class="check"><input type="checkbox"' + (r.done ? ' checked' : '') + ' onchange="companies.find(x=>x.id===\'' + c.id + '\').reminders[' + i + '].done=this.checked"><div><b>' + r.title + '</b><div class="muted">Due ' + r.due + '</div></div></div>').join('');
+        } else if (companyTab === 'tasks') {
+          body = c.tasks.map((t, i) => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + ' onchange="companies.find(x=>x.id===\'' + c.id + '\').tasks[' + i + '].done=this.checked"><div>' + t.text + ' <span class="muted">' + t.due + '</span></div></div>').join('');
+        } else if (companyTab === 'properties') {
+          body = properties.filter(p => p.company === c.id).map(p => propRow(p)).join('') || '<p class="empty">No properties yet.</p>';
+        } else {
+          body = documents.filter(d => d.company === c.id).map(d => '<div class="row"><span>' + d.title + '</span><span class="muted">' + d.kind + ' · ' + d.when + '</span></div>').join('') || '<p class="empty">No documents.</p>';
+        }
+        return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'companies\')">← Companies</button></div>' +
+          '<h1 class="page">' + c.name + '</h1><p class="sub">Company info, tax, registration, who can see it, reminders, tasks, and the properties it holds.</p>' +
+          '<div class="tabs">' + tabs.map(t => '<button class="pill' + (companyTab === t ? ' on' : '') + '" data-ctab="' + t + '">' + t + '</button>').join('') + '</div>' +
+          '<div class="card">' + body + '</div>';
+      },
+      properties() {
+        return '<h1 class="page">Properties</h1><p class="sub">Held by a company. Tap one for the map, projects, and expenses.</p>' +
+          '<div class="grid g-3">' + properties.map(p => {
+            const c = companyBy(p.company);
+            return '<div class="card click" data-property="' + p.id + '"><div class="hero" style="background-image:url(\'' + p.image + '\')"></div><b>' + p.name + '</b><div class="muted">' + p.address + '<br>Owned by ' + c.name + '</div></div>';
+          }).join('') + '</div>';
+      },
+      property() {
+        const p = propertyBy(propertyId);
+        if (!p) return '';
+        const c = companyBy(p.company);
+        const tabs = ['overview', 'projects', 'expenses', 'documents'];
+        let body = '';
+        if (propertyTab === 'overview') {
+          body = '<div id="prop-map"></div><div class="kv" style="margin-top:12px;"><span>Address</span><span>' + p.address + '</span><span>Owner</span><span>' + c.name + '</span><span>Lat/lng</span><span>' + p.lat + ', ' + p.lng + '</span></div>';
+        } else if (propertyTab === 'projects') {
+          body = p.projects.map(pr => projectCard(p, pr)).join('');
+        } else if (propertyTab === 'expenses') {
+          body = expenseTable(expenses.filter(e => e.property === p.id));
+        } else {
+          body = documents.filter(d => d.property === p.id).map(d => '<div class="row"><span>' + d.title + '</span><span class="muted">' + d.kind + '</span></div>').join('') || '<p class="empty">No papers on this property.</p>';
+        }
+        return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'properties\')">← Properties</button></div>' +
+          '<div class="hero" style="background-image:url(\'' + p.image + '\')"></div>' +
+          '<h1 class="page">' + p.name + '</h1><p class="sub">' + c.name + ' · ' + p.address + '</p>' +
+          '<div class="tabs">' + tabs.map(t => '<button class="pill' + (propertyTab === t ? ' on' : '') + '" data-ptab="' + t + '">' + t + '</button>').join('') + '</div>' +
+          '<div class="card">' + body + '</div>';
+      },
+      map() {
+        return '<h1 class="page">Map</h1><p class="sub">Every property. Click a pin or a row.</p>' +
+          '<div class="grid g-main"><div id="map-root"></div><div class="list">' + properties.map(p => propRow(p)).join('') + '</div></div>';
+      },
+      calendar() {
+        const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const start = new Date(2026, 8, 1).getDay();
+        let html = '<h1 class="page">Calendar</h1><p class="sub">September 2026. Complete view, or one company.</p>' +
+          '<div class="chips"><button class="pill' + (calCompany === 'all' ? ' on' : '') + '" onclick="calCompany=\'all\';render()">All</button>' +
+          companies.map(c => '<button class="pill' + (calCompany === c.id ? ' on' : '') + '" onclick="calCompany=\'' + c.id + '\';render()">' + c.name + '</button>').join('') + '</div>' +
+          '<div class="cal">';
+        labels.forEach(d => { html += '<div class="dow">' + d + '</div>'; });
+        for (let i = 0; i < start; i++) html += '<div></div>';
+        for (let d = 1; d <= 30; d++) {
+          const ev = calEvents.filter(e => e.day === d && (calCompany === 'all' || e.company === calCompany || e.company === 'all'));
+          html += '<div><b>' + d + '</b>' + ev.map(e => '<span class="dot">' + e.title + '</span>').join('') + '</div>';
+        }
+        return html + '</div>';
+      },
+      tasks() {
+        const rows = companies.flatMap(c => c.tasks.map(t => Object.assign({ company: c.name, cid: c.id }, t)))
+          .filter(t => taskCompany === 'all' || t.cid === taskCompany);
+        return '<h1 class="page">Tasks</h1><p class="sub">Complete view, or slice by company.</p>' +
+          '<div class="chips"><button class="pill' + (taskCompany === 'all' ? ' on' : '') + '" onclick="taskCompany=\'all\';render()">All</button>' +
+          companies.map(c => '<button class="pill' + (taskCompany === c.id ? ' on' : '') + '" onclick="taskCompany=\'' + c.id + '\';render()">' + c.name + '</button>').join('') + '</div>' +
+          '<div class="card">' + rows.map(t => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + '><div>' + t.text + '<div class="muted">' + t.company + ' · ' + t.due + '</div></div></div>').join('') + '</div>';
+      },
+      documents() {
+        const rows = documents.filter(d => {
+          if (docFilter === 'all') return true;
+          if (docFilter === 'global') return d.scope === 'global';
+          if (docFilter === 'company') return d.scope === 'company';
+          if (docFilter === 'property') return d.scope === 'property';
+          return true;
+        });
+        return '<h1 class="page">Documents</h1><p class="sub">Global papers, or assigned to a company or a property. Unindexed items live in Inbox.</p>' +
+          '<div class="chips">' +
+            ['all','global','company','property'].map(f => '<button class="pill' + (docFilter === f ? ' on' : '') + '" onclick="docFilter=\'' + f + '\';render()">' + f + '</button>').join('') +
+            '<button class="pill" onclick="go(\'inbox\')">Unindexed (' + inbox.length + ')</button>' +
+          '</div>' +
+          '<p class="muted" style="margin-bottom:8px;">Folders: ' + folders.map(f => f.name).join(', ') + '</p>' +
+          '<div class="card"><table><tr><th>Title</th><th>Scope</th><th>Company</th><th>Property</th><th>When</th></tr>' +
+          rows.map(d => {
+            const c = d.company ? (companyBy(d.company) || {}).name : '—';
+            const p = d.property ? (propertyBy(d.property) || {}).name : '—';
+            return '<tr><td>' + d.title + '</td><td>' + d.scope + '</td><td>' + c + '</td><td>' + p + '</td><td>' + d.when + '</td></tr>';
+          }).join('') + '</table></div>';
+      },
+      expenses() {
+        const rows = expenses.filter(e => expFilter === 'all' || e.status === expFilter);
+        return '<h1 class="page">Expenses</h1><p class="sub">Tied to a property. Paid or still coming.</p>' +
+          '<div class="chips">' +
+            ['all','paid','upcoming'].map(f => '<button class="pill' + (expFilter === f ? ' on' : '') + '" onclick="expFilter=\'' + f + '\';render()">' + f + '</button>').join('') +
+          '</div>' +
+          '<div class="card">' + expenseTable(rows) + '</div>';
+      },
+      governance() {
+        return '<h1 class="page">Governance</h1><p class="sub">Board minutes and decision records. Company first, property when the decision is about a place.</p>' +
+          '<div class="list">' + governance.map(g => {
+            const c = companyBy(g.company);
+            const p = g.property ? propertyBy(g.property) : null;
+            return '<div class="card click" data-company="' + g.company + '"><div class="kicker">' + g.kind + '</div><b>' + g.title + '</b><div class="muted">' + c.name + (p ? ' · ' + p.name : '') + ' · ' + g.when + '</div></div>';
+          }).join('') + '</div>';
+      },
+      project() {
+        const p = propertyBy(propertyId);
+        const pr = p.projects.find(x => x.id === window._projectId) || p.projects[0];
+        const pct = pr.budget ? Math.min(100, Math.round(pr.spent / pr.budget * 100)) : 0;
+        return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'property\', \'' + p.id + '\')">← ' + p.name + '</button></div>' +
+          '<h1 class="page">' + pr.title + '</h1><p class="sub">Project on ' + p.name + ' · ' + pr.status + '</p>' +
+          '<div class="grid g-3">' +
+            '<div class="card"><div class="kicker">Budget</div><div class="stat">' + money(pr.budget, pr.currency) + '</div></div>' +
+            '<div class="card"><div class="kicker">Spent</div><div class="stat">' + money(pr.spent, pr.currency) + '</div></div>' +
+            '<div class="card"><div class="kicker">Used</div><div class="stat">' + pct + '%</div><div class="bar" style="margin-top:8px;"><span style="width:' + pct + '%"></span></div></div>' +
+          '</div>' +
+          '<div class="card" style="margin-top:12px;"><div class="kicker">Expenses on this project</div>' +
+          expenseTable(expenses.filter(e => e.property === p.id)) + '</div>';
+      },
+      audit() {
+        return '<h1 class="page">Audit</h1><p class="sub">Who did what, on which company.</p>' +
+          '<div class="card"><table><tr><th>Who</th><th>Action</th><th>Target</th><th>Where</th><th>When</th></tr>' +
+          audit.map(a => '<tr><td>' + a.who + '</td><td>' + a.action + '</td><td>' + a.target + '</td><td>' + a.where + '</td><td>' + a.at + '</td></tr>').join('') +
+          '</table></div>';
+      },
+      settings() {
+        const url = localStorage.getItem('hh_sb_url') || '';
+        return '<h1 class="page">Settings</h1><p class="sub">Your database. This portal never ships a service_role key.</p>' +
+          '<div class="grid g-2">' +
+            '<div class="card"><div class="kicker">Supabase</div>' +
+              '<div class="steps"><b>Get keys</b>1. supabase.com → New project<br>2. Project Settings → API<br>3. Copy Project URL + anon public key</div>' +
+              '<label>Project URL</label><input id="set-url" type="text" value="' + (url || 'https://your-project.supabase.co') + '">' +
+              '<label>anon public key</label><input id="set-key" type="password" placeholder="eyJhbGciOi…">' +
+              '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="saveKeys()">Save keys</button></div>' +
+              '<p class="warn-note">Never paste service_role. That key can read every table.</p>' +
+            '</div>' +
+            '<div class="card"><div class="kicker">How the harness files things</div>' +
+              '<p class="muted">Voice, photo, or PDF → Inbox if unsure, else company / property / global. Governance (minutes, decisions) is its own record. Expenses attach to a property. Users are assigned per company — household membership is not enough.</p>' +
+              '<p class="muted" style="margin-top:8px;">Say “new company”, “new project”, or “new folder” in the bar. That’s the fast path.</p>' +
+            '</div>' +
+          '</div>';
+      }
+    };
+
+    function card(title, html) {
+      return '<div class="card"><div class="kicker">' + title + '</div><div style="font-size:13px;line-height:1.5;margin-top:6px;">' + html + '</div></div>';
+    }
+    function stat(label, n, sub, goTo) {
+      return '<div class="card click" data-go="' + goTo + '"><div class="kicker">' + label + '</div><div class="stat">' + n + '</div><div class="muted">' + sub + '</div></div>';
+    }
+    function propRow(p) {
+      const c = companyBy(p.company);
+      return '<div class="row card click" data-property="' + p.id + '" style="margin-bottom:8px;"><div class="thumb" style="background-image:url(\'' + p.image + '\')"></div><div style="flex:1;"><b>' + p.name + '</b><div class="muted">' + c.name + '</div></div></div>';
+    }
+    function projectCard(p, pr) {
+      const pct = pr.budget ? Math.min(100, Math.round(pr.spent / pr.budget * 100)) : 0;
+      return '<div class="card click" data-project="' + pr.id + '" data-prop="' + p.id + '" style="margin-bottom:8px;"><div class="row"><b>' + pr.title + '</b><span class="status open">' + pr.status + '</span></div>' +
+        '<div class="muted">' + money(pr.spent, pr.currency) + ' of ' + money(pr.budget, pr.currency) + '</div>' +
+        '<div class="bar" style="margin-top:8px;"><span style="width:' + pct + '%"></span></div></div>';
+    }
+    function expenseTable(rows) {
+      return '<table><tr><th>Expense</th><th>Amount</th><th>Property</th><th>Status</th><th>When</th></tr>' +
+        rows.map(e => {
+          const p = propertyBy(e.property);
+          return '<tr><td>' + e.title + '</td><td>' + e.amount + '</td><td><button class="btn btn-ghost" type="button" data-property="' + e.property + '">' + (p ? p.name : '') + '</button></td><td class="status ' + (e.status === 'paid' ? 'paid' : 'due') + '">' + e.status + '</td><td>' + e.when + '</td></tr>';
+        }).join('') + '</table>';
+    }
+    function foundBlock() {
+      return '<div class="found"><b>Found ' + captured.length + '</b>' + captured.map(x => '<div class="row" style="margin-top:6px;"><span>' + x.title + '</span><span class="muted">' + x.meta + '</span></div>').join('') +
+        '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="saveCapture()">Send to Inbox</button></div></div>';
+    }
+    function mockCapture(kind) {
+      captured.push(
+        kind === 'voice'
+          ? { title: 'Gas bill', meta: '24.000 COP · utilities · Home/Hearthhold?' }
+          : kind === 'photo'
+            ? { title: 'Receipt photo', meta: 'Hardware · 186.000 COP · Laureles?' }
+            : { title: 'Minutes.pdf', meta: 'Governance · Hearthhold LLC?' }
+      );
+      activity.unshift({ who: 'Bryan', what: 'Captured ' + captured[captured.length - 1].title, when: 'Just now', company: 'Inbox' });
+      render();
+    }
+    function saveCapture() {
+      captured.forEach(c => inbox.unshift({ id: 'u' + Date.now() + Math.random(), title: c.title, guess: c.meta, file: 'capture', company: null, property: null }));
+      captured = [];
+      go('inbox');
+    }
+    function fileInbox(id, company, property) {
+      const item = inbox.find(x => x.id === id);
+      if (!item) return;
+      if (company === 'global') {
+        documents.unshift({ title: item.title, company: null, property: null, kind: 'other', scope: 'global', when: 'Sep 2026' });
+      } else {
+        documents.unshift({
+          title: item.title,
+          company: company,
+          property: property,
+          kind: 'other',
+          scope: property ? 'property' : 'company',
+          when: 'Sep 2026'
+        });
+      }
+      item.company = company === 'global' ? 'global' : company;
+      item.filed = true;
+      inbox = inbox.filter(x => x.id !== id);
+      audit.unshift({ who: 'Bryan', action: 'Indexed', target: item.title, where: company === 'global' ? 'Global' : (companyBy(company) || {}).name, at: 'Just now' });
+      render();
+    }
+    function inviteUser() {
+      const email = (document.getElementById('invite') || {}).value;
+      if (!email) return;
+      companyBy(companyId).users.push({ name: email.split('@')[0], email: email, role: 'View' });
+      audit.unshift({ who: 'Bryan', action: 'Assigned user', target: email, where: companyBy(companyId).name, at: 'Just now' });
+      render();
+    }
+    function saveKeys() {
+      localStorage.setItem('hh_sb_url', document.getElementById('set-url').value.trim());
+      localStorage.setItem('hh_sb_key', document.getElementById('set-key').value.trim());
+      alert('Saved in this browser. The real app uses these as EXPO_PUBLIC_ / VITE_ URL + anon key only.');
+    }
+    function hideOverlay() { document.getElementById('overlay').classList.remove('on'); }
+
+    function initMap() {
+      const el = document.getElementById('map-root');
+      if (!el || typeof L === 'undefined') return;
+      if (mapObj) { mapObj.remove(); mapObj = null; }
+      mapObj = L.map(el).setView([20, -78], 3);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(mapObj);
+      properties.forEach(p => {
+        L.marker([p.lat, p.lng]).addTo(mapObj).bindPopup(p.name).on('click', () => go('property', p.id));
+      });
+      setTimeout(() => mapObj.invalidateSize(), 80);
+    }
+    function initPropMap() {
+      const el = document.getElementById('prop-map');
+      const p = propertyBy(propertyId);
+      if (!el || !p || typeof L === 'undefined') return;
+      const m = L.map(el).setView([p.lat, p.lng], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(m);
+      L.marker([p.lat, p.lng]).addTo(m).bindPopup(p.name);
+      setTimeout(() => m.invalidateSize(), 80);
+    }
+
+    const FB_API = 'https://rtmhuejfstridmdlaqlj.supabase.co';
+    const FB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0bWh1ZWpmc3RyaWRtZGxhcWxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg3OTY3MDksImV4cCI6MjA2NDM3MjcwOX0.Xn0qWeOZEFxocxp2qfZWDr4pr-F8fPCGAH1M5WlDA9w';
+    let fbKind = 'feedback';
+    let fbShotBlob = null;
+    let fbFiles = [];
+    let fbRecorder = null;
+    let fbChunks = [];
+    let fbRecKind = null;
+
+    document.getElementById('fb-photo').onchange = (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      addFbFile(f, 'image');
+      e.target.value = '';
+    };
+
+    function setFbKind(btn) {
+      fbKind = btn.getAttribute('data-kind');
+      document.querySelectorAll('.fb-kinds .pill').forEach(p => p.classList.toggle('on', p === btn));
+    }
+
+    function addFbFile(file, type) {
+      fbFiles = fbFiles.filter(x => x.type !== type);
+      fbFiles.push({ type: type, file: file });
+      renderFbMedia();
+    }
+
+    function renderFbMedia() {
+      const labels = fbFiles.map(f => f.type + ' · ' + Math.round(f.file.size / 1024) + ' KB');
+      document.getElementById('fb-media').textContent = labels.length
+        ? ('Attached: ' + labels.join(', '))
+        : 'No extra clip yet. Screenshot is included.';
+    }
+
+    async function captureShot() {
+      const status = document.getElementById('fb-status');
+      const img = document.getElementById('fb-shot');
+      status.textContent = 'Capturing screen…';
+      document.getElementById('fb-panel').classList.remove('on');
+      await new Promise(r => setTimeout(r, 80));
+      try {
+        if (typeof html2canvas !== 'function') throw new Error('no html2canvas');
+        const canvas = await html2canvas(document.body, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 0.6,
+          ignoreElements: (el) => el.classList && el.classList.contains('no-shot')
+        });
+        fbShotBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.72));
+        img.src = URL.createObjectURL(fbShotBlob);
+        img.hidden = false;
+        status.textContent = '';
+      } catch (err) {
+        fbShotBlob = null;
+        img.hidden = true;
+        status.textContent = 'Could not grab a screenshot. You can still send text or a clip.';
+      }
+      document.getElementById('fb-panel').classList.add('on');
+    }
+
+    async function openFeedback() {
+      document.getElementById('fb-panel').classList.add('on');
+      document.getElementById('fb-msg').value = '';
+      fbFiles = [];
+      renderFbMedia();
+      await captureShot();
+    }
+
+    function closeFeedback() {
+      stopRec();
+      document.getElementById('fb-panel').classList.remove('on');
+    }
+
+    async function toggleVoice() {
+      if (fbRecorder && fbRecKind === 'audio') { stopRec(); return; }
+      await startRec({ audio: true }, 'audio');
+    }
+
+    async function toggleVideo() {
+      if (fbRecorder && fbRecKind === 'video') { stopRec(); return; }
+      await startRec({ audio: true, video: true }, 'video');
+    }
+
+    async function startRec(constraints, kind) {
+      stopRec();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        fbChunks = [];
+        fbRecKind = kind;
+        fbRecorder = new MediaRecorder(stream);
+        fbRecorder.ondataavailable = (e) => { if (e.data.size) fbChunks.push(e.data); };
+        fbRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          const mime = kind === 'video' ? 'video/webm' : 'audio/webm';
+          const blob = new Blob(fbChunks, { type: mime });
+          const file = new File([blob], kind + '.webm', { type: mime });
+          addFbFile(file, kind === 'video' ? 'video' : 'audio');
+        };
+        fbRecorder.start();
+        document.getElementById('fb-rec').style.display = 'block';
+      } catch (err) {
+        document.getElementById('fb-status').textContent = 'Mic/camera blocked. Use a photo instead.';
+      }
+    }
+
+    function stopRec() {
+      document.getElementById('fb-rec').style.display = 'none';
+      if (fbRecorder && fbRecorder.state !== 'inactive') fbRecorder.stop();
+      fbRecorder = null;
+      fbRecKind = null;
+    }
+
+    async function fbUpload(path, blob, contentType) {
+      const res = await fetch(FB_API + '/storage/v1/object/home-portal-feedback/' + path, {
+        method: 'POST',
+        headers: {
+          apikey: FB_KEY,
+          Authorization: 'Bearer ' + FB_KEY,
+          'Content-Type': contentType,
+          'x-upsert': 'true'
+        },
+        body: blob
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    async function sendFeedback() {
+      const msg = (document.getElementById('fb-msg').value || '').trim();
+      const sendBtn = document.getElementById('fb-send');
+      const status = document.getElementById('fb-status');
+      if (!msg && !fbShotBlob && !fbFiles.length) {
+        status.textContent = 'Add a note, a screenshot, or a clip.';
+        return;
+      }
+      sendBtn.disabled = true;
+      status.textContent = 'Sending…';
+      stopRec();
+      const id = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now());
+      try {
+        let shotPath = null;
+        const media = [];
+        if (fbShotBlob) {
+          shotPath = 'portal/' + id + '/screenshot.jpg';
+          await fbUpload(shotPath, fbShotBlob, 'image/jpeg');
+        }
+        for (const item of fbFiles) {
+          const ext = item.type === 'image' ? 'jpg' : 'webm';
+          const path = 'portal/' + id + '/' + item.type + '.' + ext;
+          await fbUpload(path, item.file, item.file.type || 'application/octet-stream');
+          media.push({ type: item.type, path: path });
+        }
+        const ctx = (typeof screen === 'string' ? screen : 'connect') + (companyId ? ' · ' + companyId : '');
+        const res = await fetch(FB_API + '/rest/v1/home_portal_feedback', {
+          method: 'POST',
+          headers: {
+            apikey: FB_KEY,
+            Authorization: 'Bearer ' + FB_KEY,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal'
+          },
+          body: JSON.stringify({
+            kind: fbKind,
+            page_context: ctx,
+            message: msg || null,
+            screenshot_path: shotPath,
+            media: media
+          })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        status.textContent = 'Got it. Thank you.';
+        setTimeout(closeFeedback, 900);
+      } catch (err) {
+        status.textContent = 'Could not send. Check the network and try again.';
+      }
+      sendBtn.disabled = false;
+    }
+
+  </script>
+</body>
+</html>
