@@ -313,7 +313,7 @@
         <input id="ask" type="text" placeholder="Ask, or say: new company, new project, new folder…" onkeydown="if(event.key==='Enter') runAsk()">
         <button class="btn btn-primary" type="button" onclick="runAsk()">Run</button>
       </div>
-      <div class="listen" id="listen" style="display:none;padding:0 20px;">Listening… try “new company Andes Holdings in Wyoming”</div>
+      <div class="listen" id="listen" style="display:none;padding:0 20px;">Listening…</div>
       <div class="content" id="content"></div>
     </div>
   </div>
@@ -884,9 +884,9 @@
       setTimeout(() => {
         el.style.display = 'none';
         btn.classList.remove('on');
-        document.getElementById('ask').value = 'new company Cedar Row LLC in Ohio';
-        runAsk();
-      }, 700);
+        go('capture');
+        mockCapture('voice');
+      }, 500);
     }
 
     function runAsk() {
