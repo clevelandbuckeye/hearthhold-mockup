@@ -1096,7 +1096,7 @@
         status.textContent = 'Got it. Thank you.';
         setTimeout(closeFeedback, 900);
       } catch (err) {
-        status.textContent = 'Could not send. Check the network and try again.';
+        status.textContent = 'Could not send. ' + String(err && err.message ? err.message : err).slice(0, 140);
       }
       sendBtn.disabled = false;
     }
