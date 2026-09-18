@@ -201,8 +201,16 @@
       z-index: 20;
     }
     .overlay.on { display: flex; }
-    .overlay { z-index: 50; }
+    .overlay { z-index: 55; }
     .overlay .card { width: min(520px, calc(100vw - 24px)); max-height: 80vh; overflow: auto; }
+    #damage-pop { z-index: 48; }
+    .dmg-pop { width: min(480px, calc(100vw - 24px)); }
+    .dmg-pop textarea { min-height: 160px; resize: vertical; }
+    .dmg-tools { display: flex; gap: 8px; margin: 12px 0 4px; flex-wrap: wrap; }
+    .dmg-pop .gallery { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+    .dmg-pop .gal-img { height: 72px; }
+    .dmg-pop .btn-row { flex-wrap: wrap; }
+    .dmg-pop .btn-row > * { flex: 0 0 auto; }
     .dash-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; }
     @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
     .check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--line); }
@@ -539,6 +547,7 @@
 
   <div class="nav-scrim" id="nav-scrim" onclick="closeNav()"></div>
   <div class="overlay" id="overlay" onclick="if(event.target.id==='overlay') hideOverlay()"></div>
+  <div class="overlay" id="damage-pop" onclick="if(event.target.id==='damage-pop') closeDamage()"></div>
 
   <button class="fb-btn no-shot" type="button" onclick="openFeedback()">Feedback</button>
   <div class="fb-panel no-shot" id="fb-panel">
@@ -946,6 +955,8 @@
         let manageTab = 'inspections';
         let inspectionId = 'i-ohio';
         let damageId = 'd-rail';
+        let damagePopOpen = false;
+        let dmgRec = null;
 
     const inspectCatalog = {
       inside: [
@@ -1061,7 +1072,7 @@
         company: 'Pinturas Laureles',
         handyman: 'Luis Pinto',
         phone: '+57 310 882 4411',
-        note: 'Small rust on the balcony railing. Quote to grind, prime, and repaint. Quote paper photographed. Waiting on owner approval before scheduling.',
+        note: 'Small rust on the balcony railing.\nQuote: grind, prime, and repaint.\nCost: 420.000 COP\nPinturas Laureles / Luis Pinto\n+57 310 882 4411\nWaiting on owner approval before scheduling.',
         photos: [
           { src: 'thumbs/laureles-balcony.png', caption: 'Railing rust' }
         ],
@@ -1081,7 +1092,7 @@
         company: 'Hank Miller',
         handyman: 'Hank Miller',
         phone: '740-555-0110',
-        note: 'Hinge pin was loose in June. Owner approved. Hank is on site Tuesday with a new pin.',
+        note: 'Hinge pin was loose in June.\nCost: 180 USD\nHank Miller\n740-555-0110\nOwner approved. Hank is on site Tuesday with a new pin.',
         photos: [
           { src: 'thumbs/ohio-gate.png', caption: 'Drive gate hinge' }
         ],
@@ -1102,7 +1113,7 @@
         company: 'Portones del Sur',
         handyman: 'Diego Portones',
         phone: '+57 304 119 2200',
-        note: 'Safety edge failed. Spring replaced. Bill photographed after the visit.',
+        note: 'Safety edge failed. Spring replaced.\nCost: 1.100.000 COP\nPortones del Sur / Diego Portones\n+57 304 119 2200\nBill photographed after the visit.',
         photos: [
           { src: 'thumbs/envigado-door.png', caption: 'Safety edge failed' }
         ],
@@ -1123,7 +1134,7 @@
         company: '',
         handyman: '',
         phone: '',
-        note: 'Condenser fins were packed with dust. Need a coil-clean quote from Frío Andino before we approve.',
+        note: 'Condenser fins were packed with dust.\nNeed a coil-clean quote. Say the cost and the company, then take a picture of the quote paper.',
         photos: [
           { src: 'thumbs/envigado-hvac.png', caption: 'Dirty condenser fins' }
         ],
@@ -1373,19 +1384,34 @@
         name = 'company';
         extra = undefined;
       }
+      if (name === 'damage') {
+        if (extra) damageId = extra;
+        if (screen !== 'manage' && screen !== 'inspection') {
+          screen = 'manage';
+          manageTab = 'damages';
+        }
+        document.querySelectorAll('.nav-item').forEach(b => {
+          const g = b.getAttribute('data-go');
+          b.classList.toggle('on', g === 'manage' || g === screen);
+        });
+        closeNav();
+        render();
+        openDamage(damageId);
+        return;
+      }
+      if (damagePopOpen) closeDamage();
       screen = name;
       if (name === 'company' && extra) { companyId = extra; companyTab = 'dashboard'; }
       if (name === 'property' && extra) { propertyId = extra; propertyTab = 'dashboard'; }
       if (name === 'project' && extra) { propertyId = extra.property; window._projectId = extra.project; }
       if (name === 'inspection' && extra) inspectionId = extra;
-      if (name === 'damage' && extra) damageId = extra;
       document.querySelectorAll('.nav-item').forEach(b => {
         const g = b.getAttribute('data-go');
         const on = g === name
           || (name === 'company' && g === 'companies')
           || (name === 'property' && g === 'properties')
           || (name === 'project' && g === 'properties')
-          || ((name === 'inspection' || name === 'damage') && g === 'manage');
+          || (name === 'inspection' && g === 'manage');
         b.classList.toggle('on', on);
       });
       closeNav();
@@ -1492,7 +1518,7 @@
         el.onclick = (e) => { e.stopPropagation(); go('inspection', el.getAttribute('data-insp')); };
       });
       document.querySelectorAll('[data-damage]').forEach(el => {
-        el.onclick = (e) => { e.stopPropagation(); go('damage', el.getAttribute('data-damage')); };
+        el.onclick = (e) => { e.stopPropagation(); openDamage(el.getAttribute('data-damage')); };
       });
       document.querySelectorAll('[data-mtab]').forEach(el => {
         el.onclick = () => { manageTab = el.getAttribute('data-mtab'); render(); };
@@ -1609,49 +1635,207 @@
         company: '',
         handyman: '',
         phone: '',
-        note: 'Opened from ' + insp.title + '. Add the handyman, a quote, and photos.',
+        note: 'Opened from ' + insp.title + '. Say the quote and take a picture.',
         photos: [],
         quote: null,
         bill: null,
         updates: [{ when: 'Just now', who: 'You', text: 'Opened from the inspection.' }]
       });
-      go('damage', id);
+      openDamage(id);
     }
     function pullDamageForm(d) {
       const el = document.getElementById('dmg-note');
-      if (el) d.note = el.value;
-      const cost = document.getElementById('dmg-cost');
-      const who = document.getElementById('dmg-who');
-      const phone = document.getElementById('dmg-phone');
-      const co = document.getElementById('dmg-company');
-      if (cost) d.cost = cost.value;
-      if (who) d.handyman = who.value;
-      if (phone) d.phone = phone.value;
-      if (co) d.company = co.value;
+      if (el && d) d.note = el.value;
+    }
+    function parseDamageNote(d) {
+      if (!d || !d.note) return;
+      const cost = d.note.match(/([\d.]+)\s*(COP|USD)/i);
+      if (cost) d.cost = cost[1] + ' ' + cost[2].toUpperCase();
+      const phone = d.note.match(/(\+?\d[\d\s-]{7,}\d)/);
+      if (phone) d.phone = phone[1].trim();
+    }
+    function refreshDamage() {
+      const d = damageBy(damageId);
+      pullDamageForm(d);
+      parseDamageNote(d);
+      render();
+      if (damagePopOpen) fillDamagePop();
     }
     function setDamageStatus(id, status) {
       const d = damageBy(id);
       if (!d) return;
       pullDamageForm(d);
+      parseDamageNote(d);
       d.status = status;
       d.updates.unshift({ when: 'Just now', who: 'Bryan', text: 'Marked ' + statusLabel(status) + '.' });
-      render();
+      refreshDamage();
     }
     function saveDamage(id) {
       const d = damageBy(id);
       if (!d) return;
       pullDamageForm(d);
+      parseDamageNote(d);
       d.updates.unshift({ when: 'Just now', who: 'Bryan', text: 'Updated the note.' });
-      render();
+      refreshDamage();
     }
-    function addDamagePhoto(id, kind) {
+    function addDamagePhoto(id, kind, extra) {
       const d = damageBy(id);
+      if (!d) return;
+      pullDamageForm(d);
       const p = propertyBy(d.property);
-      const src = (p && p.image) || 'thumbs/home.png';
-      if (kind === 'bill') d.bill = { src: src, caption: 'Bill' };
-      else if (kind === 'quote') d.quote = { src: src, caption: 'Quote paper' };
-      else d.photos.push({ src: src, caption: 'Damage photo' });
-      render();
+      const src = (extra && extra.src) || (p && p.image) || 'thumbs/home.png';
+      const cap = (extra && extra.caption) || (kind === 'bill' ? 'Bill' : kind === 'quote' ? 'Quote paper' : 'Photo');
+      if (kind === 'bill') d.bill = { src: src, caption: cap };
+      else if (kind === 'quote') d.quote = { src: src, caption: cap };
+      else d.photos.push({ src: src, caption: cap });
+      refreshDamage();
+    }
+    function damageShots(d) {
+      return (d.photos || []).concat(d.quote ? [d.quote] : []).concat(d.bill ? [d.bill] : []);
+    }
+    function mockQuoteLine(d) {
+      const p = propertyBy(d.property) || {};
+      if (p.id === 'ohio') return 'Hank Miller, 740-555-0110. Quote 180 USD for the hinge pin and labor.';
+      if (p.id === 'envigado') return 'Frío Andino, +57 304 119 2200. Quote 380.000 COP to wash the rooftop coils.';
+      return 'Luis Pinto at Pinturas Laureles, +57 310 882 4411. Quote 420.000 COP to grind, prime, and repaint.';
+    }
+    function appendDamageNote(text) {
+      const d = damageBy(damageId);
+      if (!d) return;
+      const el = document.getElementById('dmg-note');
+      const cur = el ? el.value : (d.note || '');
+      const next = (cur && cur.trim() ? cur.replace(/\s+$/, '') + '\n\n' : '') + text;
+      d.note = next;
+      if (el) el.value = next;
+      parseDamageNote(d);
+      const btn = document.getElementById('dmg-mic');
+      if (btn) { btn.classList.remove('on'); btn.textContent = '🎤 Mic'; }
+      const listen = document.getElementById('dmg-listen');
+      if (listen) listen.style.display = 'none';
+    }
+    function stopDamageMic() {
+      if (dmgRec) {
+        try { dmgRec.stop(); } catch (e) {}
+        dmgRec = null;
+      }
+    }
+    function sayDamageQuote() {
+      const d = damageBy(damageId);
+      if (!d) return;
+      pullDamageForm(d);
+      const btn = document.getElementById('dmg-mic');
+      const listen = document.getElementById('dmg-listen');
+      if (btn) { btn.classList.add('on'); btn.textContent = 'Listening…'; }
+      if (listen) listen.style.display = 'block';
+      stopDamageMic();
+      const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const finish = (text) => {
+        const listenEl = document.getElementById('dmg-listen');
+        if (!listenEl || listenEl.style.display === 'none') return;
+        appendDamageNote(text);
+      };
+      setTimeout(() => finish(mockQuoteLine(d)), 1600);
+      if (Rec) {
+        try {
+          dmgRec = new Rec();
+          dmgRec.lang = 'en-US';
+          dmgRec.interimResults = false;
+          dmgRec.onresult = (e) => finish(e.results[0][0].transcript);
+          dmgRec.onerror = () => {};
+          dmgRec.onend = () => { dmgRec = null; };
+          dmgRec.start();
+        } catch (e) {}
+      }
+    }
+    function snapDamagePhoto() {
+      const d = damageBy(damageId);
+      if (!d) return;
+      const p = propertyBy(d.property);
+      const thumbs = (p && p.gallery && p.gallery.length) ? p.gallery : [{ src: (p && p.image) || 'thumbs/home.png', caption: 'Photo' }];
+      const pick = thumbs[d.photos.length % thumbs.length];
+      const kind = d.status === 'fixed' ? 'bill' : 'photo';
+      addDamagePhoto(d.id, kind, { src: pick.src, caption: pick.caption || 'Photo' });
+    }
+    function onDamageCam(input) {
+      const f = input.files && input.files[0];
+      input.value = '';
+      if (!f) { snapDamagePhoto(); return; }
+      addDamagePhoto(damageId, damageBy(damageId).status === 'fixed' ? 'bill' : 'photo', {
+        src: URL.createObjectURL(f),
+        caption: f.name || 'Photo'
+      });
+    }
+    function takeDamagePhoto() {
+      const input = document.getElementById('dmg-cam');
+      if (input && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || '')) {
+        input.click();
+        return;
+      }
+      snapDamagePhoto();
+    }
+    function openDamage(id) {
+      if (id) damageId = id;
+      damagePopOpen = true;
+      fillDamagePop();
+    }
+    function closeDamage() {
+      stopDamageMic();
+      pullDamageForm(damageBy(damageId));
+      parseDamageNote(damageBy(damageId));
+      damagePopOpen = false;
+      const o = document.getElementById('damage-pop');
+      if (!o) return;
+      o.classList.remove('on');
+      o.innerHTML = '';
+    }
+    function fillDamagePop() {
+      const o = document.getElementById('damage-pop');
+      if (!o) return;
+      o.classList.add('on');
+      o.innerHTML = damagePopHtml();
+      o.querySelectorAll('.gal-item:not(.empty)').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); openPhoto(el.getAttribute('data-src'), el.getAttribute('data-cap')); };
+      });
+    }
+    function damagePopHtml() {
+      const d = damageBy(damageId);
+      if (!d) return '<div class="card dmg-pop" onclick="event.stopPropagation()"><p class="empty">Damage not found.</p></div>';
+      const p = propertyBy(d.property) || { name: '' };
+      const shots = damageShots(d);
+      return '<div class="card dmg-pop" onclick="event.stopPropagation()">' +
+        '<div class="row">' +
+          '<div><div class="kicker">Damage</div><b>' + esc(d.title) + '</b>' +
+            '<div class="muted">' + esc(p.name) + ' · <span class="dmg-status ' + statusClass(d.status) + '">' + statusLabel(d.status) + '</span></div></div>' +
+          '<button class="btn btn-ghost" type="button" onclick="closeDamage()">Close</button>' +
+        '</div>' +
+        '<p class="sub" style="margin:10px 0 0;">Say the quote. Take a picture. Cost, handyman, company, and number go in the note.</p>' +
+        '<div class="dmg-tools">' +
+          '<button class="icon-btn" id="dmg-mic" type="button" onclick="sayDamageQuote()">🎤 Mic</button>' +
+          '<button class="icon-btn" type="button" onclick="takeDamagePhoto()">📷 Camera</button>' +
+          '<input id="dmg-cam" type="file" accept="image/*" capture="environment" hidden onchange="onDamageCam(this)">' +
+        '</div>' +
+        '<div class="listen" id="dmg-listen" style="display:none;padding:0;">Listening… say the quote</div>' +
+        '<label>Note</label>' +
+        '<textarea id="dmg-note" placeholder="Quote, handyman name and number, cost, what is broken…">' + esc(d.note) + '</textarea>' +
+        (shots.length
+          ? '<div class="gallery">' + shots.map(ph =>
+              '<button type="button" class="gal-item" data-src="' + ph.src + '" data-cap="' + esc(ph.caption) + '"><span class="gal-img" style="background-image:url(\'' + ph.src + '\')"></span><span class="gal-cap">' + esc(ph.caption) + '</span></button>'
+            ).join('') + '</div>'
+          : '<p class="empty">No photos yet. Use Camera.</p>') +
+        '<div class="btn-row">' +
+          '<button class="btn btn-primary" type="button" onclick="saveDamage(\'' + d.id + '\')">Save note</button>' +
+          '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'pending-approval\')">Send for approval</button>' +
+          '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'approved\')">Approve</button>' +
+          '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'rejected\')">Not approved</button>' +
+          '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'scheduled\')">Schedule</button>' +
+          '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'fixed\')">Mark fixed</button>' +
+        '</div>' +
+        (d.updates && d.updates.length
+          ? '<div class="kicker" style="margin-top:14px;">Updates</div>' + d.updates.map(u =>
+              '<div class="check"><div><b>' + esc(u.text) + '</b><div class="muted">' + esc(u.who) + ' · ' + esc(u.when) + '</div></div></div>'
+            ).join('')
+          : '') +
+      '</div>';
     }
 
     const screens = {
@@ -1661,7 +1845,7 @@
             card('Get in', '<b>Home</b> — companies, upcoming appointments, and recently completed property tasks. Opens on demo data. No keys needed.<br><b>Settings</b> — paste a Supabase URL and anon key later, if you want your own project.') +
             card('Capture', '<b>Capture</b> — voice, photo, files, a folder from the desktop, or Google Drive / Dropbox.<br><b>Inbox</b> — thumbnail and file, then company, property, type (task / note / document), and text. AI fills what it can.<br><b>Activity</b> — recent uploads.') +
             card('Portfolio', '<b>Companies</b> — one row each, with a thumbnail. Click for a dashboard.<br><b>Company</b> — dashboard, plus records for that company only: documents, expenses, board notes. Also tax, filings, users, tasks, properties.<br><b>Properties</b> — scrolling dashboard: tenant, lease, maintenance schedule, inspections, contacts, money.<br><b>Map</b> — filter or sort by company.') +
-            card('Work', '<b>Manage</b> — property manager home: inspections to do, damage approvals, gardener schedule.<br><b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
+            card('Work', '<b>Manage</b> — property manager home: inspections to do, damage popups (one note, mic, camera), gardener schedule.<br><b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
             card('System', '<b>Audit</b> — who did what.<br><b>Settings</b> — your database keys, how to get them.<br><b>Feedback</b> — button in the corner. Screenshot plus text, voice, video, or a photo.') +
           '</div>';
       },
@@ -1766,7 +1950,7 @@
         } else if (manageTab === 'damages') {
           const queue = damages.filter(d => d.status === 'needs-quote' || d.status === 'pending-approval');
           const rest = damages.filter(d => d.status !== 'needs-quote' && d.status !== 'pending-approval');
-          body = '<p class="sub">Owner queue. Approve a quote, send it back, or open the note and add the handyman, cost, photos, and later the bill.</p>' +
+          body = '<p class="sub">Owner queue. Open a report to say the quote and take a picture. Approve it, send it back, or mark it scheduled or fixed.</p>' +
             '<div class="kicker" style="margin-bottom:8px;">Needs you</div>' +
             '<div class="list">' + (queue.length ? queue.map(d => {
               const p = propertyBy(d.property);
@@ -1840,62 +2024,6 @@
             '<div class="btn-row">' +
               (insp.status !== 'done' ? '<button class="btn btn-primary" type="button" onclick="completeInspection(\'' + insp.id + '\')">Mark inspection done</button>' : '') +
               '<button class="pill" type="button" onclick="flagDamage(\'' + insp.id + '\',\'Damage from inspection\')">Open a damage</button>' +
-            '</div>' +
-          '</div>';
-      },
-      damage() {
-        const d = damageBy(damageId);
-        if (!d) return '<p class="empty">Damage not found.</p>';
-        const p = propertyBy(d.property);
-        return '<button class="pill" type="button" onclick="manageTab=\'damages\';go(\'manage\')">← Damage approvals</button>' +
-          '<h1 class="page" style="margin-top:10px;">' + esc(d.title) + '</h1>' +
-          '<p class="sub">' + p.name + ' · <span class="dmg-status ' + statusClass(d.status) + '">' + statusLabel(d.status) + '</span></p>' +
-          '<div class="grid g-main">' +
-            '<div>' +
-              '<div class="card" style="margin-bottom:12px;">' +
-                '<div class="kicker">Gallery</div>' +
-                '<div class="gallery">' + d.photos.map(ph =>
-                  '<button type="button" class="gal-item" data-src="' + ph.src + '" data-cap="' + esc(ph.caption) + '"><span class="gal-img" style="background-image:url(\'' + ph.src + '\')"></span><span class="gal-cap">' + esc(ph.caption) + '</span></button>'
-                ).join('') +
-                  '<button type="button" class="gal-item empty" onclick="addDamagePhoto(\'' + d.id + '\',\'photo\')"><span class="gal-img"></span><span class="gal-cap">Add a photo</span></button>' +
-                '</div>' +
-              '</div>' +
-              '<div class="card" style="margin-bottom:12px;">' +
-                '<div class="kicker">Quote paper</div>' +
-                (d.quote
-                  ? '<button type="button" class="gal-item" data-src="' + d.quote.src + '" data-cap="' + esc(d.quote.caption) + '" style="margin-top:8px;max-width:180px;"><span class="gal-img" style="background-image:url(\'' + d.quote.src + '\')"></span><span class="gal-cap">' + esc(d.quote.caption) + '</span></button>'
-                  : '<p class="empty">No quote paper. Not always required.</p>') +
-                '<button class="pill" type="button" onclick="addDamagePhoto(\'' + d.id + '\',\'quote\')">Attach quote</button>' +
-              '</div>' +
-              '<div class="card">' +
-                '<div class="kicker">Bill after it is fixed</div>' +
-                (d.bill
-                  ? '<button type="button" class="gal-item" data-src="' + d.bill.src + '" data-cap="' + esc(d.bill.caption) + '" style="margin-top:8px;max-width:180px;"><span class="gal-img" style="background-image:url(\'' + d.bill.src + '\')"></span><span class="gal-cap">' + esc(d.bill.caption) + '</span></button>'
-                  : '<p class="empty">No bill yet. Add one when the work is done.</p>') +
-                '<button class="pill" type="button" onclick="addDamagePhoto(\'' + d.id + '\',\'bill\')">Attach bill photo</button>' +
-              '</div>' +
-            '</div>' +
-            '<div>' +
-              '<div class="card" style="margin-bottom:12px;">' +
-                '<label>Cost</label><input id="dmg-cost" type="text" value="' + esc(d.cost) + '" placeholder="420.000 COP">' +
-                '<label>Company</label><input id="dmg-company" type="text" value="' + esc(d.company) + '" placeholder="Handyman company">' +
-                '<label>Handyman name</label><input id="dmg-who" type="text" value="' + esc(d.handyman) + '">' +
-                '<label>Phone</label><input id="dmg-phone" type="text" value="' + esc(d.phone) + '">' +
-                '<label>Note</label><textarea id="dmg-note">' + esc(d.note) + '</textarea>' +
-                '<div class="btn-row">' +
-                  '<button class="btn btn-primary" type="button" onclick="saveDamage(\'' + d.id + '\')">Save note</button>' +
-                '</div>' +
-                '<div class="btn-row">' +
-                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'pending-approval\')">Send for approval</button>' +
-                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'approved\')">Approve</button>' +
-                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'rejected\')">Not approved</button>' +
-                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'scheduled\')">Schedule</button>' +
-                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'fixed\')">Mark fixed</button>' +
-                '</div>' +
-              '</div>' +
-              '<div class="card"><div class="kicker">Updates</div>' +
-                d.updates.map(u => '<div class="check"><div><b>' + esc(u.text) + '</b><div class="muted">' + esc(u.who) + ' · ' + esc(u.when) + '</div></div></div>').join('') +
-              '</div>' +
             '</div>' +
           '</div>';
       },
@@ -2742,7 +2870,11 @@
     }
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeNav();
+      if (e.key !== 'Escape') return;
+      const photo = document.getElementById('overlay');
+      if (photo && photo.classList.contains('on')) { hideOverlay(); return; }
+      if (damagePopOpen) { closeDamage(); return; }
+      closeNav();
     });
     enterApp();
   </script>
