@@ -457,8 +457,31 @@
     }
     .inbox-form textarea { min-height: 72px; resize: vertical; }
     .inbox-form .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .chk {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      align-items: start;
+      font-size: 13px;
+    }
+    .chk-actions { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    .chk-photos { display: flex; gap: 6px; flex-wrap: wrap; grid-column: 1 / -1; }
+    .chk-photos .gal-img { width: 64px; height: 48px; }
+    .dmg-status { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .needs-quote, .pending-approval, .todo { color: var(--warn); }
+    .approved, .fixed, .done { color: var(--forest-2); }
+    .scheduled, .in-progress { color: var(--river); }
+    .rejected { color: var(--bad); }
+    .ai-chip { font-size: 10px; font-weight: 700; background: var(--mist); color: var(--forest); border-radius: 99px; padding: 2px 8px; }
+    .week-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .week-cal > div { background: #fff; border-radius: 8px; padding: 8px; min-height: 88px; font-size: 12px; border: 1px solid var(--line); }
+    .week-cal .hit { background: var(--mist); border-color: var(--forest-2); }
+    .inv-row { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
     @media (max-width: 900px) {
       .inbox-card, .inbox-form .fields { grid-template-columns: 1fr; }
+      .week-cal { grid-template-columns: 1fr 1fr; }
       .fb-btn {
         right: max(12px, env(safe-area-inset-right, 0px));
         bottom: max(12px, env(safe-area-inset-bottom, 0px));
@@ -492,6 +515,7 @@
       <button class="nav-item" data-go="properties">Properties</button>
       <button class="nav-item" data-go="map">Map</button>
       <div class="nav-label">Work</div>
+      <button class="nav-item" data-go="manage">Manage <span class="badge" id="manage-count">0</span></button>
       <button class="nav-item" data-go="calendar">Calendar</button>
       <button class="nav-item" data-go="tasks">Tasks</button>
       <div class="nav-label">System</div>
@@ -919,6 +943,244 @@
         let clouds = { google: false, dropbox: false };
         const TODAY = '2026-09-11';
         let folders = [{ name: '2026 taxes', company: 'hearthhold' }];
+        let manageTab = 'inspections';
+        let inspectionId = 'i-ohio';
+        let damageId = 'd-rail';
+
+    const inspectCatalog = {
+      inside: [
+        { id: 'locks', label: 'All locks are working' },
+        { id: 'walls', label: 'Walls — paint or repair needed?' },
+        { id: 'doors', label: 'Interior doors working' },
+        { id: 'water', label: 'Faucets and showers working' },
+        { id: 'fridge', label: 'Fridge working' },
+        { id: 'ac', label: 'AC working' },
+        { id: 'tv', label: 'TV working' },
+        { id: 'stove', label: 'Stove working' },
+        { id: 'furniture', label: 'Furniture — damage or stains' },
+        { id: 'clean', label: 'Clean, or needs to be cleaned' },
+        { id: 'linens', label: 'Bedsheets and towels' },
+        { id: 'windows', label: 'Windows clean and functional' }
+      ],
+      outside: [
+        { id: 'garden', label: 'Garden maintained' },
+        { id: 'lawn', label: 'Lawn needs cut' },
+        { id: 'plants', label: 'Plant maintenance' },
+        { id: 'fruit', label: 'Fruit trees' },
+        { id: 'pool', label: 'Pool pump and water pump' },
+        { id: 'septic', label: 'Septic tank — last maintenance on record' }
+      ],
+      shots: [
+        { id: 'shots', label: 'Photos of every room and outside' }
+      ]
+    };
+    function makeChecks(skip, preset) {
+      const checks = {};
+      inspectCatalog.inside.concat(inspectCatalog.outside, inspectCatalog.shots).forEach(it => {
+        checks[it.id] = skip.indexOf(it.id) !== -1
+          ? { state: 'na', photos: [], note: 'Not on this property' }
+          : { state: '', photos: [], note: '' };
+      });
+      Object.keys(preset || {}).forEach(k => {
+        if (checks[k]) Object.assign(checks[k], preset[k]);
+      });
+      return checks;
+    }
+    const skipApt = ['pool', 'septic', 'lawn', 'fruit'];
+    const skipRetail = ['linens', 'fridge', 'tv', 'stove', 'furniture', 'garden', 'lawn', 'plants', 'fruit', 'pool', 'septic'];
+    let inspections = [
+      {
+        id: 'i-ohio',
+        property: 'ohio',
+        type: 'general',
+        title: 'General inspection',
+        due: '2026-09-12',
+        who: 'Hank Miller',
+        status: 'in-progress',
+        skip: ['pool'],
+        note: 'Spring walk started. Gate hinge still loose. Septic last pumped Mar 11, 2026 — card is in the well house.',
+        inventory: [
+          { name: 'Fridge', detail: 'Whirlpool 2-door · stainless', photo: 'thumbs/ohio.png', ai: true },
+          { name: 'Stove', detail: 'GE gas range', photo: 'thumbs/home.png', ai: true },
+          { name: 'Microwave', detail: 'Countertop, white', photo: 'thumbs/home.png', ai: true }
+        ],
+        checks: null
+      },
+      {
+        id: 'i-laureles-pre',
+        property: 'laureles',
+        type: 'pre-move-in',
+        title: 'Pre-move-in inspection',
+        due: '2026-09-18',
+        who: 'Marisol Cárdenas',
+        status: 'todo',
+        skip: skipApt,
+        note: '',
+        inventory: [],
+        checks: null
+      },
+      {
+        id: 'i-envigado',
+        property: 'envigado',
+        type: 'general',
+        title: 'General inspection',
+        due: '2026-09-22',
+        who: 'Andrés Mejía',
+        status: 'todo',
+        skip: skipRetail,
+        note: '',
+        inventory: [],
+        checks: null
+      },
+      {
+        id: 'i-laureles-done',
+        property: 'laureles',
+        type: 'general',
+        title: 'General inspection',
+        due: '2026-06-04',
+        who: 'Marisol Cárdenas',
+        status: 'done',
+        skip: skipApt,
+        note: 'Walked the unit with Camila. Gate motor noisy on close. Small rust on the balcony railing. HVAC drain clear.',
+        inventory: [
+          { name: 'Fridge', detail: 'Mabe · working', photo: 'thumbs/laureles-kitchen.png', ai: true },
+          { name: 'Stove', detail: 'Electric cooktop', photo: 'thumbs/laureles-kitchen.png', ai: true },
+          { name: 'AC', detail: 'Minisplit living room', photo: 'thumbs/laureles.png', ai: true }
+        ],
+        checks: null
+      }
+    ];
+    let damages = [
+      {
+        id: 'd-rail',
+        property: 'laureles',
+        inspection: 'i-laureles-done',
+        title: 'Balcony railing rust / paint',
+        status: 'pending-approval',
+        cost: '420.000 COP',
+        company: 'Pinturas Laureles',
+        handyman: 'Luis Pinto',
+        phone: '+57 310 882 4411',
+        note: 'Small rust on the balcony railing. Quote to grind, prime, and repaint. Quote paper photographed. Waiting on owner approval before scheduling.',
+        photos: [
+          { src: 'thumbs/laureles-balcony.png', caption: 'Railing rust' }
+        ],
+        quote: { src: 'thumbs/laureles.png', caption: 'Quote — Pinturas Laureles' },
+        bill: null,
+        updates: [
+          { when: 'Sep 8', who: 'Marisol', text: 'Quote in. 420.000 COP. Sent for approval.' }
+        ]
+      },
+      {
+        id: 'd-gate',
+        property: 'ohio',
+        inspection: 'i-ohio',
+        title: 'Drive gate hinge pin',
+        status: 'scheduled',
+        cost: '180 USD',
+        company: 'Hank Miller',
+        handyman: 'Hank Miller',
+        phone: '740-555-0110',
+        note: 'Hinge pin was loose in June. Owner approved. Hank is on site Tuesday with a new pin.',
+        photos: [
+          { src: 'thumbs/ohio-gate.png', caption: 'Drive gate hinge' }
+        ],
+        quote: null,
+        bill: null,
+        updates: [
+          { when: 'Sep 10', who: 'Bryan', text: 'Approved. Schedule this week.' },
+          { when: 'Sep 9', who: 'Hank', text: 'Quote 180 USD parts and labor.' }
+        ]
+      },
+      {
+        id: 'd-door',
+        property: 'envigado',
+        inspection: 'i-envigado',
+        title: 'Roll-up door safety edge',
+        status: 'fixed',
+        cost: '1.100.000 COP',
+        company: 'Portones del Sur',
+        handyman: 'Diego Portones',
+        phone: '+57 304 119 2200',
+        note: 'Safety edge failed. Spring replaced. Bill photographed after the visit.',
+        photos: [
+          { src: 'thumbs/envigado-door.png', caption: 'Safety edge failed' }
+        ],
+        quote: { src: 'thumbs/andes.png', caption: 'Quote — Portones del Sur' },
+        bill: { src: 'thumbs/andes.png', caption: 'Paid bill — Sep 2' },
+        updates: [
+          { when: 'Sep 2', who: 'Andrés', text: 'Fixed. Bill on file.' },
+          { when: 'Aug 28', who: 'Bryan', text: 'Approved and scheduled.' }
+        ]
+      },
+      {
+        id: 'd-hvac',
+        property: 'envigado',
+        inspection: 'i-envigado',
+        title: 'Rooftop HVAC fins dirty',
+        status: 'needs-quote',
+        cost: '',
+        company: '',
+        handyman: '',
+        phone: '',
+        note: 'Condenser fins were packed with dust. Need a coil-clean quote from Frío Andino before we approve.',
+        photos: [
+          { src: 'thumbs/envigado-hvac.png', caption: 'Dirty condenser fins' }
+        ],
+        quote: null,
+        bill: null,
+        updates: [
+          { when: 'Jul 9', who: 'Andrés', text: 'Flagged on inspection. Waiting on quote.' }
+        ]
+      }
+    ];
+    const serviceSchedules = [
+      { property: 'ohio', kind: 'gardener', who: 'Green Thumb Lawn', day: 'Tue', time: '8:00', cost: '85 USD', cadence: 'Weekly', notes: 'Mow, edge, check the apple and pear trees, bag clippings.' },
+      { property: 'laureles', kind: 'gardener', who: 'Jardines del 70', day: 'Thu', time: '9:30', cost: '80.000 COP', cadence: 'Weekly', notes: 'Common garden and the balcony planters Camila asked us to keep.' }
+    ];
+    inspections[0].checks = makeChecks(['pool'], {
+      locks: { state: 'ok', photos: [{ src: 'thumbs/ohio-gate.png', caption: 'Door locks' }] },
+      walls: { state: 'ok', photos: [] },
+      doors: { state: 'ok', photos: [] },
+      water: { state: 'ok', photos: [{ src: 'thumbs/ohio-well.png', caption: 'Well house / water' }], note: 'Pressure good.' },
+      fridge: { state: 'ok', photos: [] },
+      ac: { state: 'ok', photos: [], note: 'Window unit in the back bedroom.' },
+      tv: { state: 'ok', photos: [] },
+      stove: { state: 'ok', photos: [] },
+      furniture: { state: 'issue', photos: [{ src: 'thumbs/home.png', caption: 'Living room sofa' }], note: 'Faint stain on the sofa arm. Flag if we re-let.' },
+      clean: { state: 'issue', photos: [], note: 'Kitchen floor needs a mop before photos.' },
+      linens: { state: 'ok', photos: [] },
+      windows: { state: '', photos: [] },
+      garden: { state: 'ok', photos: [{ src: 'thumbs/home.png', caption: 'East garden' }] },
+      lawn: { state: 'issue', photos: [], note: 'Long on the east line. Gardener is Tuesday.' },
+      plants: { state: 'ok', photos: [] },
+      fruit: { state: 'ok', photos: [], note: 'Apple and pear. Fruit set looks thin this year.' },
+      septic: { state: 'ok', photos: [{ src: 'thumbs/ohio-well.png', caption: 'Septic lid' }], note: 'Last pumped Mar 11, 2026. Card in the well house.' },
+      shots: { state: '', photos: [{ src: 'thumbs/ohio.png', caption: 'House' }, { src: 'thumbs/ohio-gate.png', caption: 'Drive' }] }
+    });
+    inspections[1].checks = makeChecks(skipApt);
+    inspections[2].checks = makeChecks(skipRetail);
+    inspections[3].checks = makeChecks(skipApt, {
+      locks: { state: 'ok', photos: [] },
+      walls: { state: 'issue', photos: [{ src: 'thumbs/laureles-balcony.png', caption: 'Railing rust' }], note: 'Opened a damage report for paint.' },
+      doors: { state: 'ok', photos: [] },
+      water: { state: 'ok', photos: [] },
+      fridge: { state: 'ok', photos: [{ src: 'thumbs/laureles-kitchen.png', caption: 'Kitchen' }] },
+      ac: { state: 'ok', photos: [] },
+      tv: { state: 'ok', photos: [] },
+      stove: { state: 'ok', photos: [] },
+      furniture: { state: 'ok', photos: [] },
+      clean: { state: 'ok', photos: [] },
+      linens: { state: 'ok', photos: [] },
+      windows: { state: 'ok', photos: [] },
+      garden: { state: 'ok', photos: [] },
+      plants: { state: 'ok', photos: [] },
+      shots: { state: 'ok', photos: [
+        { src: 'thumbs/laureles.png', caption: 'Facade' },
+        { src: 'thumbs/laureles-kitchen.png', caption: 'Kitchen' },
+        { src: 'thumbs/laureles-balcony.png', caption: 'Balcony' }
+      ] }
+    });
 
     function companyBy(id) { return companies.find(c => c.id === id); }
     function propertyBy(id) { return properties.find(p => p.id === id); }
@@ -1115,9 +1377,15 @@
       if (name === 'company' && extra) { companyId = extra; companyTab = 'dashboard'; }
       if (name === 'property' && extra) { propertyId = extra; propertyTab = 'dashboard'; }
       if (name === 'project' && extra) { propertyId = extra.property; window._projectId = extra.project; }
+      if (name === 'inspection' && extra) inspectionId = extra;
+      if (name === 'damage' && extra) damageId = extra;
       document.querySelectorAll('.nav-item').forEach(b => {
         const g = b.getAttribute('data-go');
-        const on = g === name || (name === 'company' && g === 'companies') || (name === 'property' && g === 'properties') || (name === 'project' && g === 'properties');
+        const on = g === name
+          || (name === 'company' && g === 'companies')
+          || (name === 'property' && g === 'properties')
+          || (name === 'project' && g === 'properties')
+          || ((name === 'inspection' || name === 'damage') && g === 'manage');
         b.classList.toggle('on', on);
       });
       closeNav();
@@ -1179,6 +1447,10 @@
 
     function render() {
       document.getElementById('inbox-count').textContent = inbox.length;
+      const openManage = inspections.filter(i => i.status === 'todo' || i.status === 'in-progress').length
+        + damages.filter(d => d.status === 'pending-approval' || d.status === 'needs-quote').length;
+      const mc = document.getElementById('manage-count');
+      if (mc) mc.textContent = openManage;
       const fn = screens[screen] || screens.home;
       document.getElementById('content').innerHTML = fn();
       bind();
@@ -1213,9 +1485,173 @@
       document.querySelectorAll('[data-dnode]').forEach(el => {
         el.onclick = (e) => { e.stopPropagation(); docNode = el.getAttribute('data-dnode'); render(); };
       });
-      document.querySelectorAll('.gal-item').forEach(el => {
+      document.querySelectorAll('.gal-item:not(.empty)').forEach(el => {
         el.onclick = (e) => { e.stopPropagation(); openPhoto(el.getAttribute('data-src'), el.getAttribute('data-cap')); };
       });
+      document.querySelectorAll('[data-insp]').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); go('inspection', el.getAttribute('data-insp')); };
+      });
+      document.querySelectorAll('[data-damage]').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); go('damage', el.getAttribute('data-damage')); };
+      });
+      document.querySelectorAll('[data-mtab]').forEach(el => {
+        el.onclick = () => { manageTab = el.getAttribute('data-mtab'); render(); };
+      });
+    }
+
+    function fmtIsoDate(iso) {
+      if (!iso) return '';
+      const parts = String(iso).split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return months[+parts[1] - 1] + ' ' + (+parts[2]);
+    }
+    function inspectionBy(id) { return inspections.find(x => x.id === id); }
+    function damageBy(id) { return damages.find(x => x.id === id); }
+    function statusClass(s) {
+      return String(s || '').replace(/\s/g, '-');
+    }
+    function statusLabel(s) {
+      const map = {
+        todo: 'To do',
+        'in-progress': 'In progress',
+        done: 'Done',
+        'needs-quote': 'Needs quote',
+        'pending-approval': 'Needs approval',
+        approved: 'Approved',
+        scheduled: 'Scheduled',
+        rejected: 'Not approved',
+        fixed: 'Fixed'
+      };
+      return map[s] || s;
+    }
+    function checkPhotos(photos) {
+      if (!photos || !photos.length) return '';
+      return '<div class="chk-photos">' + photos.map(p =>
+        '<button type="button" class="gal-item" data-src="' + p.src + '" data-cap="' + esc(p.caption || '') + '"><span class="gal-img" style="background-image:url(\'' + p.src + '\')"></span></button>'
+      ).join('') + '</div>';
+    }
+    function checkRow(insp, group, it) {
+      const c = insp.checks[it.id] || { state: '', photos: [], note: '' };
+      const states = [
+        { id: 'ok', label: 'OK' },
+        { id: 'issue', label: 'Issue' },
+        { id: 'na', label: 'N/A' }
+      ];
+      return '<div class="chk">' +
+        '<div><b>' + it.label + '</b>' +
+          (c.note ? '<div class="muted">' + esc(c.note) + '</div>' : '') +
+          checkPhotos(c.photos) +
+        '</div>' +
+        '<div class="chk-actions">' +
+          states.map(s => '<button class="pill' + (c.state === s.id ? ' on' : '') + '" type="button" onclick="setCheck(\'' + insp.id + '\',\'' + it.id + '\',\'' + s.id + '\')">' + s.label + '</button>').join('') +
+          '<button class="pill" type="button" onclick="addCheckPhoto(\'' + insp.id + '\',\'' + it.id + '\')">Photo</button>' +
+          (c.state === 'issue' ? '<button class="pill" type="button" onclick="flagDamage(\'' + insp.id + '\',\'' + it.label + '\')">Damage</button>' : '') +
+        '</div>' +
+      '</div>';
+    }
+    function stashInspNote(insp) {
+      const el = document.getElementById('insp-note');
+      if (el && insp) insp.note = el.value;
+    }
+    function setCheck(inspId, itemId, state) {
+      const insp = inspectionBy(inspId);
+      if (!insp || !insp.checks[itemId]) return;
+      stashInspNote(insp);
+      insp.checks[itemId].state = state;
+      if (insp.status === 'todo') insp.status = 'in-progress';
+      render();
+    }
+    function addCheckPhoto(inspId, itemId) {
+      const insp = inspectionBy(inspId);
+      stashInspNote(insp);
+      const p = propertyBy(insp.property);
+      const thumbs = (p && p.gallery) ? p.gallery : [{ src: 'thumbs/home.png', caption: 'Shot' }];
+      const pick = thumbs[insp.checks[itemId].photos.length % thumbs.length];
+      insp.checks[itemId].photos.push({ src: pick.src, caption: pick.caption || itemId });
+      if (insp.status === 'todo') insp.status = 'in-progress';
+      render();
+    }
+    function mockAiInventory(inspId) {
+      const insp = inspectionBy(inspId);
+      if (!insp) return;
+      stashInspNote(insp);
+      const p = propertyBy(insp.property) || {};
+      const gal = p.gallery || [];
+      const guesses = [
+        { name: 'Fridge', detail: 'AI: two-door refrigerator, stainless', photo: (gal[1] && gal[1].src) || p.image },
+        { name: 'Stove', detail: 'AI: range / cooktop in the kitchen', photo: (gal[1] && gal[1].src) || p.image },
+        { name: 'Microwave', detail: 'AI: countertop microwave', photo: p.image }
+      ];
+      guesses.forEach(g => {
+        if (!insp.inventory.some(x => x.name === g.name)) insp.inventory.push(Object.assign({ ai: true }, g));
+      });
+      render();
+    }
+    function completeInspection(inspId) {
+      const insp = inspectionBy(inspId);
+      stashInspNote(insp);
+      insp.status = 'done';
+      insp.due = TODAY;
+      audit.unshift({ who: 'Bryan', action: 'Finished inspection', target: insp.title, where: (propertyBy(insp.property) || {}).name, at: 'Just now' });
+      go('manage');
+    }
+    function flagDamage(inspId, label) {
+      const insp = inspectionBy(inspId);
+      stashInspNote(insp);
+      const id = 'd' + Date.now();
+      damages.unshift({
+        id: id,
+        property: insp.property,
+        inspection: inspId,
+        title: label || 'Damage from inspection',
+        status: 'needs-quote',
+        cost: '',
+        company: '',
+        handyman: '',
+        phone: '',
+        note: 'Opened from ' + insp.title + '. Add the handyman, a quote, and photos.',
+        photos: [],
+        quote: null,
+        bill: null,
+        updates: [{ when: 'Just now', who: 'You', text: 'Opened from the inspection.' }]
+      });
+      go('damage', id);
+    }
+    function pullDamageForm(d) {
+      const el = document.getElementById('dmg-note');
+      if (el) d.note = el.value;
+      const cost = document.getElementById('dmg-cost');
+      const who = document.getElementById('dmg-who');
+      const phone = document.getElementById('dmg-phone');
+      const co = document.getElementById('dmg-company');
+      if (cost) d.cost = cost.value;
+      if (who) d.handyman = who.value;
+      if (phone) d.phone = phone.value;
+      if (co) d.company = co.value;
+    }
+    function setDamageStatus(id, status) {
+      const d = damageBy(id);
+      if (!d) return;
+      pullDamageForm(d);
+      d.status = status;
+      d.updates.unshift({ when: 'Just now', who: 'Bryan', text: 'Marked ' + statusLabel(status) + '.' });
+      render();
+    }
+    function saveDamage(id) {
+      const d = damageBy(id);
+      if (!d) return;
+      pullDamageForm(d);
+      d.updates.unshift({ when: 'Just now', who: 'Bryan', text: 'Updated the note.' });
+      render();
+    }
+    function addDamagePhoto(id, kind) {
+      const d = damageBy(id);
+      const p = propertyBy(d.property);
+      const src = (p && p.image) || 'thumbs/home.png';
+      if (kind === 'bill') d.bill = { src: src, caption: 'Bill' };
+      else if (kind === 'quote') d.quote = { src: src, caption: 'Quote paper' };
+      else d.photos.push({ src: src, caption: 'Damage photo' });
+      render();
     }
 
     const screens = {
@@ -1225,7 +1661,7 @@
             card('Get in', '<b>Home</b> — companies, upcoming appointments, and recently completed property tasks. Opens on demo data. No keys needed.<br><b>Settings</b> — paste a Supabase URL and anon key later, if you want your own project.') +
             card('Capture', '<b>Capture</b> — voice, photo, files, a folder from the desktop, or Google Drive / Dropbox.<br><b>Inbox</b> — thumbnail and file, then company, property, type (task / note / document), and text. AI fills what it can.<br><b>Activity</b> — recent uploads.') +
             card('Portfolio', '<b>Companies</b> — one row each, with a thumbnail. Click for a dashboard.<br><b>Company</b> — dashboard, plus records for that company only: documents, expenses, board notes. Also tax, filings, users, tasks, properties.<br><b>Properties</b> — scrolling dashboard: tenant, lease, maintenance schedule, inspections, contacts, money.<br><b>Map</b> — filter or sort by company.') +
-            card('Work', '<b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
+            card('Work', '<b>Manage</b> — property manager home: inspections to do, damage approvals, gardener schedule.<br><b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
             card('System', '<b>Audit</b> — who did what.<br><b>Settings</b> — your database keys, how to get them.<br><b>Feedback</b> — button in the corner. Screenshot plus text, voice, video, or a photo.') +
           '</div>';
       },
@@ -1292,6 +1728,174 @@
             '<div class="card">' +
               '<div class="row" style="margin-bottom:8px;"><div class="kicker">Properties</div><button class="pill" type="button" onclick="go(\'properties\')">All</button></div>' +
               properties.map(p => propRow(p)).join('') +
+            '</div>' +
+          '</div>';
+      },
+      manage() {
+        const tabs = [
+          { id: 'inspections', label: 'Inspections' },
+          { id: 'damages', label: 'Damage approvals' },
+          { id: 'schedules', label: 'Schedules' }
+        ];
+        const open = inspections.filter(i => i.status !== 'done').sort((a, b) => a.due.localeCompare(b.due));
+        const done = inspections.filter(i => i.status === 'done');
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        let body = '';
+        if (manageTab === 'inspections') {
+          body = '<p class="sub">Inspections you still have to walk. Pre-move-in, general, or a return visit. Open one to check locks, water, appliances, garden, pool, septic, photos, and inventory.</p>' +
+            '<div class="list">' + open.map(i => {
+              const p = propertyBy(i.property);
+              const late = i.due < TODAY;
+              const checks = Object.keys(i.checks).filter(k => i.checks[k].state && i.checks[k].state !== 'na');
+              const total = Object.keys(i.checks).filter(k => i.checks[k].state !== 'na').length;
+              return '<div class="card click line-card" data-insp="' + i.id + '">' +
+                '<div class="thumb" style="background-image:url(\'' + p.image + '\')"></div>' +
+                '<div style="flex:1;min-width:0;"><b>' + i.title + '</b>' +
+                  '<div class="muted">' + p.name + ' · ' + fmtIsoDate(i.due) + ' · ' + i.who + ' · ' + checks.length + '/' + total + ' checked</div>' +
+                '</div>' +
+                '<span class="dmg-status ' + statusClass(i.status) + (late && i.status !== 'done' ? ' late' : '') + '">' + (late && i.status !== 'done' ? 'Due ' : '') + statusLabel(i.status) + '</span>' +
+              '</div>';
+            }).join('') + '</div>' +
+            (done.length ? '<div class="kicker" style="margin:18px 0 8px;">Done</div><div class="list">' + done.map(i => {
+              const p = propertyBy(i.property);
+              return '<div class="card click line-card" data-insp="' + i.id + '">' +
+                '<div class="thumb" style="background-image:url(\'' + p.image + '\')"></div>' +
+                '<div style="flex:1;"><b>' + i.title + '</b><div class="muted">' + p.name + ' · ' + fmtIsoDate(i.due) + ' · ' + i.who + '</div></div>' +
+                '<span class="dmg-status done">Done</span></div>';
+            }).join('') + '</div>' : '');
+        } else if (manageTab === 'damages') {
+          const queue = damages.filter(d => d.status === 'needs-quote' || d.status === 'pending-approval');
+          const rest = damages.filter(d => d.status !== 'needs-quote' && d.status !== 'pending-approval');
+          body = '<p class="sub">Owner queue. Approve a quote, send it back, or open the note and add the handyman, cost, photos, and later the bill.</p>' +
+            '<div class="kicker" style="margin-bottom:8px;">Needs you</div>' +
+            '<div class="list">' + (queue.length ? queue.map(d => {
+              const p = propertyBy(d.property);
+              return '<div class="card click line-card" data-damage="' + d.id + '">' +
+                '<div class="thumb" style="background-image:url(\'' + ((d.photos[0] && d.photos[0].src) || p.image) + '\')"></div>' +
+                '<div style="flex:1;"><b>' + d.title + '</b><div class="muted">' + p.name + ' · ' + (d.cost || 'No cost yet') + ' · ' + (d.handyman || d.company || 'No handyman yet') + '</div></div>' +
+                '<span class="dmg-status ' + statusClass(d.status) + '">' + statusLabel(d.status) + '</span></div>';
+            }).join('') : '<p class="empty">Nothing waiting on approval.</p>') + '</div>' +
+            '<div class="kicker" style="margin:18px 0 8px;">In motion / fixed</div>' +
+            '<div class="list">' + rest.map(d => {
+              const p = propertyBy(d.property);
+              return '<div class="card click line-card" data-damage="' + d.id + '">' +
+                '<div class="thumb" style="background-image:url(\'' + ((d.photos[0] && d.photos[0].src) || p.image) + '\')"></div>' +
+                '<div style="flex:1;"><b>' + d.title + '</b><div class="muted">' + p.name + ' · ' + (d.cost || '—') + '</div></div>' +
+                '<span class="dmg-status ' + statusClass(d.status) + '">' + statusLabel(d.status) + '</span></div>';
+            }).join('') + '</div>';
+        } else {
+          body = '<p class="sub">Who comes each week, which day, and what it costs. Gardener first. Pool or septic vendors sit here when a property has them.</p>' +
+            '<div class="week-cal" style="margin-bottom:14px;">' + days.map(day => {
+              const hits = serviceSchedules.filter(s => s.day === day);
+              return '<div class="' + (hits.length ? 'hit' : '') + '"><b>' + day + '</b>' +
+                (hits.length ? hits.map(s => '<div class="muted" style="margin-top:6px;">' + propertyBy(s.property).name.split(' ')[0] + '<br>' + s.who + '<br>' + s.cost + '</div>').join('') : '<div class="muted" style="margin-top:6px;">—</div>') +
+              '</div>';
+            }).join('') + '</div>' +
+            '<div class="list">' + serviceSchedules.map(s => {
+              const p = propertyBy(s.property);
+              return '<div class="card line-card">' +
+                '<div class="thumb" style="background-image:url(\'' + p.image + '\')"></div>' +
+                '<div style="flex:1;"><b>' + s.kind[0].toUpperCase() + s.kind.slice(1) + ' · ' + p.name + '</b>' +
+                  '<div class="muted">' + s.cadence + ' · ' + s.day + ' ' + s.time + ' · ' + s.cost + ' · ' + s.who + '</div>' +
+                  '<div class="muted" style="margin-top:4px;">' + esc(s.notes) + '</div></div></div>';
+            }).join('') + '</div>';
+        }
+        return '<h1 class="page">Manage Properties</h1>' +
+          '<div class="chips">' + tabs.map(t => '<button class="pill' + (manageTab === t.id ? ' on' : '') + '" type="button" data-mtab="' + t.id + '">' + t.label + '</button>').join('') + '</div>' +
+          body;
+      },
+      inspection() {
+        const insp = inspectionBy(inspectionId);
+        if (!insp) return '<p class="empty">Inspection not found.</p>';
+        const p = propertyBy(insp.property);
+        const c = companyBy(p.company);
+        const issues = Object.keys(insp.checks).filter(k => insp.checks[k].state === 'issue').length;
+        function group(title, items) {
+          const rows = items.filter(it => insp.skip.indexOf(it.id) === -1);
+          if (!rows.length) return '';
+          return '<div class="card" style="margin-bottom:12px;"><div class="kicker">' + title + '</div>' +
+            rows.map(it => checkRow(insp, title, it)).join('') + '</div>';
+        }
+        return '<button class="pill" type="button" onclick="go(\'manage\')">← Manage Properties</button>' +
+          '<h1 class="page" style="margin-top:10px;">' + insp.title + '</h1>' +
+          '<p class="sub">' + p.name + ' · ' + c.name + ' · ' + fmtIsoDate(insp.due) + ' · ' + insp.who +
+            ' · <span class="dmg-status ' + statusClass(insp.status) + '">' + statusLabel(insp.status) + '</span>' +
+            (issues ? ' · <span class="late">' + issues + ' issues</span>' : '') + '</p>' +
+          group('Inside', inspectCatalog.inside) +
+          group('Outside', inspectCatalog.outside) +
+          group('Photos', inspectCatalog.shots) +
+          '<div class="card" style="margin-bottom:12px;">' +
+            '<div class="row"><div class="kicker">Inventory</div>' +
+              '<button class="pill" type="button" onclick="mockAiInventory(\'' + insp.id + '\')">AI from photos</button></div>' +
+            '<p class="muted" style="margin:6px 0 8px;">AI reads the inspection photos and keeps fridge, stove, microwave, and the rest for next time.</p>' +
+            (insp.inventory.length ? insp.inventory.map(inv =>
+              '<div class="inv-row"><div class="thumb" style="width:48px;height:48px;background-image:url(\'' + inv.photo + '\')"></div>' +
+                '<div><b>' + esc(inv.name) + '</b> ' + (inv.ai ? '<span class="ai-chip">AI</span>' : '') +
+                '<div class="muted">' + esc(inv.detail) + '</div></div></div>'
+            ).join('') : '<p class="empty">No inventory yet. Take photos, then run AI.</p>') +
+          '</div>' +
+          '<div class="card">' +
+            '<div class="kicker">Inspection note</div>' +
+            '<textarea id="insp-note" style="margin-top:8px;">' + esc(insp.note) + '</textarea>' +
+            '<div class="btn-row">' +
+              (insp.status !== 'done' ? '<button class="btn btn-primary" type="button" onclick="completeInspection(\'' + insp.id + '\')">Mark inspection done</button>' : '') +
+              '<button class="pill" type="button" onclick="flagDamage(\'' + insp.id + '\',\'Damage from inspection\')">Open a damage</button>' +
+            '</div>' +
+          '</div>';
+      },
+      damage() {
+        const d = damageBy(damageId);
+        if (!d) return '<p class="empty">Damage not found.</p>';
+        const p = propertyBy(d.property);
+        return '<button class="pill" type="button" onclick="manageTab=\'damages\';go(\'manage\')">← Damage approvals</button>' +
+          '<h1 class="page" style="margin-top:10px;">' + esc(d.title) + '</h1>' +
+          '<p class="sub">' + p.name + ' · <span class="dmg-status ' + statusClass(d.status) + '">' + statusLabel(d.status) + '</span></p>' +
+          '<div class="grid g-main">' +
+            '<div>' +
+              '<div class="card" style="margin-bottom:12px;">' +
+                '<div class="kicker">Gallery</div>' +
+                '<div class="gallery">' + d.photos.map(ph =>
+                  '<button type="button" class="gal-item" data-src="' + ph.src + '" data-cap="' + esc(ph.caption) + '"><span class="gal-img" style="background-image:url(\'' + ph.src + '\')"></span><span class="gal-cap">' + esc(ph.caption) + '</span></button>'
+                ).join('') +
+                  '<button type="button" class="gal-item empty" onclick="addDamagePhoto(\'' + d.id + '\',\'photo\')"><span class="gal-img"></span><span class="gal-cap">Add a photo</span></button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="card" style="margin-bottom:12px;">' +
+                '<div class="kicker">Quote paper</div>' +
+                (d.quote
+                  ? '<button type="button" class="gal-item" data-src="' + d.quote.src + '" data-cap="' + esc(d.quote.caption) + '" style="margin-top:8px;max-width:180px;"><span class="gal-img" style="background-image:url(\'' + d.quote.src + '\')"></span><span class="gal-cap">' + esc(d.quote.caption) + '</span></button>'
+                  : '<p class="empty">No quote paper. Not always required.</p>') +
+                '<button class="pill" type="button" onclick="addDamagePhoto(\'' + d.id + '\',\'quote\')">Attach quote</button>' +
+              '</div>' +
+              '<div class="card">' +
+                '<div class="kicker">Bill after it is fixed</div>' +
+                (d.bill
+                  ? '<button type="button" class="gal-item" data-src="' + d.bill.src + '" data-cap="' + esc(d.bill.caption) + '" style="margin-top:8px;max-width:180px;"><span class="gal-img" style="background-image:url(\'' + d.bill.src + '\')"></span><span class="gal-cap">' + esc(d.bill.caption) + '</span></button>'
+                  : '<p class="empty">No bill yet. Add one when the work is done.</p>') +
+                '<button class="pill" type="button" onclick="addDamagePhoto(\'' + d.id + '\',\'bill\')">Attach bill photo</button>' +
+              '</div>' +
+            '</div>' +
+            '<div>' +
+              '<div class="card" style="margin-bottom:12px;">' +
+                '<label>Cost</label><input id="dmg-cost" type="text" value="' + esc(d.cost) + '" placeholder="420.000 COP">' +
+                '<label>Company</label><input id="dmg-company" type="text" value="' + esc(d.company) + '" placeholder="Handyman company">' +
+                '<label>Handyman name</label><input id="dmg-who" type="text" value="' + esc(d.handyman) + '">' +
+                '<label>Phone</label><input id="dmg-phone" type="text" value="' + esc(d.phone) + '">' +
+                '<label>Note</label><textarea id="dmg-note">' + esc(d.note) + '</textarea>' +
+                '<div class="btn-row">' +
+                  '<button class="btn btn-primary" type="button" onclick="saveDamage(\'' + d.id + '\')">Save note</button>' +
+                '</div>' +
+                '<div class="btn-row">' +
+                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'pending-approval\')">Send for approval</button>' +
+                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'approved\')">Approve</button>' +
+                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'rejected\')">Not approved</button>' +
+                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'scheduled\')">Schedule</button>' +
+                  '<button class="pill" type="button" onclick="setDamageStatus(\'' + d.id + '\',\'fixed\')">Mark fixed</button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="card"><div class="kicker">Updates</div>' +
+                d.updates.map(u => '<div class="check"><div><b>' + esc(u.text) + '</b><div class="muted">' + esc(u.who) + ' · ' + esc(u.when) + '</div></div></div>').join('') +
+              '</div>' +
             '</div>' +
           '</div>';
       },
