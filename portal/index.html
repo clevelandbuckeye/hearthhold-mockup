@@ -211,6 +211,8 @@
     .dmg-pop .gal-img { height: 72px; }
     .dmg-pop .btn-row { flex-wrap: wrap; }
     .dmg-pop .btn-row > * { flex: 0 0 auto; }
+    #insp-note { min-height: 120px; resize: vertical; margin-top: 8px; }
+    .ai-line { font-size: 13px; color: var(--forest-2); margin-top: 8px; font-weight: 600; }
     .dash-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; }
     @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
     .check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--line); }
@@ -957,32 +959,33 @@
         let damageId = 'd-rail';
         let damagePopOpen = false;
         let dmgRec = null;
+        let inspRec = null;
 
     const inspectCatalog = {
       inside: [
-        { id: 'locks', label: 'All locks are working' },
-        { id: 'walls', label: 'Walls — paint or repair needed?' },
-        { id: 'doors', label: 'Interior doors working' },
-        { id: 'water', label: 'Faucets and showers working' },
-        { id: 'fridge', label: 'Fridge working' },
-        { id: 'ac', label: 'AC working' },
-        { id: 'tv', label: 'TV working' },
-        { id: 'stove', label: 'Stove working' },
-        { id: 'furniture', label: 'Furniture — damage or stains' },
-        { id: 'clean', label: 'Clean, or needs to be cleaned' },
-        { id: 'linens', label: 'Bedsheets and towels' },
-        { id: 'windows', label: 'Windows clean and functional' }
+        { id: 'locks', label: 'All locks are working', keys: ['lock', 'deadbolt'] },
+        { id: 'walls', label: 'Walls — paint or repair needed?', keys: ['wall', 'paint', 'plaster'] },
+        { id: 'doors', label: 'Interior doors working', keys: ['interior door', 'bedroom door', 'door'] },
+        { id: 'water', label: 'Faucets and showers working', keys: ['faucet', 'shower', 'tap', 'sink'] },
+        { id: 'fridge', label: 'Fridge working', keys: ['fridge', 'refrigerator'] },
+        { id: 'ac', label: 'AC working', keys: ['air condition', 'minisplit', 'hvac', 'a/c'] },
+        { id: 'tv', label: 'TV working', keys: ['television', 'tv'] },
+        { id: 'stove', label: 'Stove working', keys: ['stove', 'oven', 'cooktop', 'range'] },
+        { id: 'furniture', label: 'Furniture — damage or stains', keys: ['furniture', 'sofa', 'couch', 'stain', 'mattress', 'chair'] },
+        { id: 'clean', label: 'Clean, or needs to be cleaned', keys: ['mop', 'mess', 'kitchen floor', 'floor', 'needs clean'] },
+        { id: 'linens', label: 'Bedsheets and towels', keys: ['sheet', 'towel', 'linen', 'bedding'] },
+        { id: 'windows', label: 'Windows clean and functional', keys: ['window'] }
       ],
       outside: [
-        { id: 'garden', label: 'Garden maintained' },
-        { id: 'lawn', label: 'Lawn needs cut' },
-        { id: 'plants', label: 'Plant maintenance' },
-        { id: 'fruit', label: 'Fruit trees' },
-        { id: 'pool', label: 'Pool pump and water pump' },
-        { id: 'septic', label: 'Septic tank — last maintenance on record' }
+        { id: 'garden', label: 'Garden maintained', keys: ['garden'] },
+        { id: 'lawn', label: 'Lawn needs cut', keys: ['lawn', 'grass', 'mow'] },
+        { id: 'plants', label: 'Plant maintenance', keys: ['plant'] },
+        { id: 'fruit', label: 'Fruit trees', keys: ['fruit tree', 'apple', 'pear'] },
+        { id: 'pool', label: 'Pool pump and water pump', keys: ['pool', 'water pump'] },
+        { id: 'septic', label: 'Septic tank — last maintenance on record', keys: ['septic'] }
       ],
       shots: [
-        { id: 'shots', label: 'Photos of every room and outside' }
+        { id: 'shots', label: 'Photos of every room and outside', keys: ['photo', 'picture', 'camera'] }
       ]
     };
     function makeChecks(skip, preset) {
@@ -1400,6 +1403,7 @@
         return;
       }
       if (damagePopOpen) closeDamage();
+      if (name !== 'inspection') stopInspMic();
       screen = name;
       if (name === 'company' && extra) { companyId = extra; companyTab = 'dashboard'; }
       if (name === 'property' && extra) { propertyId = extra; propertyTab = 'dashboard'; }
@@ -1563,8 +1567,8 @@
         { id: 'issue', label: 'Issue' },
         { id: 'na', label: 'N/A' }
       ];
-      return '<div class="chk">' +
-        '<div><b>' + it.label + '</b>' +
+      return '<div class="chk" data-check="' + it.id + '">' +
+        '<div><b>' + it.label + '</b>' + (c.fromAi ? ' <span class="ai-chip">AI</span>' : '') +
           (c.note ? '<div class="muted">' + esc(c.note) + '</div>' : '') +
           checkPhotos(c.photos) +
         '</div>' +
@@ -1579,11 +1583,179 @@
       const el = document.getElementById('insp-note');
       if (el && insp) insp.note = el.value;
     }
+    function walkItems(insp) {
+      return inspectCatalog.inside.concat(inspectCatalog.outside, inspectCatalog.shots)
+        .filter(it => (insp.skip || []).indexOf(it.id) === -1);
+    }
+    function noteMentions(sent, keys) {
+      const t = sent.toLowerCase();
+      return (keys || []).some(k => {
+        if (k.length <= 2) return new RegExp('\\b' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(t);
+        return t.indexOf(k.toLowerCase()) !== -1;
+      });
+    }
+    function sentenceIsBad(s) {
+      const t = s.toLowerCase();
+      if (/\b(no problem|no issue|no damage|looks? good|all good|working fine|is working|are working|is ok|is okay|is fine)\b/.test(t) && !/\b(not |n't |broken|stain|leak|dirty|needs)\b/.test(t)) return false;
+      return /\b(problem|issue|broken|not working|doesn't work|does not work|stain|stains|damage|damaged|leak|leaking|dirty|rust|loose|crack|cracked|missing|fail|failed|sticky|wrong|not ok|not okay|needs? (a |to |cut|paint|repair|clean|mop)|too long|needs cut)\b/i.test(t);
+    }
+    function noteSaysAllOk(raw) {
+      return /\b(everything (is |looks )?(ok|okay|fine|good)|all (good|fine|ok|okay)|no (problems|issues)|nothing wrong)\b/i.test(raw || '');
+    }
+    function applyNoteToChecks(insp) {
+      if (!insp || !insp.checks) return;
+      const raw = insp.note || '';
+      const items = walkItems(insp);
+      if (noteSaysAllOk(raw)) {
+        items.forEach(it => {
+          const c = insp.checks[it.id];
+          if (!c || c.state === 'na') return;
+          c.state = 'ok';
+          c.fromAi = true;
+        });
+      }
+      raw.split(/[\n.;]+/).forEach(sent => {
+        const s = sent.trim();
+        if (!s) return;
+        const bad = sentenceIsBad(s);
+        items.forEach(it => {
+          const keys = (it.keys || [it.id]).concat(it.id === 'ac' ? ['ac'] : []).concat(it.id === 'tv' ? ['tv'] : []);
+          if (!noteMentions(s, keys)) return;
+          const c = insp.checks[it.id];
+          if (!c || c.state === 'na') return;
+          c.state = bad ? 'issue' : 'ok';
+          c.fromAi = true;
+          if (bad) c.note = s;
+        });
+      });
+    }
+    function inspAiLine(insp) {
+      const items = walkItems(insp);
+      const issues = items.filter(it => insp.checks[it.id] && insp.checks[it.id].state === 'issue');
+      const aiIssues = issues.filter(it => insp.checks[it.id].fromAi);
+      const ok = items.filter(it => insp.checks[it.id] && insp.checks[it.id].state === 'ok').length;
+      const names = (list) => list.map(it => it.label.replace(/ —.*$/, '')).join(' · ');
+      if (aiIssues.length) {
+        return 'AI marked issue: ' + names(aiIssues) + (ok ? '. Rest OK.' : '.');
+      }
+      if (issues.length) return issues.length + ' issue' + (issues.length === 1 ? '' : 's') + ' on the list. Talk or tap Everything is OK.';
+      if (ok) return 'AI: ' + ok + ' items OK.';
+      return 'Speak or type. If you mention a problem, the boxes update.';
+    }
+    function markInspectionAllOk(inspId) {
+      const insp = inspectionBy(inspId);
+      if (!insp) return;
+      stashInspNote(insp);
+      walkItems(insp).forEach(it => {
+        const c = insp.checks[it.id];
+        if (!c || c.state === 'na') return;
+        c.state = 'ok';
+        c.fromAi = false;
+      });
+      if (!(insp.note || '').trim()) insp.note = 'Everything is OK.';
+      else if (!noteSaysAllOk(insp.note)) insp.note = insp.note.replace(/\s+$/, '') + '\n\nEverything is OK.';
+      applyNoteToChecks(insp);
+      if (insp.status === 'todo') insp.status = 'in-progress';
+      render();
+    }
+    function applyInspectionNote(inspId) {
+      const el = document.getElementById('insp-note');
+      const start = el ? el.selectionStart : null;
+      const end = el ? el.selectionEnd : null;
+      const keep = el && document.activeElement === el;
+      const insp = inspectionBy(inspId);
+      if (!insp) return;
+      stashInspNote(insp);
+      applyNoteToChecks(insp);
+      if (insp.status === 'todo') insp.status = 'in-progress';
+      render();
+      if (keep) {
+        const n = document.getElementById('insp-note');
+        if (n) {
+          n.focus();
+          if (start != null) n.setSelectionRange(start, end);
+        }
+      }
+    }
+    function queueInspNote(inspId) {
+      clearTimeout(window._inspNoteT);
+      window._inspNoteT = setTimeout(() => applyInspectionNote(inspId), 400);
+    }
+    function mockWalkLine(insp) {
+      const p = propertyBy(insp.property) || {};
+      if (p.id === 'ohio') return 'Everything is OK besides the lawn — it needs cut on the east line — and a faint stain on the sofa. Kitchen floor needs a mop.';
+      if (p.id === 'envigado') return 'Everything is OK. HVAC fins are dirty. The roll-up door already has a damage report.';
+      return 'Everything is OK. One bedroom window is sticky and needs a look.';
+    }
+    function stopInspMic() {
+      if (inspRec) {
+        try { inspRec.stop(); } catch (e) {}
+        inspRec = null;
+      }
+    }
+    function sayInspectionNote() {
+      const insp = inspectionBy(inspectionId);
+      if (!insp) return;
+      stashInspNote(insp);
+      const btn = document.getElementById('insp-mic');
+      const listen = document.getElementById('insp-listen');
+      if (btn) { btn.classList.add('on'); btn.textContent = 'Listening…'; }
+      if (listen) listen.style.display = 'block';
+      stopInspMic();
+      const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const finish = (text) => {
+        const listenEl = document.getElementById('insp-listen');
+        if (!listenEl || listenEl.style.display === 'none') return;
+        const el = document.getElementById('insp-note');
+        const cur = el ? el.value : (insp.note || '');
+        insp.note = (cur && cur.trim() ? cur.replace(/\s+$/, '') + '\n\n' : '') + text;
+        applyNoteToChecks(insp);
+        if (insp.status === 'todo') insp.status = 'in-progress';
+        render();
+      };
+      setTimeout(() => finish(mockWalkLine(insp)), 1600);
+      if (Rec) {
+        try {
+          inspRec = new Rec();
+          inspRec.lang = 'en-US';
+          inspRec.interimResults = false;
+          inspRec.onresult = (e) => finish(e.results[0][0].transcript);
+          inspRec.onerror = () => {};
+          inspRec.onend = () => { inspRec = null; };
+          inspRec.start();
+        } catch (e) {}
+      }
+    }
+    function snapInspectionPhoto() {
+      addCheckPhoto(inspectionId, 'shots');
+    }
+    function onInspCam(input) {
+      const f = input.files && input.files[0];
+      input.value = '';
+      const insp = inspectionBy(inspectionId);
+      if (!insp) return;
+      if (!f) { snapInspectionPhoto(); return; }
+      stashInspNote(insp);
+      if (!insp.checks.shots) insp.checks.shots = { state: '', photos: [], note: '' };
+      insp.checks.shots.photos.push({ src: URL.createObjectURL(f), caption: f.name || 'Photo' });
+      insp.checks.shots.state = insp.checks.shots.state || 'ok';
+      if (insp.status === 'todo') insp.status = 'in-progress';
+      render();
+    }
+    function takeInspectionPhoto() {
+      const input = document.getElementById('insp-cam');
+      if (input && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || '')) {
+        input.click();
+        return;
+      }
+      snapInspectionPhoto();
+    }
     function setCheck(inspId, itemId, state) {
       const insp = inspectionBy(inspId);
       if (!insp || !insp.checks[itemId]) return;
       stashInspNote(insp);
       insp.checks[itemId].state = state;
+      insp.checks[itemId].fromAi = false;
       if (insp.status === 'todo') insp.status = 'in-progress';
       render();
     }
@@ -1594,6 +1766,7 @@
       const thumbs = (p && p.gallery) ? p.gallery : [{ src: 'thumbs/home.png', caption: 'Shot' }];
       const pick = thumbs[insp.checks[itemId].photos.length % thumbs.length];
       insp.checks[itemId].photos.push({ src: pick.src, caption: pick.caption || itemId });
+      if (itemId === 'shots' && !insp.checks[itemId].state) insp.checks[itemId].state = 'ok';
       if (insp.status === 'todo') insp.status = 'in-progress';
       render();
     }
@@ -1616,6 +1789,7 @@
     function completeInspection(inspId) {
       const insp = inspectionBy(inspId);
       stashInspNote(insp);
+      applyNoteToChecks(insp);
       insp.status = 'done';
       insp.due = TODAY;
       audit.unshift({ who: 'Bryan', action: 'Finished inspection', target: insp.title, where: (propertyBy(insp.property) || {}).name, at: 'Just now' });
@@ -2005,6 +2179,20 @@
           '<p class="sub">' + p.name + ' · ' + c.name + ' · ' + fmtIsoDate(insp.due) + ' · ' + insp.who +
             ' · <span class="dmg-status ' + statusClass(insp.status) + '">' + statusLabel(insp.status) + '</span>' +
             (issues ? ' · <span class="late">' + issues + ' issues</span>' : '') + '</p>' +
+          '<div class="card" style="margin-bottom:12px;">' +
+            '<div class="row"><div class="kicker">Notes</div>' +
+              '<button class="btn btn-primary" type="button" onclick="markInspectionAllOk(\'' + insp.id + '\')">Everything is OK</button></div>' +
+            '<p class="muted" style="margin:8px 0 0;">Tap that if the walk is fine, then add a note. Or talk — if you mention a problem, the checklist marks what is OK and what is not.</p>' +
+            '<div class="dmg-tools">' +
+              '<button class="icon-btn" id="insp-mic" type="button" onclick="sayInspectionNote()">🎤 Mic</button>' +
+              '<button class="icon-btn" type="button" onclick="takeInspectionPhoto()">📷 Camera</button>' +
+              '<input id="insp-cam" type="file" accept="image/*" capture="environment" hidden onchange="onInspCam(this)">' +
+            '</div>' +
+            '<div class="listen" id="insp-listen" style="display:none;padding:0;">Listening… say what you see</div>' +
+            '<textarea id="insp-note" placeholder="Everything is OK. Lawn needs cut. Stain on the sofa…"' +
+              ' oninput="queueInspNote(\'' + insp.id + '\')">' + esc(insp.note) + '</textarea>' +
+            '<div class="ai-line">' + esc(inspAiLine(insp)) + '</div>' +
+          '</div>' +
           group('Inside', inspectCatalog.inside) +
           group('Outside', inspectCatalog.outside) +
           group('Photos', inspectCatalog.shots) +
@@ -2018,13 +2206,9 @@
                 '<div class="muted">' + esc(inv.detail) + '</div></div></div>'
             ).join('') : '<p class="empty">No inventory yet. Take photos, then run AI.</p>') +
           '</div>' +
-          '<div class="card">' +
-            '<div class="kicker">Inspection note</div>' +
-            '<textarea id="insp-note" style="margin-top:8px;">' + esc(insp.note) + '</textarea>' +
-            '<div class="btn-row">' +
-              (insp.status !== 'done' ? '<button class="btn btn-primary" type="button" onclick="completeInspection(\'' + insp.id + '\')">Mark inspection done</button>' : '') +
-              '<button class="pill" type="button" onclick="flagDamage(\'' + insp.id + '\',\'Damage from inspection\')">Open a damage</button>' +
-            '</div>' +
+          '<div class="btn-row">' +
+            (insp.status !== 'done' ? '<button class="btn btn-primary" type="button" onclick="completeInspection(\'' + insp.id + '\')">Mark inspection done</button>' : '') +
+            '<button class="pill" type="button" onclick="flagDamage(\'' + insp.id + '\',\'Damage from inspection\')">Open a damage</button>' +
           '</div>';
       },
       capture() {
