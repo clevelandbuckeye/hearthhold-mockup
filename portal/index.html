@@ -2041,7 +2041,12 @@
       const tc = document.getElementById('task-count');
       if (tc) tc.textContent = openWork;
       const fn = screens[screen] || screens.home;
-      document.getElementById('content').innerHTML = fn();
+      try {
+        document.getElementById('content').innerHTML = fn();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('content').innerHTML = '<h1 class="page">Could not load this page</h1><p class="sub">' + esc(err && err.message) + '</p>';
+      }
       bind();
       if (screen === 'map') initMap();
       if (screen === 'properties') initHubMap();
@@ -2577,6 +2582,7 @@
       '</div>';
     }
 
+    function usd(n) { return '$' + Number(n || 0).toLocaleString('en-US'); }
     function ordinal(n) {
       const d = Number(n);
       const v = d % 100;
@@ -3473,27 +3479,43 @@
           '</div>';
       },
       people() {
-        const kinds = [['all', 'Everyone'], ['owner', 'Me'], ['manager', 'Property managers'], ['tenant', 'Tenants'], ['contractor', 'Contractors'], ['pro', 'Other']];
-        const rows = people.filter(x => peopleKind === 'all' || x.kind === peopleKind);
+        const groups = [
+          { id: 'owner', label: 'You' },
+          { id: 'manager', label: 'Property managers' },
+          { id: 'tenant', label: 'Tenants' },
+          { id: 'contractor', label: 'Contractors' },
+          { id: 'pro', label: 'Other' }
+        ];
+        const shown = peopleKind === 'all' ? groups : groups.filter(g => g.id === peopleKind);
         const withLogin = people.filter(x => x.access === 'account').length;
+        function personRow(x) {
+          const props = x.props.map(id => (propertyBy(id) || {}).short || '').filter(Boolean);
+          const where = props.length > 3 ? 'All ' + props.length + ' properties' : (props.join(' · ') || 'No property');
+          return '<button type="button" class="wrow" onclick="go(\'person\',\'' + x.id + '\')">' +
+            '<span class="avatar ' + x.kind + '">' + initials(x.name) + '</span>' +
+            '<span style="flex:1;min-width:0;"><b>' + esc(x.name) + '</b>' +
+              '<span class="muted" style="display:block;">' + esc(x.role) + ' · ' + esc(where) + '</span>' +
+              '<span class="muted" style="display:block;">' + esc(x.summary) + '</span></span>' +
+            (x.access === 'account'
+              ? '<span class="tag" style="background:#eaf3ee;color:#2f6a4a;">Last in ' + fmtIsoDate(x.lastLogin) + '</span>'
+              : '<span class="tag">Record only</span>') +
+          '</button>';
+        }
         return '<h1 class="page">People</h1>' +
           '<p class="sub">' + people.length + ' people on file. ' + withLogin + ' can sign in, the rest are just records — most tenants and contractors never need an account.</p>' +
           '<div class="chips">' +
-            kinds.map(k => '<button class="pill' + (peopleKind === k[0] ? ' on' : '') + '" type="button" onclick="peopleKind=\'' + k[0] + '\';render()">' + k[1] + '</button>').join('') +
+            [['all', 'Everyone']].concat(groups.map(g => [g.id, g.label])).map(k =>
+              '<button class="pill' + (peopleKind === k[0] ? ' on' : '') + '" type="button" onclick="peopleKind=\'' + k[0] + '\';render()">' + k[1] + '</button>'
+            ).join('') +
           '</div>' +
-          '<div class="card">' + rows.map(x => {
-            const props = x.props.map(id => (propertyBy(id) || {}).short || '').filter(Boolean);
-            const where = props.length > 3 ? 'All ' + props.length + ' properties' : (props.join(' · ') || 'No property');
-            return '<button type="button" class="wrow" onclick="go(\'person\',\'' + x.id + '\')">' +
-              '<span class="avatar ' + x.kind + '">' + initials(x.name) + '</span>' +
-              '<span style="flex:1;min-width:0;"><b>' + esc(x.name) + '</b>' +
-                '<span class="muted" style="display:block;">' + esc(x.role) + ' · ' + esc(where) + '</span>' +
-                '<span class="muted" style="display:block;">' + esc(x.summary) + '</span></span>' +
-              (x.access === 'account'
-                ? '<span class="tag" style="background:#eaf3ee;color:#2f6a4a;">Last in ' + fmtIsoDate(x.lastLogin) + '</span>'
-                : '<span class="tag">Record only</span>') +
-            '</button>';
-          }).join('') + '</div>';
+          shown.map(g => {
+            const rows = people.filter(x => x.kind === g.id);
+            if (!rows.length) return '';
+            return '<div class="card" style="margin-bottom:12px;">' +
+              '<div class="kicker">' + g.label + ' · ' + rows.length + '</div>' +
+              rows.map(personRow).join('') +
+            '</div>';
+          }).join('');
       },
       person() {
         const x = personBy(personId);
