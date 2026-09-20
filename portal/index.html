@@ -70,6 +70,24 @@
     .btn-primary { background: var(--forest); color: #fff; }
     .btn-ghost { background: transparent; color: var(--forest); }
     .btn-row { display: flex; gap: 8px; margin-top: 14px; }
+    .back-bar { margin: -4px 0 10px; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 8px 14px 8px 10px;
+      margin-left: -6px;
+      border: none;
+      background: var(--mist);
+      color: var(--forest);
+      font-weight: 650;
+      font-size: 16px;
+      border-radius: 10px;
+      line-height: 1.2;
+    }
+    .back-btn:hover, .back-btn:focus-visible { background: var(--mist); }
+    .back-btn .chev { font-size: 18px; line-height: 1; }
     .warn-note { font-size: 12px; color: var(--warn); margin-top: 8px; }
 
     .app { display: none; height: 100%; }
@@ -366,7 +384,13 @@
       .overlay { padding: 8vh 12px 24px; }
       button, .pill, .nav-item { touch-action: manipulation; }
       .hub { grid-template-columns: 1fr; }
-      #hub-map, #home-map { height: 260px; }
+      #hub-map, #home-map { height: 300px; }
+      .wrow { min-height: 48px; padding: 12px 0; }
+      .wrow .thumb { width: 48px; height: 48px; }
+      .pin-card { min-height: 88px; padding: 12px; }
+      .pin-go { min-height: 44px; }
+      .map-picked .pin-card { flex-wrap: wrap; }
+      .map-picked .pin-go { width: 100%; justify-content: center; margin-left: 0; }
       .mgr-week { grid-template-columns: repeat(4, 1fr); }
       .hub-list { max-height: none; overflow: visible; }
       .board { grid-template-columns: 1fr; }
@@ -453,10 +477,17 @@
     /* Property hub */
     .hub { display: grid; grid-template-columns: 1.25fr .9fr; gap: 12px; align-items: start; }
     #home-map { height: 340px; border-radius: 12px; }
-    .pin-mark { background: none !important; border: none !important; }
+    .pin-mark {
+      background: none !important;
+      border: none !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
     .pin-dot {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 99px;
       display: flex;
       align-items: center;
@@ -466,22 +497,70 @@
       font-weight: 700;
       box-shadow: 0 2px 8px rgba(26,42,36,.28);
       border: 2px solid #fff;
+      pointer-events: none;
     }
-    .leaflet-tooltip.pin-tip {
+    .pin-mark.open .pin-dot {
+      transform: scale(1.12);
+      box-shadow: 0 0 0 3px rgba(30,77,58,.22), 0 2px 8px rgba(26,42,36,.28);
+    }
+    .leaflet-popup.pin-tip .leaflet-popup-content-wrapper {
       padding: 0;
-      border: none;
-      border-radius: 10px;
+      border-radius: 14px;
       background: #fff;
       box-shadow: 0 10px 28px rgba(26,42,36,.18);
-      white-space: normal;
     }
-    .leaflet-tooltip.pin-tip::before { display: none; }
-    .pin-card { display: flex; gap: 10px; width: 230px; padding: 8px; align-items: center; }
-    .pin-card .thumb { width: 72px; height: 56px; border-radius: 8px; }
-    .pin-card b { display: block; font-size: 13px; }
+    .leaflet-popup.pin-tip .leaflet-popup-content {
+      margin: 0;
+      width: 252px !important;
+    }
+    .leaflet-popup.pin-tip .pin-go { display: none; }
+    .pin-card {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      padding: 10px;
+      align-items: center;
+      border: none;
+      background: #fff;
+      text-align: left;
+      border-radius: 14px;
+      cursor: pointer;
+      min-height: 76px;
+    }
+    .pin-card .thumb { width: 76px; height: 60px; border-radius: 8px; }
+    .pin-card b { display: block; font-size: 14px; }
+    .pin-copy { min-width: 0; flex: 1; }
+    .pin-go {
+      display: inline-flex;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--forest);
+      flex-shrink: 0;
+    }
     .map-legend { display: flex; flex-wrap: wrap; gap: 10px 14px; font-size: 12px; color: var(--mute); margin: 10px 4px 0; }
     .map-legend span { display: inline-flex; align-items: center; gap: 6px; }
     .map-legend .pin-dot { width: 22px; height: 22px; font-size: 11px; border-width: 1px; }
+    .map-picked {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      min-height: 64px;
+      overflow: hidden;
+    }
+    .map-picked .hint { display: block; padding: 16px; }
+    .map-picked .pin-card { width: 100%; min-height: 72px; }
+    .map-picked .thumb { width: 96px; height: 72px; }
+    .map-picked .pin-go {
+      margin-left: auto;
+      margin-top: 0;
+      padding: 0 14px;
+      min-height: 44px;
+      border-radius: 8px;
+      background: var(--forest);
+      color: #fff;
+      flex-shrink: 0;
+    }
     .mgr-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 10px 0 12px; }
     .mgr-day {
       background: var(--mist);
@@ -1534,6 +1613,13 @@
         let taskWho = 'all';
         let taskPopId = null;
         let hubMap = null;
+        let hubPins = {};
+        let mapViews = {};
+        let stickyPin = null;
+        let cameFrom = null;
+        let navDepth = 0;
+        let popping = false;
+        let pendingScroll = null;
         let peopleKind = 'all';
 
     const inspectCatalog = {
@@ -1963,7 +2049,7 @@
 
     function enterApp() {
       document.getElementById('app').classList.add('on');
-      go('home');
+      go('home', undefined, { replace: true });
     }
     function toggleNav() {
       if (document.body.classList.contains('nav-open')) closeNav();
@@ -1980,35 +2066,70 @@
       if (btn) btn.setAttribute('aria-expanded', 'false');
     }
 
-    function go(name, extra) {
-      if (name === 'documents' || name === 'expenses' || name === 'governance') {
-        companyTab = name;
-        name = 'company';
-        extra = undefined;
+    function rememberMap() {
+      if (!hubMap) return;
+      const el = hubMap.getContainer();
+      if (!el) return;
+      const c = hubMap.getCenter();
+      mapViews[el.id] = {
+        mapId: el.id,
+        lat: c.lat,
+        lng: c.lng,
+        zoom: hubMap.getZoom(),
+        pin: stickyPin
+      };
+    }
+    function captureNav() {
+      rememberMap();
+      const box = document.getElementById('content');
+      return {
+        screen: screen,
+        companyId: companyId,
+        propertyId: propertyId,
+        personId: personId,
+        inspectionId: inspectionId,
+        companyTab: companyTab,
+        propertyTab: propertyTab,
+        manageTab: manageTab,
+        projectId: window._projectId || null,
+        mapViews: Object.assign({}, mapViews),
+        stickyPin: stickyPin,
+        scroll: { content: box ? box.scrollTop : 0, window: window.scrollY || 0 }
+      };
+    }
+    function screenLabel(s, st) {
+      const names = {
+        home: 'Home',
+        properties: 'Properties',
+        property: 'Property',
+        calendar: 'Calendar',
+        tasks: 'Tasks',
+        money: 'Money',
+        people: 'People',
+        person: 'People',
+        capture: 'Upload',
+        activity: 'News',
+        settings: 'Settings',
+        manage: 'Inspections',
+        inspection: 'Inspection',
+        companies: 'Entities',
+        company: 'Company',
+        inbox: 'Inbox',
+        project: 'Project',
+        map: 'Map'
+      };
+      if (s === 'property' && st && st.propertyId) {
+        const p = propertyBy(st.propertyId);
+        if (p) return p.short || p.name;
       }
-      if (name === 'damage') {
-        if (extra) damageId = extra;
-        if (screen !== 'manage' && screen !== 'inspection' && screen !== 'tasks') {
-          screen = 'tasks';
-        }
-        document.querySelectorAll('.nav-item').forEach(b => {
-          const g = b.getAttribute('data-go');
-          b.classList.toggle('on', g === 'tasks');
-        });
-        closeNav();
-        render();
-        openDamage(damageId);
-        return;
-      }
-      if (damagePopOpen) closeDamage();
-      if (taskPopId) closeTask();
-      if (name !== 'inspection') stopInspMic();
-      screen = name;
-      if (name === 'company' && extra) { companyId = extra; companyTab = 'dashboard'; }
-      if (name === 'property' && extra) { propertyId = extra; propertyTab = 'dashboard'; }
-      if (name === 'project' && extra) { propertyId = extra.property; window._projectId = extra.project; }
-      if (name === 'inspection' && extra) inspectionId = extra;
-      if (name === 'person' && extra) personId = extra;
+      return names[s] || 'Back';
+    }
+    function backBar(fallback, fallbackLabel) {
+      const label = cameFrom ? screenLabel(cameFrom.screen, cameFrom) : (fallbackLabel || 'Back');
+      const fb = fallback || 'home';
+      return '<div class="back-bar"><button type="button" class="back-btn" onclick="back(\'' + fb + '\')"><span class="chev" aria-hidden="true">←</span>' + esc(label) + '</button></div>';
+    }
+    function syncNav(name) {
       document.querySelectorAll('.nav-item').forEach(b => {
         const g = b.getAttribute('data-go');
         const on = g === name
@@ -2021,9 +2142,111 @@
           || (name === 'inspection' && g === 'tasks');
         b.classList.toggle('on', on);
       });
+    }
+    function beginNav(opts) {
+      if ((opts && opts.replace) || popping) return;
+      try { history.replaceState(captureNav(), ''); } catch (err) {}
+      cameFrom = captureNav();
+    }
+    function finishNav(opts) {
+      if (popping) return;
+      const st = captureNav();
+      st.cameFrom = cameFrom;
+      try {
+        if (opts && opts.replace) history.replaceState(st, '');
+        else {
+          navDepth++;
+          history.pushState(st, '');
+          const box = document.getElementById('content');
+          if (box) box.scrollTop = 0;
+          window.scrollTo(0, 0);
+        }
+      } catch (err) {}
+    }
+    function restoreNav(st) {
+      if (!st || !st.screen) return;
+      popping = true;
+      if (damagePopOpen) closeDamage();
+      if (taskPopId) closeTask();
+      if (st.screen !== 'inspection') stopInspMic();
+      screen = st.screen;
+      if (st.companyId) companyId = st.companyId;
+      if (st.propertyId) propertyId = st.propertyId;
+      if (st.personId) personId = st.personId;
+      if (st.inspectionId) inspectionId = st.inspectionId;
+      if (st.companyTab) companyTab = st.companyTab;
+      if (st.propertyTab) propertyTab = st.propertyTab;
+      if (st.manageTab) manageTab = st.manageTab;
+      if (st.projectId) window._projectId = st.projectId;
+      mapViews = Object.assign({}, st.mapViews || {});
+      stickyPin = st.stickyPin || null;
+      cameFrom = st.cameFrom || null;
+      pendingScroll = st.scroll || null;
+      syncNav(screen);
       closeNav();
       render();
+      popping = false;
     }
+    function back(fallback) {
+      if (navDepth > 0) {
+        history.back();
+        return;
+      }
+      go(fallback || 'home', undefined, { replace: true });
+    }
+    function applyPendingScroll() {
+      if (!pendingScroll) return;
+      const s = pendingScroll;
+      pendingScroll = null;
+      requestAnimationFrame(function () {
+        const box = document.getElementById('content');
+        if (box) box.scrollTop = s.content || 0;
+        window.scrollTo(0, s.window || 0);
+      });
+    }
+    function go(name, extra, opts) {
+      opts = opts || {};
+      if (name === 'documents' || name === 'expenses' || name === 'governance') {
+        companyTab = name;
+        name = 'company';
+        extra = undefined;
+      }
+      const same = !extra && screen === name;
+      const sameProp = name === 'property' && extra && extra === propertyId && screen === 'property';
+      const samePerson = name === 'person' && extra && extra === personId && screen === 'person';
+      if (!opts.replace && (same || sameProp || samePerson)) return;
+      beginNav(opts);
+      if (name === 'damage') {
+        if (extra) damageId = extra;
+        if (screen !== 'manage' && screen !== 'inspection' && screen !== 'tasks') {
+          screen = 'tasks';
+        }
+        syncNav('tasks');
+        closeNav();
+        render();
+        finishNav(opts);
+        openDamage(damageId);
+        return;
+      }
+      if (damagePopOpen) closeDamage();
+      if (taskPopId) closeTask();
+      if (name !== 'inspection') stopInspMic();
+      screen = name;
+      if (name === 'company' && extra) { companyId = extra; companyTab = 'dashboard'; }
+      if (name === 'property' && extra) { propertyId = extra; propertyTab = 'dashboard'; }
+      if (name === 'project' && extra) { propertyId = extra.property; window._projectId = extra.project; }
+      if (name === 'inspection' && extra) inspectionId = extra;
+      if (name === 'person' && extra) personId = extra;
+      syncNav(name);
+      closeNav();
+      render();
+      finishNav(opts);
+    }
+    window.addEventListener('popstate', function (e) {
+      if (navDepth > 0) navDepth--;
+      if (e.state && e.state.screen) restoreNav(e.state);
+      else restoreNav({ screen: 'home' });
+    });
 
     document.querySelectorAll('.nav-item').forEach(b => {
       b.onclick = () => go(b.getAttribute('data-go'));
@@ -2079,6 +2302,12 @@
     }
 
     function render() {
+      if (hubMap) {
+        rememberMap();
+        hubMap.remove();
+        hubMap = null;
+        hubPins = {};
+      }
       document.getElementById('inbox-count').textContent = inbox.length;
       const pc = document.getElementById('prop-count');
       if (pc) pc.textContent = properties.length;
@@ -2099,6 +2328,7 @@
       if (screen === 'properties') initHubMap('hub-map');
       if (screen === 'property' && (propertyTab === 'dashboard' || propertyTab === 'overview' || propertyTab === 'map')) initPropMap();
       if (screen === 'capture') setupDrop();
+      applyPendingScroll();
     }
 
     function bind() {
@@ -2952,31 +3182,115 @@
     function pinTip(p) {
       const sig = propSignal(p);
       const rent = p.tenant && p.tenant.rentAmount ? usd(p.tenant.rentAmount) + '/mo' : 'Vacant';
-      return '<div class="pin-card">' +
+      return '<button type="button" class="pin-card" onclick="openPinnedProperty(\'' + p.id + '\')">' +
         '<div class="thumb" style="background-image:url(\'' + p.image + '\')"></div>' +
-        '<div><b>' + esc(p.name) + '</b>' +
+        '<div class="pin-copy"><b>' + esc(p.name) + '</b>' +
           '<span class="muted" style="display:block;">' + esc(cityOf(p)) + '</span>' +
           '<span class="muted" style="display:block;">' + esc(sig.label) + ' · ' + esc(rent) + '</span></div>' +
-      '</div>';
+        '<span class="pin-go">View property</span>' +
+      '</button>';
+    }
+    function fillPicked(id) {
+      const el = document.getElementById('map-picked');
+      if (!el) return;
+      if (!id) {
+        el.innerHTML = '<span class="muted hint">Tap a pin to see the place. Tap the card to open it.</span>';
+        return;
+      }
+      const p = propertyBy(id);
+      if (!p) return;
+      el.innerHTML = pinTip(p);
+    }
+    function openPinnedProperty(id) {
+      stickyPin = id;
+      rememberMap();
+      go('property', id);
+    }
+    function markPinOpen(id, on) {
+      Object.keys(hubPins).forEach(function (k) {
+        const icon = hubPins[k].getElement();
+        if (icon) icon.classList.toggle('open', on && k === id);
+      });
     }
     function initHubMap(id) {
       const el = document.getElementById(id || 'hub-map');
       if (!el || typeof L === 'undefined') return;
       if (hubMap) { hubMap.remove(); hubMap = null; }
-      hubMap = L.map(el, { scrollWheelZoom: false, attributionControl: false }).setView([41.25, -81.55], 8);
+      hubPins = {};
+      hubMap = L.map(el, { scrollWheelZoom: false, attributionControl: false, tapTolerance: 18 }).setView([41.25, -81.55], 8);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(hubMap);
       properties.forEach(p => {
         const sig = propSignal(p);
         const m = L.marker([p.lat, p.lng], {
-          icon: L.divIcon({ className: 'pin-mark', html: pinMarkup(sig), iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16] })
+          icon: L.divIcon({ className: 'pin-mark', html: pinMarkup(sig), iconSize: [44, 44], iconAnchor: [22, 22], popupAnchor: [0, -22] }),
+          riseOnHover: true,
+          zIndexOffset: sig.key === 'overdue' ? 600 : sig.key === 'repair' ? 400 : 0
         }).addTo(hubMap);
-        m.bindTooltip(pinTip(p), { className: 'pin-tip', direction: 'top', offset: [0, -12], opacity: 1, sticky: true });
-        m.on('mouseover', () => highlightProp(p.id, true));
-        m.on('mouseout', () => highlightProp(p.id, false));
-        m.on('click', () => go('property', p.id));
+        m.bindPopup(pinTip(p), {
+          className: 'pin-tip',
+          closeButton: false,
+          autoPan: true,
+          autoPanPadding: [36, 36],
+          maxWidth: 280,
+          offset: [0, -4],
+          closeOnClick: true,
+          autoClose: true
+        });
+        m.off('click', m._openPopup);
+        m.on('click', function (e) {
+          L.DomEvent.stop(e);
+          stickyPin = p.id;
+          rememberMap();
+          m.openPopup();
+          setTimeout(function () {
+            if (hubPins[p.id]) hubPins[p.id].openPopup();
+          }, 0);
+        });
+        m.on('popupopen', function () {
+          markPinOpen(p.id, true);
+          highlightProp(p.id, true);
+          fillPicked(p.id);
+          const node = m.getPopup().getElement();
+          if (node) L.DomEvent.disableClickPropagation(node);
+        });
+        m.on('popupclose', function () {
+          markPinOpen(p.id, false);
+          highlightProp(p.id, false);
+          if (stickyPin === p.id) stickyPin = null;
+          if (!stickyPin) fillPicked(null);
+        });
+        m.on('mouseover', function () {
+          if (!window.matchMedia('(hover: hover)').matches) return;
+          highlightProp(p.id, true);
+          m.openPopup();
+        });
+        m.on('mouseout', function () {
+          highlightProp(p.id, false);
+          if (stickyPin === p.id) return;
+          setTimeout(function () {
+            if (stickyPin === p.id) return;
+            if (document.querySelector('.leaflet-popup.pin-tip:hover')) return;
+            m.closePopup();
+          }, 180);
+        });
+        hubPins[p.id] = m;
       });
-      hubMap.fitBounds(L.latLngBounds(properties.map(p => [p.lat, p.lng])).pad(0.22));
-      setTimeout(() => hubMap.invalidateSize(), 80);
+      hubMap.on('moveend', rememberMap);
+      const saved = mapViews[el.id];
+      if (saved && saved.lat != null) {
+        hubMap.setView([saved.lat, saved.lng], saved.zoom);
+        const pinId = saved.pin;
+        if (pinId && hubPins[pinId]) {
+          stickyPin = pinId;
+          fillPicked(pinId);
+          setTimeout(function () {
+            if (hubPins[pinId]) hubPins[pinId].openPopup();
+          }, 120);
+        }
+      } else {
+        hubMap.fitBounds(L.latLngBounds(properties.map(p => [p.lat, p.lng])).pad(0.22));
+      }
+      setTimeout(function () { if (hubMap) hubMap.invalidateSize(); }, 80);
     }
     function highlightProp(id, on) {
       const el = document.querySelector('[data-prop-row="' + id + '"]');
@@ -2989,8 +3303,8 @@
       sitemap() {
         return '<h1 class="page">Sitemap</h1><p class="sub">Eight things in the left nav. The bar at the top is always there: voice, photo, or a sentence. Everything else hangs off one of the eight.</p>' +
           '<div class="grid g-2">' +
-            card('Home', 'A map of the six Ohio places. Pins change color: red rent late, wrench if a repair still needs a decision, vacant, a calendar if something is on this week, green if it is fine. Hover for a photo. Click the pin for the place. Then needs you, coming up, and what the managers did this week.') +
-            card('Property', 'Map of northeast Ohio plus the list. Hover a pin to find the row, click either to open the place: tenant, lease, maintenance, inspections, contacts, photos, money.') +
+            card('Home', 'A map of the six Ohio places. Pins change color: red rent late, wrench if a repair still needs a decision, vacant, a calendar if something is on this week, green if it is fine. Tap a pin to hold the photo open. Tap the card to open the place. Back returns you to the same map. Then needs you, coming up, and what the managers did this week.') +
+            card('Property', 'Map of northeast Ohio plus the list. Tap a pin for a photo, tap the card or a row to open the place: tenant, lease, maintenance, inspections, contacts, photos, money.') +
             card('Calendar', 'Month or week. Appointments, site visits, inspections, showings, and move in / move out. Google Calendar can be added (simulated).') +
             card('Tasks', 'List or a board with draft, to do, in progress, review, done. Damage reports needing a decision sit in Review with cost, thumbnail, and gallery. Open one for the full note.<br><b>Inspections</b> lives here too — the walk list, checklists, and damage popups.') +
             card('Money', 'In and out for the month, rent due per property, who is late, and what is coming.') +
@@ -3036,13 +3350,14 @@
           }).join('');
         }
         return '<h1 class="page">Today</h1>' +
-          '<p class="sub">' + fmtLongDate(TODAY) + ' · Hover a pin for a photo. Click it to open the place.</p>' +
+          '<p class="sub">' + fmtLongDate(TODAY) + ' · Tap a pin for a photo. Tap the card to open the place.</p>' +
           '<div class="card" style="padding:8px 8px 12px;margin-bottom:12px;">' +
             '<div id="home-map"></div>' +
             '<div class="map-legend">' + legend.map(x => {
               const sig = { overdue: { glyph: '$', color: '#9b3a2a' }, repair: { glyph: '🔧', color: '#8b6240' }, vacant: { glyph: '○', color: '#5c6b64' }, visit: { glyph: '📅', color: '#2c5f78' }, ok: { glyph: '✓', color: '#2f6a4a' } }[x.key];
               return '<span>' + pinMarkup(sig) + x.label + '</span>';
             }).join('') + '</div>' +
+            '<div class="map-picked" id="map-picked"><span class="muted hint">Tap a pin to see the place. Tap the card to open it.</span></div>' +
           '</div>' +
           '<div class="card" style="margin-bottom:12px;">' +
             '<div class="row" style="margin-bottom:6px;"><div class="kicker">Needs you</div>' +
@@ -3154,8 +3469,8 @@
           return '<div class="card" style="margin-bottom:12px;"><div class="kicker">' + title + '</div>' +
             rows.map(it => checkRow(insp, title, it)).join('') + '</div>';
         }
-        return '<button class="pill" type="button" onclick="go(\'manage\')">← Manage Properties</button>' +
-          '<h1 class="page" style="margin-top:10px;">' + insp.title + '</h1>' +
+        return backBar('manage', 'Inspections') +
+          '<h1 class="page" style="margin-top:2px;">' + insp.title + '</h1>' +
           '<p class="sub">' + p.name + ' · ' + c.name + ' · ' + fmtIsoDate(insp.due) + ' · ' + insp.who +
             ' · <span class="dmg-status ' + statusClass(insp.status) + '">' + statusLabel(insp.status) + '</span>' +
             (issues ? ' · <span class="late">' + issues + ' issues</span>' : '') + '</p>' +
@@ -3340,7 +3655,7 @@
         } else {
           body = '<p class="empty">Nothing here.</p>';
         }
-        return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'companies\')">← Companies</button></div>' +
+        return backBar('companies', 'Entities') +
           '<div class="line-card" style="margin-bottom:8px;"><div class="thumb" style="background-image:url(\'' + (c.image || '') + '\')"></div><div><h1 class="page" style="margin:0;">' + c.name + '</h1><p class="sub" style="margin:4px 0 0;">Dashboard, filings, tenants, and records for this company.</p></div></div>' +
           '<div class="tabs">' + tabs.map(t => '<button class="pill' + (companyTab === t ? ' on' : '') + '" data-ctab="' + t + '">' + t + '</button>').join('') + '</div>' +
           '<div class="card">' + body + '</div>';
@@ -3350,7 +3665,7 @@
         const roll = properties.reduce((n, p) => n + ((p.tenant && p.tenant.rentAmount) || 0), 0);
         const openInsp = inspections.filter(i => i.status !== 'done').length;
         return '<h1 class="page">Property</h1>' +
-          '<p class="sub">Everything is in northeast Ohio. Hover a pin to find it in the list, click either one to open the place.</p>' +
+          '<p class="sub">Everything is in northeast Ohio. Tap a pin for a photo, tap the card or a row to open the place.</p>' +
           '<div class="grid g-3" style="margin-bottom:12px;">' +
             '<div class="card"><div class="kicker">Places</div><div class="big">' + properties.length + '</div>' +
               '<div class="muted">' + occupied + ' occupied · ' + (properties.length - occupied) + ' vacant</div></div>' +
@@ -3449,7 +3764,7 @@
         } else {
           body = docs.map(d => '<div class="doc-row"><div class="doc-thumb" style="background-image:url(\'' + (d.thumb || p.image) + '\')"></div><div><b>' + d.title + '</b><div class="muted">' + d.kind + '</div></div></div>').join('') || '<p class="empty">No papers on this property.</p>';
         }
-        return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'properties\')">← Properties</button></div>' +
+        return backBar('properties', 'Properties') +
           '<div class="hero" style="background-image:url(\'' + p.image + '\')"></div>' +
           '<h1 class="page">' + p.name + '</h1><p class="sub">' + c.name + ' · ' + p.address + '</p>' +
           '<div class="tabs">' + tabs.map(t => '<button class="pill' + (propertyTab === t ? ' on' : '') + '" data-ptab="' + t + '">' + t + '</button>').join('') + '</div>' +
@@ -3630,7 +3945,7 @@
         const theirTasks = allWork().filter(w => w.assignee === x.name);
         const theirEvents = allCalEvents().filter(e => e.who === x.name && e.date >= TODAY)
           .sort((a, b) => a.date.localeCompare(b.date)).slice(0, 5);
-        return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'people\')">← People</button></div>' +
+        return backBar('people', 'People') +
           '<div class="row" style="justify-content:flex-start;gap:14px;margin:12px 0 4px;">' +
             '<div class="avatar lg ' + x.kind + '">' + initials(x.name) + '</div>' +
             '<div><h1 class="page" style="margin:0;">' + esc(x.name) + '</h1>' +
@@ -3703,7 +4018,7 @@
         const p = propertyBy(propertyId);
         const pr = p.projects.find(x => x.id === window._projectId) || p.projects[0];
         const pct = pr.budget ? Math.min(100, Math.round(pr.spent / pr.budget * 100)) : 0;
-        return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'property\', \'' + p.id + '\')">← ' + p.name + '</button></div>' +
+        return backBar('property', p.short || p.name) +
           '<h1 class="page">' + pr.title + '</h1><p class="sub">Project on ' + p.name + ' · ' + pr.status + '</p>' +
           '<div class="grid g-3">' +
             '<div class="card"><div class="kicker">Budget</div><div class="stat">' + money(pr.budget, pr.currency) + '</div></div>' +
