@@ -366,7 +366,8 @@
       .overlay { padding: 8vh 12px 24px; }
       button, .pill, .nav-item { touch-action: manipulation; }
       .hub { grid-template-columns: 1fr; }
-      #hub-map { height: 300px; }
+      #hub-map, #home-map { height: 260px; }
+      .mgr-week { grid-template-columns: repeat(4, 1fr); }
       .hub-list { max-height: none; overflow: visible; }
       .board { grid-template-columns: 1fr; }
       .cal2 .cell { min-height: 64px; padding: 4px; }
@@ -451,7 +452,49 @@
 
     /* Property hub */
     .hub { display: grid; grid-template-columns: 1.25fr .9fr; gap: 12px; align-items: start; }
-    #hub-map { height: 460px; border-radius: 12px; }
+    #home-map { height: 340px; border-radius: 12px; }
+    .pin-mark { background: none !important; border: none !important; }
+    .pin-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 99px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(26,42,36,.28);
+      border: 2px solid #fff;
+    }
+    .leaflet-tooltip.pin-tip {
+      padding: 0;
+      border: none;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(26,42,36,.18);
+      white-space: normal;
+    }
+    .leaflet-tooltip.pin-tip::before { display: none; }
+    .pin-card { display: flex; gap: 10px; width: 230px; padding: 8px; align-items: center; }
+    .pin-card .thumb { width: 72px; height: 56px; border-radius: 8px; }
+    .pin-card b { display: block; font-size: 13px; }
+    .map-legend { display: flex; flex-wrap: wrap; gap: 10px 14px; font-size: 12px; color: var(--mute); margin: 10px 4px 0; }
+    .map-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .map-legend .pin-dot { width: 22px; height: 22px; font-size: 11px; border-width: 1px; }
+    .mgr-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 10px 0 12px; }
+    .mgr-day {
+      background: var(--mist);
+      border-radius: 8px;
+      padding: 6px 5px;
+      min-height: 72px;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+    .mgr-day.now { background: #eaf3ee; box-shadow: inset 0 0 0 1px var(--forest-2); }
+    .mgr-day .d { display: block; font-size: 10px; font-weight: 700; color: var(--mute); margin-bottom: 4px; }
+    .mgr-act { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .mgr-act:last-child { border-bottom: none; }
     .hub-list { display: flex; flex-direction: column; gap: 8px; max-height: 460px; overflow-y: auto; padding-right: 2px; }
     .p-card { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; padding: 10px; }
     .p-card.hot { outline: 2px solid var(--forest-2); }
@@ -1406,8 +1449,11 @@
     const activity = [
       { who: 'Bryan', what: 'Uploaded deed — Tremont duplex', when: '2h ago', company: 'Hearthhold LLC', property: 'tremont' },
       { who: 'Bryan', what: 'Voice capture — gas bill', when: 'Yesterday', company: 'Inbox' },
+      { who: 'Denise Kolar', what: 'Called Marcus about September rent', when: 'Yesterday', company: 'Hearthhold LLC', property: 'lakewood' },
+      { who: 'Denise Kolar', what: 'Walked Lakewood up unit with Gwen after coat one', when: 'Yesterday', company: 'Hearthhold LLC', property: 'lakewood' },
       { who: 'Denise Kolar', what: 'Filed kitchen receipt to Tremont', when: 'Sep 8', company: 'Hearthhold LLC', property: 'tremont' },
-      { who: 'Linda Shaw', what: 'Viewed EIN letter', when: 'Sep 7', company: 'Hearthhold LLC' },
+      { who: 'Ray Vasquez', what: 'Started two quotes on the Akron rear roof', when: 'Yesterday', company: 'Cuyahoga Rentals LLC', property: 'akron' },
+      { who: 'Ray Vasquez', what: 'Walked the Canton storefront before today\'s inspection', when: 'This morning', company: 'Cuyahoga Rentals LLC', property: 'canton' },
       { who: 'Ray Vasquez', what: 'Opened Canton lease for renewal', when: 'Sep 4', company: 'Cuyahoga Rentals LLC', property: 'canton' },
       { who: 'Bryan', what: 'Paused east fence', when: 'Jul 2', company: 'Northstar Trust', property: 'ohio' }
     ];
@@ -2049,7 +2095,8 @@
       }
       bind();
       if (screen === 'map') initMap();
-      if (screen === 'properties') initHubMap();
+      if (screen === 'home') initHubMap('home-map');
+      if (screen === 'properties') initHubMap('hub-map');
       if (screen === 'property' && (propertyTab === 'dashboard' || propertyTab === 'overview' || propertyTab === 'map')) initPropMap();
       if (screen === 'capture') setupDrop();
     }
@@ -2881,20 +2928,54 @@
       }
       return '<div class="calw">' + head + body + '</div>';
     }
-    function initHubMap() {
-      const el = document.getElementById('hub-map');
+    function weekDates(iso) {
+      const start = weekStart(iso || TODAY);
+      const days = [];
+      for (let i = 0; i < 7; i++) days.push(shiftDays(start, i));
+      return days;
+    }
+    function propSignal(p) {
+      const late = p.tenant && p.tenant.status !== 'vacant' && p.tenant.onTime === false;
+      const repair = damages.some(d => d.property === p.id && (d.status === 'pending-approval' || d.status === 'needs-quote'));
+      const vacant = p.tenant && p.tenant.status === 'vacant';
+      const week = weekDates(TODAY);
+      const visit = calEvents.some(e => e.property === p.id && week.indexOf(e.date) !== -1);
+      if (late) return { key: 'overdue', label: 'Rent late', glyph: '$', color: '#9b3a2a' };
+      if (repair) return { key: 'repair', label: 'Repair needs a decision', glyph: '🔧', color: '#8b6240' };
+      if (vacant) return { key: 'vacant', label: 'Vacant', glyph: '○', color: '#5c6b64' };
+      if (visit) return { key: 'visit', label: 'Visit this week', glyph: '📅', color: '#2c5f78' };
+      return { key: 'ok', label: 'All good', glyph: '✓', color: '#2f6a4a' };
+    }
+    function pinMarkup(sig) {
+      return '<div class="pin-dot" style="background:' + sig.color + '">' + sig.glyph + '</div>';
+    }
+    function pinTip(p) {
+      const sig = propSignal(p);
+      const rent = p.tenant && p.tenant.rentAmount ? usd(p.tenant.rentAmount) + '/mo' : 'Vacant';
+      return '<div class="pin-card">' +
+        '<div class="thumb" style="background-image:url(\'' + p.image + '\')"></div>' +
+        '<div><b>' + esc(p.name) + '</b>' +
+          '<span class="muted" style="display:block;">' + esc(cityOf(p)) + '</span>' +
+          '<span class="muted" style="display:block;">' + esc(sig.label) + ' · ' + esc(rent) + '</span></div>' +
+      '</div>';
+    }
+    function initHubMap(id) {
+      const el = document.getElementById(id || 'hub-map');
       if (!el || typeof L === 'undefined') return;
       if (hubMap) { hubMap.remove(); hubMap = null; }
-      hubMap = L.map(el, { scrollWheelZoom: false }).setView([41.25, -81.55], 8);
+      hubMap = L.map(el, { scrollWheelZoom: false, attributionControl: false }).setView([41.25, -81.55], 8);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(hubMap);
       properties.forEach(p => {
-        const m = L.marker([p.lat, p.lng]).addTo(hubMap);
-        m.bindTooltip('<b>' + p.name + '</b><br>' + cityOf(p) + ' · ' + tenantLabel(p));
+        const sig = propSignal(p);
+        const m = L.marker([p.lat, p.lng], {
+          icon: L.divIcon({ className: 'pin-mark', html: pinMarkup(sig), iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16] })
+        }).addTo(hubMap);
+        m.bindTooltip(pinTip(p), { className: 'pin-tip', direction: 'top', offset: [0, -12], opacity: 1, sticky: true });
         m.on('mouseover', () => highlightProp(p.id, true));
         m.on('mouseout', () => highlightProp(p.id, false));
         m.on('click', () => go('property', p.id));
       });
-      hubMap.fitBounds(L.latLngBounds(properties.map(p => [p.lat, p.lng])).pad(0.2));
+      hubMap.fitBounds(L.latLngBounds(properties.map(p => [p.lat, p.lng])).pad(0.22));
       setTimeout(() => hubMap.invalidateSize(), 80);
     }
     function highlightProp(id, on) {
@@ -2908,7 +2989,7 @@
       sitemap() {
         return '<h1 class="page">Sitemap</h1><p class="sub">Eight things in the left nav. The bar at the top is always there: voice, photo, or a sentence. Everything else hangs off one of the eight.</p>' +
           '<div class="grid g-2">' +
-            card('Home', 'Click Hearthhold at the top of the nav. Money in this month, what needs you, what is next, and the six properties. Nothing else.') +
+            card('Home', 'A map of the six Ohio places. Pins change color: red rent late, wrench if a repair still needs a decision, vacant, a calendar if something is on this week, green if it is fine. Hover for a photo. Click the pin for the place. Then needs you, coming up, and what the managers did this week.') +
             card('Property', 'Map of northeast Ohio plus the list. Hover a pin to find the row, click either to open the place: tenant, lease, maintenance, inspections, contacts, photos, money.') +
             card('Calendar', 'Month or week. Appointments, site visits, inspections, showings, and move in / move out. Google Calendar can be added (simulated).') +
             card('Tasks', 'List or a board with draft, to do, in progress, review, done. Damage reports needing a decision sit in Review with cost, thumbnail, and gallery. Open one for the full note.<br><b>Inspections</b> lives here too — the walk list, checklists, and damage popups.') +
@@ -2918,50 +2999,75 @@
           '</div>';
       },
       home() {
-        const ym = TODAY.slice(0, 7);
-        const sum = a => a.reduce((n, x) => n + x.amount, 0);
-        const inNow = ledger.filter(l => l.kind === 'income' && l.date.slice(0, 7) === ym && l.status === 'received');
-        const outNow = ledger.filter(l => l.kind === 'expense' && l.date.slice(0, 7) === ym && l.status === 'paid');
-        const lateRent = ledger.filter(l => l.kind === 'income' && l.status === 'late');
         const work = allWork();
         const needsApproval = work.filter(w => w.approval && (w.raw.status === 'pending-approval' || w.raw.status === 'needs-quote'));
         const overdue = work.filter(w => !w.approval && w.status !== 'done' && w.due && w.due < TODAY);
         const attention = needsApproval.concat(overdue);
         const soon = allCalEvents()
-          .filter(e => e.date >= TODAY)
+          .filter(e => e.date >= TODAY && e.who !== 'Google Calendar')
           .sort((a, b) => a.date.localeCompare(b.date) || timeKey(a.time) - timeKey(b.time))
           .slice(0, 6);
+        const week = weekDates(TODAY);
+        const managers = people.filter(x => x.kind === 'manager');
+        const legend = [
+          { key: 'overdue', label: 'Rent late' },
+          { key: 'repair', label: 'Repair to approve' },
+          { key: 'vacant', label: 'Vacant' },
+          { key: 'visit', label: 'Visit this week' },
+          { key: 'ok', label: 'All good' }
+        ];
+        function mgrWeek(mgr) {
+          return '<div class="mgr-week">' + week.map(iso => {
+            const evs = calEvents.filter(e => e.date === iso && e.who === mgr.name);
+            const bits = evs.map(e => {
+              const pr = e.property ? propertyBy(e.property) : null;
+              return esc(e.title.replace(/ —.*$/, '')) + (pr ? ' · ' + esc(pr.short || pr.name) : '');
+            }).join('<br>');
+            return '<div class="mgr-day' + (iso === TODAY ? ' now' : '') + '"><span class="d">' + dowShort(iso) + ' ' + (+iso.slice(8)) + '</span>' +
+              (bits || '<span class="muted">—</span>') + '</div>';
+          }).join('') + '</div>';
+        }
+        function mgrFeed(mgr) {
+          const rows = activity.filter(a => a.who === mgr.name).slice(0, 3);
+          if (!rows.length) return '<p class="empty">No recent notes.</p>';
+          return rows.map(a => {
+            const pr = a.property ? propertyBy(a.property) : null;
+            return '<div class="mgr-act"><b>' + esc(a.what) + '</b><div class="muted">' + esc(a.when) + (pr ? ' · ' + esc(pr.name) : '') + '</div></div>';
+          }).join('');
+        }
         return '<h1 class="page">Today</h1>' +
-          '<p class="sub">' + fmtLongDate(TODAY) + ' · ' + properties.length + ' places in northeast Ohio. Use the bar at the top to talk, shoot, or type.</p>' +
-          '<div class="grid g-3" style="margin-bottom:12px;">' +
-            '<div class="card click" data-go="money"><div class="kicker">Money in this month</div>' +
-              '<div class="big">' + usd(sum(inNow)) + '</div>' +
-              '<div class="muted">' + usd(sum(outNow)) + ' out · ' +
-              (lateRent.length ? '<span class="late">' + lateRent.length + ' rent late</span>' : 'nothing late') + '</div></div>' +
-            '<div class="card click" data-go="tasks"><div class="kicker">Needs you</div>' +
-              '<div class="big">' + attention.length + '</div>' +
-              '<div class="muted">' + needsApproval.length + ' to decide · ' + overdue.length + ' overdue</div></div>' +
-            '<div class="card click" data-go="calendar"><div class="kicker">Next up</div>' +
-              '<div class="big">' + (soon[0] ? fmtIsoDate(soon[0].date) : '—') + '</div>' +
-              '<div class="muted">' + (soon[0] ? esc(soon[0].title) : 'Nothing booked') + '</div></div>' +
+          '<p class="sub">' + fmtLongDate(TODAY) + ' · Hover a pin for a photo. Click it to open the place.</p>' +
+          '<div class="card" style="padding:8px 8px 12px;margin-bottom:12px;">' +
+            '<div id="home-map"></div>' +
+            '<div class="map-legend">' + legend.map(x => {
+              const sig = { overdue: { glyph: '$', color: '#9b3a2a' }, repair: { glyph: '🔧', color: '#8b6240' }, vacant: { glyph: '○', color: '#5c6b64' }, visit: { glyph: '📅', color: '#2c5f78' }, ok: { glyph: '✓', color: '#2f6a4a' } }[x.key];
+              return '<span>' + pinMarkup(sig) + x.label + '</span>';
+            }).join('') + '</div>' +
           '</div>' +
-          '<div class="grid g-main" style="margin-bottom:12px;">' +
-            '<div class="card">' +
-              '<div class="row" style="margin-bottom:6px;"><div class="kicker">Needs you</div>' +
-                '<button class="pill" type="button" onclick="go(\'tasks\')">All tasks</button></div>' +
-              (attention.length ? attention.map(workRow).join('') : '<p class="empty">Nothing waiting on you.</p>') +
-            '</div>' +
-            '<div class="card">' +
-              '<div class="row" style="margin-bottom:6px;"><div class="kicker">Coming up</div>' +
-                '<button class="pill" type="button" onclick="go(\'calendar\')">Calendar</button></div>' +
-              (soon.length ? soon.map(evRow).join('') : '<p class="empty">Nothing booked.</p>') +
-            '</div>' +
+          '<div class="card" style="margin-bottom:12px;">' +
+            '<div class="row" style="margin-bottom:6px;"><div class="kicker">Needs you</div>' +
+              '<button class="pill" type="button" onclick="go(\'tasks\')">All tasks</button></div>' +
+            (attention.length ? attention.map(workRow).join('') : '<p class="empty">Nothing waiting on you.</p>') +
           '</div>' +
-          '<div class="card">' +
-            '<div class="row" style="margin-bottom:10px;"><div class="kicker">Properties</div>' +
-              '<button class="pill" type="button" onclick="go(\'properties\')">Map and list</button></div>' +
-            '<div class="list">' + properties.map(propCard).join('') + '</div>' +
-          '</div>';
+          '<div class="card" style="margin-bottom:12px;">' +
+            '<div class="row" style="margin-bottom:6px;"><div class="kicker">Coming up</div>' +
+              '<button class="pill" type="button" onclick="go(\'calendar\')">Calendar</button></div>' +
+            (soon.length ? soon.map(evRow).join('') : '<p class="empty">Nothing booked.</p>') +
+          '</div>' +
+          '<div class="row" style="margin:4px 0 8px;"><div class="kicker">Property managers this week</div>' +
+            '<button class="pill" type="button" onclick="go(\'people\')">People</button></div>' +
+          '<div class="grid g-2">' + managers.map(mgr =>
+            '<div class="card">' +
+              '<button type="button" class="wrow" style="border:none;padding:0 0 8px;" onclick="go(\'person\',\'' + mgr.id + '\')">' +
+                '<span class="avatar manager">' + initials(mgr.name) + '</span>' +
+                '<span style="flex:1;min-width:0;"><b>' + esc(mgr.name) + '</b>' +
+                  '<span class="muted" style="display:block;">' + esc(mgr.summary) + '</span></span>' +
+                '<span class="tag" style="background:#eaf3ee;color:#2f6a4a;">Last in ' + fmtIsoDate(mgr.lastLogin) + '</span>' +
+              '</button>' +
+              '<div class="kicker">Schedule</div>' + mgrWeek(mgr) +
+              '<div class="kicker">Activity</div>' + mgrFeed(mgr) +
+            '</div>'
+          ).join('') + '</div>';
       },
       manage() {
         const tabs = [
