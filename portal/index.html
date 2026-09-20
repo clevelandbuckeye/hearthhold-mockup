@@ -84,9 +84,30 @@
       gap: 2px;
       overflow: auto;
     }
-    .side .brand { color: #cfe3d6; padding: 0 8px 12px; }
+    .side .brand { color: #cfe3d6; padding: 0; display: block; }
     .side h2 { font-size: 18px; color: #fff; padding: 0 8px 14px; font-weight: 700; }
     .side-head { display: block; }
+    .brand-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      padding: 0 8px 14px;
+      cursor: pointer;
+    }
+    .brand-btn .brand-sub { display: block; font-size: 18px; color: #fff; font-weight: 700; margin-top: 4px; }
+    .brand-btn:hover .brand-sub { color: #cfe3d6; }
+    .nav-more { margin-top: auto; padding-top: 18px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+    .nav-more button {
+      border: none;
+      background: transparent;
+      color: #8fae9c;
+      font-size: 11px;
+      padding: 2px 0;
+      cursor: pointer;
+    }
+    .nav-more button:hover { color: #fff; text-decoration: underline; }
     .nav-close, .nav-scrim { display: none; }
     .nav-label { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #9cb8a8; padding: 12px 8px 4px; }
     .nav-item {
@@ -344,6 +365,16 @@
       .card:has(table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
       .overlay { padding: 8vh 12px 24px; }
       button, .pill, .nav-item { touch-action: manipulation; }
+      .hub { grid-template-columns: 1fr; }
+      #hub-map { height: 300px; }
+      .hub-list { max-height: none; overflow: visible; }
+      .board { grid-template-columns: 1fr; }
+      .cal2 .cell { min-height: 64px; padding: 4px; }
+      .cal2 .ev b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .cal2 .ev span { display: none; }
+      .calw { grid-template-columns: 1fr; }
+      .calw .cell { min-height: 0; }
+      .nav-more { padding-bottom: 12px; }
     }
 
     .fb-btn {
@@ -417,6 +448,115 @@
     .late { color: var(--bad); }
     .ok { color: var(--forest-2); }
     .line-card { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; }
+
+    /* Property hub */
+    .hub { display: grid; grid-template-columns: 1.25fr .9fr; gap: 12px; align-items: start; }
+    #hub-map { height: 460px; border-radius: 12px; }
+    .hub-list { display: flex; flex-direction: column; gap: 8px; max-height: 460px; overflow-y: auto; padding-right: 2px; }
+    .p-card { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; padding: 10px; }
+    .p-card.hot { outline: 2px solid var(--forest-2); }
+    .p-rent { font-weight: 700; font-size: 13px; white-space: nowrap; }
+
+    /* Calendar */
+    .cal2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--line); border-radius: 12px; overflow: hidden; }
+    .cal2 .dow2 { background: var(--mist); font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--mute); padding: 6px 8px; text-align: center; }
+    .calw { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--line); border-radius: 12px; overflow: hidden; }
+    .calw .dow2 { background: var(--mist); font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--mute); padding: 6px 8px; text-align: center; }
+    .cal2 .cell, .calw .cell { background: #fff; min-height: 96px; padding: 6px; display: flex; flex-direction: column; gap: 3px; }
+    .calw .cell { min-height: 220px; }
+    .cal2 .cell.off { background: #fafbfa; }
+    .cal2 .cell.now, .calw .cell.now { background: #f2f8f4; box-shadow: inset 0 0 0 2px var(--forest-2); }
+    .cal2 .num, .calw .num { font-size: 11px; font-weight: 700; color: var(--mute); }
+    .cal2 .cell.now .num, .calw .cell.now .num { color: var(--forest); }
+    .ev {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: none;
+      border-left: 3px solid var(--mute);
+      background: var(--mist);
+      border-radius: 4px;
+      padding: 3px 5px;
+      font-size: 11px;
+      line-height: 1.3;
+      cursor: pointer;
+    }
+    .ev:hover { filter: brightness(.97); }
+    .ev b { display: block; font-weight: 600; }
+    .ev span { color: var(--mute); font-size: 10px; }
+    .ev.inspection { border-left-color: var(--forest-2); background: #eaf3ee; }
+    .ev.showing { border-left-color: var(--river); background: #e9f0f4; }
+    .ev.visit { border-left-color: var(--earth); background: #f4efe9; }
+    .ev.appointment { border-left-color: var(--mute); background: var(--mist); }
+    .ev.move-in { border-left-color: #3f8f5e; background: #ecf5ef; }
+    .ev.move-out { border-left-color: #b98130; background: #f7f1e6; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--mute); margin-bottom: 12px; }
+    .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 4px; vertical-align: -1px; }
+
+    /* Tasks */
+    .board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; align-items: start; }
+    .col { background: var(--mist); border-radius: 12px; padding: 10px; min-height: 120px; }
+    .col-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .col-head b { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--forest-2); }
+    .col-head span { font-size: 11px; color: var(--mute); }
+    .tcard { display: block; background: #fff; border-radius: 10px; padding: 9px; margin-bottom: 8px; text-align: left; width: 100%; border: 1px solid var(--line); cursor: pointer; }
+    .tcard:hover { border-color: var(--forest-2); }
+    .tcard b { font-size: 13px; display: block; line-height: 1.35; }
+    .tcard .tmeta { display: block; font-size: 11px; color: var(--mute); margin-top: 5px; }
+    .tcard .tthumb { display: block; width: 100%; height: 64px; border-radius: 6px; background: #e7ebe8 center/cover; margin-bottom: 8px; }
+    .tcard .tcost { font-weight: 700; font-size: 12px; color: var(--ink); }
+    .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; border-radius: 99px; padding: 2px 7px; background: var(--mist); color: var(--mute); }
+    .tag.approval { background: #f7f1e6; color: var(--warn); }
+    .trow { display: flex; gap: 12px; align-items: center; padding: 10px; text-align: left; width: 100%; }
+    .task-pop { width: min(560px, calc(100vw - 24px)); }
+    .task-pop textarea { min-height: 80px; resize: vertical; }
+    .note-item { border-left: 2px solid var(--line); padding: 4px 0 4px 10px; margin-bottom: 8px; font-size: 13px; }
+    .note-item .muted { display: block; }
+
+    /* Money */
+    .big { font-size: 24px; font-weight: 700; }
+    .money-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .money-row:last-child { border-bottom: none; }
+    .amt { font-weight: 700; white-space: nowrap; }
+    .amt.in { color: var(--forest-2); }
+    .amt.out { color: var(--bad); }
+
+    /* People */
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 99px;
+      background: var(--forest-2);
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .avatar.tenant { background: var(--river); }
+    .avatar.contractor { background: var(--earth); }
+    .avatar.manager { background: var(--forest); }
+    .avatar.pro { background: var(--mute); }
+    .avatar.lg { width: 72px; height: 72px; font-size: 24px; }
+
+    #task-pop { z-index: 48; }
+    .wrow {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+    }
+    .wrow:last-child { border-bottom: none; }
+    .wrow:hover b { color: var(--forest-2); }
+    .wrow .thumb { width: 40px; height: 40px; border-radius: 8px; }
     .inbox-card {
       display: grid;
       grid-template-columns: 148px 1fr;
@@ -510,28 +650,27 @@
   <div class="app on" id="app">
     <aside class="side" id="side">
       <div class="side-head">
-        <div>
-          <div class="brand">Hearthhold</div>
-          <h2>Portfolio</h2>
-        </div>
+        <button class="brand-btn" type="button" onclick="go('home')">
+          <span class="brand">Hearthhold</span>
+          <span class="brand-sub">Home</span>
+        </button>
         <button class="nav-close" type="button" onclick="closeNav()" aria-label="Close menu">Close</button>
       </div>
-      <button class="nav-item" data-go="home">Home</button>
-      <button class="nav-item" data-go="capture">Capture</button>
-      <button class="nav-item" data-go="inbox">Inbox <span class="badge" id="inbox-count">3</span></button>
-      <button class="nav-item" data-go="activity">Activity</button>
-      <div class="nav-label">Portfolio</div>
-      <button class="nav-item" data-go="companies">Companies</button>
-      <button class="nav-item" data-go="properties">Properties</button>
-      <button class="nav-item" data-go="map">Map</button>
-      <div class="nav-label">Work</div>
-      <button class="nav-item" data-go="manage">Manage <span class="badge" id="manage-count">0</span></button>
+      <button class="nav-item" data-go="properties">Property <span class="badge" id="prop-count">0</span></button>
       <button class="nav-item" data-go="calendar">Calendar</button>
-      <button class="nav-item" data-go="tasks">Tasks</button>
-      <div class="nav-label">System</div>
-      <button class="nav-item" data-go="audit">Audit</button>
+      <button class="nav-item" data-go="tasks">Tasks <span class="badge" id="task-count">0</span></button>
+      <button class="nav-item" data-go="money">Money</button>
+      <button class="nav-item" data-go="people">People</button>
+      <button class="nav-item" data-go="capture">Upload <span class="badge" id="inbox-count">3</span></button>
+      <button class="nav-item" data-go="activity">News</button>
       <button class="nav-item" data-go="settings">Settings</button>
-      <button class="nav-item" data-go="sitemap">Sitemap</button>
+      <div class="nav-more">
+        <button type="button" data-go="manage">Inspections</button>
+        <button type="button" data-go="inbox">Inbox</button>
+        <button type="button" data-go="companies">Entities</button>
+        <button type="button" data-go="audit">Audit</button>
+        <button type="button" data-go="sitemap">Sitemap</button>
+      </div>
     </aside>
 
     <div class="main">
@@ -550,6 +689,7 @@
   <div class="nav-scrim" id="nav-scrim" onclick="closeNav()"></div>
   <div class="overlay" id="overlay" onclick="if(event.target.id==='overlay') hideOverlay()"></div>
   <div class="overlay" id="damage-pop" onclick="if(event.target.id==='damage-pop') closeDamage()"></div>
+  <div class="overlay" id="task-pop" onclick="if(event.target.id==='task-pop') closeTask()"></div>
 
   <button class="fb-btn no-shot" type="button" onclick="openFeedback()">Feedback</button>
   <div class="fb-panel no-shot" id="fb-panel">
@@ -591,44 +731,45 @@
         ein: '12-3456789',
         jurisdiction: 'Ohio',
         formed: 'Mar 2024',
-        tax: { year: '2025', status: 'Open', accountant: 'cpa@example.com', method: 'Cash' },
+        tax: { year: '2025', status: 'Open', accountant: 'linda@shawcpa.com', method: 'Cash' },
         registration: { agent: 'Northwest Registered Agent', number: 'OH-449201', goodStanding: 'Yes' },
         users: [
           { name: 'Bryan', email: 'you@hearthhold.app', role: 'Owner' },
-          { name: 'Ana', email: 'ana@hearthhold.app', role: 'Editor' },
-          { name: 'CPA', email: 'cpa@example.com', role: 'Tax only' }
+          { name: 'Denise Kolar', email: 'denise@hearthhold.app', role: 'Editor' },
+          { name: 'Linda Shaw', email: 'linda@shawcpa.com', role: 'Tax only' }
         ],
         image: 'thumbs/laureles.png',
         reminders: [
           { title: 'Ohio annual report', due: '2027-04-15', done: false },
-          { title: 'Franchise tax', due: '2027-05-01', done: false }
+          { title: 'Cuyahoga County tax bill', due: '2027-01-20', done: false }
         ],
         tasks: [
-          { text: 'Send OA to accountant', done: true, due: '2026-09-08', property: null },
+          { text: 'Send operating agreement to the CPA', done: true, due: '2026-09-08', property: null },
           { text: 'Update registered agent address', done: false, due: '2026-09-20', property: null }
         ],
         compliance: [
           { title: 'Ohio annual report', due: '2027-04-15', kind: 'Corporate filing' },
-          { title: 'Franchise tax', due: '2027-05-01', kind: 'Tax' }
+          { title: 'Cuyahoga County tax bill', due: '2027-01-20', kind: 'Tax' }
         ]
       },
       {
         id: 'andes',
-        name: 'Andes Holdings LLC',
-        legal: 'Andes Holdings LLC',
+        name: 'Cuyahoga Rentals LLC',
+        legal: 'Cuyahoga Rentals LLC',
         ein: '98-7654321',
-        jurisdiction: 'Wyoming',
+        jurisdiction: 'Ohio',
         formed: 'Jan 2025',
-        tax: { year: '2025', status: 'Filed', accountant: 'cpa@example.com', method: 'Cash' },
-        registration: { agent: 'Wyoming Registered Agent', number: 'WY-2025-441', goodStanding: 'Yes' },
+        tax: { year: '2025', status: 'Filed', accountant: 'linda@shawcpa.com', method: 'Cash' },
+        registration: { agent: 'Northwest Registered Agent', number: 'OH-512877', goodStanding: 'Yes' },
         users: [
-          { name: 'Bryan', email: 'you@hearthhold.app', role: 'Owner' }
+          { name: 'Bryan', email: 'you@hearthhold.app', role: 'Owner' },
+          { name: 'Ray Vasquez', email: 'ray@cuyrentals.com', role: 'Editor' }
         ],
         image: 'thumbs/andes.png',
-        reminders: [{ title: 'Wyoming annual report', due: '2027-01-02', done: false }],
+        reminders: [{ title: 'Ohio annual report', due: '2027-01-02', done: false }],
         tasks: [{ text: 'Collect member consents', done: false, due: '2026-09-30', property: null }],
         compliance: [
-          { title: 'Wyoming annual report', due: '2027-01-02', kind: 'Corporate filing' }
+          { title: 'Ohio annual report', due: '2027-01-02', kind: 'Corporate filing' }
         ]
       },
       {
@@ -638,11 +779,11 @@
         ein: '—',
         jurisdiction: 'Ohio',
         formed: '2019',
-        tax: { year: '2025', status: 'Grantor', accountant: 'cpa@example.com', method: 'Grantor' },
+        tax: { year: '2025', status: 'Grantor', accountant: 'linda@shawcpa.com', method: 'Grantor' },
         registration: { agent: 'You', number: 'Trust instrument', goodStanding: 'Yes' },
         users: [
           { name: 'Bryan', email: 'you@hearthhold.app', role: 'Trustee' },
-          { name: 'Ana', email: 'ana@hearthhold.app', role: 'View' }
+          { name: 'Denise Kolar', email: 'denise@hearthhold.app', role: 'View' }
         ],
         image: 'thumbs/ohio.png',
         reminders: [{ title: 'Review beneficiaries', due: '2026-12-01', done: false }],
@@ -655,66 +796,121 @@
 
     const properties = [
       {
-        id: 'laureles',
+        id: 'tremont',
         company: 'hearthhold',
-        name: 'Laureles apartment',
-        address: 'Cra. 70 #34-20, Laureles, Medellín',
-        lat: 6.249, lng: -75.589,
+        name: 'Tremont duplex',
+        short: 'Tremont',
+        address: '2418 W 11th St, Cleveland, OH 44113',
+        lat: 41.4795, lng: -81.6954,
         image: 'thumbs/laureles.png',
         projects: [
-          { id: 'kitchen', title: 'Kitchen remodel', status: 'active', budget: 12000000, spent: 3200000, currency: 'COP' },
-          { id: 'roof', title: 'Roof leak', status: 'active', budget: 800000, spent: 420000, currency: 'COP' }
+          { id: 'kitchen', title: 'Unit 2 kitchen refresh', status: 'active', budget: 14000, spent: 3800, currency: 'USD' },
+          { id: 'porch', title: 'Front porch rail', status: 'active', budget: 1800, spent: 420, currency: 'USD' }
         ],
         contacts: [
-          { name: 'Camila Restrepo', role: 'Tenant', phone: '+57 310 555 0144', email: 'camila@example.com' },
-          { name: 'Edificio admin', role: 'Building', phone: '+57 604 444 1200', email: 'admin@laureles.co' },
-          { name: 'Sura', role: 'Insurance', phone: '', email: 'claims@sura.com' },
-          { name: 'ClimaMed', role: 'HVAC', phone: '+57 304 220 1180', email: 'service@climamed.co' },
-          { name: 'Marisol Cárdenas', role: 'Inspector', phone: '+57 300 441 2290', email: 'marisol@inspect.co' }
+          { name: 'Dana Whitfield', role: 'Tenant', phone: '216-555-0144', email: 'dana@example.com' },
+          { name: 'Denise Kolar', role: 'Property manager', phone: '216-555-0188', email: 'denise@hearthhold.app' },
+          { name: 'Tomas Reyna', role: 'Handyman', phone: '216-555-0311', email: 'tomas@reynahandy.com' },
+          { name: 'Ohio Heat & Air', role: 'HVAC', phone: '216-555-0422', email: 'service@ohioheatair.com' }
         ],
-        tenant: { name: 'Camila Restrepo', unit: 'Apt 501', status: 'active', onTime: true, rent: '2.200.000 COP' },
+        tenant: { name: 'Dana Whitfield', unit: 'Unit 1', status: 'active', onTime: true, rent: '$1,450 / mo', rentAmount: 1450, dueDay: 1, paidThrough: 'Sep 2026' },
         leases: [
-          { tenant: 'Camila Restrepo', start: '2025-03-01', end: '2027-03-01', status: 'active', signed: true },
+          { tenant: 'Dana Whitfield', start: '2025-03-01', end: '2027-03-01', status: 'active', signed: true },
           { tenant: 'Prior tenant', start: '2023-03-01', end: '2025-02-28', status: 'ended', signed: true }
         ],
         payments: [
-          { month: 'Aug 2026', amount: '2.200.000 COP', onTime: true },
-          { month: 'Jul 2026', amount: '2.200.000 COP', onTime: true },
-          { month: 'Jun 2026', amount: '2.200.000 COP', onTime: true },
-          { month: 'May 2026', amount: '2.200.000 COP', onTime: true }
+          { month: 'Sep 2026', amount: '$1,450', onTime: true },
+          { month: 'Aug 2026', amount: '$1,450', onTime: true },
+          { month: 'Jul 2026', amount: '$1,450', onTime: true },
+          { month: 'Jun 2026', amount: '$1,450', onTime: true }
         ],
         gallery: [
-          { src: 'thumbs/laureles.png', caption: 'Facade' },
-          { src: 'thumbs/laureles-kitchen.png', caption: 'Kitchen' },
-          { src: 'thumbs/laureles-balcony.png', caption: 'Balcony' },
-          { src: 'thumbs/laureles-gate.png', caption: 'Building gate' }
+          { src: 'thumbs/laureles.png', caption: 'Front of the duplex' },
+          { src: 'thumbs/laureles-kitchen.png', caption: 'Unit 1 kitchen' },
+          { src: 'thumbs/laureles-balcony.png', caption: 'Back porch' },
+          { src: 'thumbs/laureles-gate.png', caption: 'Side drive' }
         ],
         maintenance: [
-          { title: 'Minisplit / HVAC service', cadence: 'Every 6 months', last: '2026-04-12', next: '2026-10-15', who: 'ClimaMed', notes: 'Clean coils, replace filters, check condensate drain' },
-          { title: 'Building gate and motor', cadence: 'Quarterly', last: '2026-06-18', next: '2026-09-20', who: 'Portones López', notes: 'Lubricate track, test auto-close, log cycle count' },
-          { title: 'Pest control', cadence: 'Quarterly', last: '2026-07-02', next: '2026-10-02', who: 'Control Total', notes: 'Kitchen, balcony, and common hall' },
-          { title: 'Fire extinguisher check', cadence: 'Yearly', last: '2026-01-10', next: '2027-01-10', who: 'Edificio admin', notes: 'Hallway and kitchen' }
+          { title: 'Furnace and filter', cadence: 'Every 6 months', last: '2026-04-12', next: '2026-10-02', who: 'Ohio Heat & Air', notes: 'Both units. Swap filters, check the flue' },
+          { title: 'Gutters and downspouts', cadence: 'Twice a year', last: '2026-04-22', next: '2026-10-20', who: 'Tomas Reyna', notes: 'Maple seed clogs the back corner' },
+          { title: 'Porch and steps', cadence: 'Quarterly', last: '2026-06-18', next: '2026-09-20', who: 'Tomas Reyna', notes: 'Rail was loose in June' },
+          { title: 'Backflow and hose bibs', cadence: 'Yearly', last: '2026-01-10', next: '2027-01-10', who: 'Tomas Reyna', notes: 'Before the first freeze' }
         ],
         inspection: {
           last: {
             date: '2026-06-04',
-            who: 'Marisol Cárdenas · property inspector',
-            notes: 'Walked the unit with Camila. Gate motor is noisy on close. Small rust on the balcony railing. HVAC drain was clear. No leaks in the wet wall.',
-            done: ['Replaced the hallway smoke detector battery', 'Photographed the balcony railing for paint', 'Logged gate motor hours with the building'],
+            who: 'Denise Kolar · property manager',
+            notes: 'Walked both units with Dana. Porch rail is loose. Small rust on the back stair. Furnace drain was clear. No leaks in the wet wall.',
+            done: ['Replaced the hallway smoke detector battery', 'Photographed the porch rail for paint', 'Logged the furnace hours'],
             photos: [
-              { src: 'thumbs/laureles-balcony.png', caption: 'Balcony railing rust' },
-              { src: 'thumbs/laureles-gate.png', caption: 'Gate motor on close' },
+              { src: 'thumbs/laureles-balcony.png', caption: 'Back stair rust' },
+              { src: 'thumbs/laureles-gate.png', caption: 'Side drive' },
               { src: 'thumbs/laureles-kitchen.png', caption: 'Kitchen after detector swap' }
             ]
           },
           next: {
             date: '2026-12-04',
-            who: 'Marisol Cárdenas',
-            tasks: ['Full unit walkthrough with the tenant', 'Re-check balcony railing after paint', 'Confirm the October HVAC filter change', 'Test building gate auto-reverse'],
+            who: 'Denise Kolar',
+            tasks: ['Full walkthrough with the tenant', 'Re-check the porch rail after paint', 'Confirm the October filter change', 'Test the back door lock'],
             photos: [
-              { caption: 'Balcony railing after paint' },
-              { caption: 'Gate auto-reverse test' },
-              { caption: 'HVAC filter sticker' }
+              { caption: 'Porch rail after paint' },
+              { caption: 'Back door lock' },
+              { caption: 'Furnace filter sticker' }
+            ]
+          }
+        }
+      },
+      {
+        id: 'lakewood',
+        company: 'hearthhold',
+        name: 'Lakewood two-family',
+        short: 'Lakewood',
+        address: '1387 Mars Ave, Lakewood, OH 44107',
+        lat: 41.4820, lng: -81.7982,
+        image: 'thumbs/home.png',
+        projects: [
+          { id: 'paint', title: 'Up unit paint', status: 'active', budget: 2600, spent: 900, currency: 'USD' }
+        ],
+        contacts: [
+          { name: 'Marcus Ellery', role: 'Tenant', phone: '216-555-0170', email: 'marcus@example.com' },
+          { name: 'Denise Kolar', role: 'Property manager', phone: '216-555-0188', email: 'denise@hearthhold.app' },
+          { name: 'Gwen Pyle', role: 'Painter', phone: '440-555-0290', email: 'gwen@pylepainting.com' }
+        ],
+        tenant: { name: 'Marcus Ellery', unit: 'Down unit', status: 'active', onTime: false, rent: '$1,250 / mo', rentAmount: 1250, dueDay: 1, paidThrough: 'Aug 2026' },
+        leases: [
+          { tenant: 'Marcus Ellery', start: '2024-09-01', end: '2026-10-31', status: 'expiring', signed: true }
+        ],
+        payments: [
+          { month: 'Sep 2026', amount: '$1,250', onTime: false },
+          { month: 'Aug 2026', amount: '$1,250', onTime: true },
+          { month: 'Jul 2026', amount: '$1,250', onTime: false }
+        ],
+        gallery: [
+          { src: 'thumbs/home.png', caption: 'Front' },
+          { src: 'thumbs/laureles-kitchen.png', caption: 'Up unit kitchen' }
+        ],
+        maintenance: [
+          { title: 'Furnace and filter', cadence: 'Every 6 months', last: '2026-03-30', next: '2026-09-30', who: 'Ohio Heat & Air', notes: 'Two furnaces, one per unit' },
+          { title: 'Driveway and walk', cadence: 'Yearly', last: '2026-05-14', next: '2027-05-14', who: 'Tomas Reyna', notes: 'Seal after the freeze thaw' },
+          { title: 'Up unit turnover paint', cadence: 'On vacancy', last: '2026-08-20', next: '2026-09-18', who: 'Gwen Pyle', notes: 'Two coats, ceilings included' }
+        ],
+        inspection: {
+          last: {
+            date: '2026-08-20',
+            who: 'Denise Kolar · property manager',
+            notes: 'Up unit is empty and ready for paint. Down unit is fine but rent ran late twice this summer. Basement drain was slow.',
+            done: ['Snaked the basement drain', 'Measured the up unit for paint', 'Sent Marcus a payment plan note'],
+            photos: [
+              { src: 'thumbs/home.png', caption: 'Up unit empty' }
+            ]
+          },
+          next: {
+            date: '2026-09-18',
+            who: 'Denise Kolar',
+            tasks: ['Pre-move-in walk on the up unit', 'Check the paint work', 'Confirm the smoke and CO alarms', 'Photograph the basement drain'],
+            photos: [
+              { caption: 'Up unit after paint' },
+              { caption: 'Alarms tested' }
             ]
           }
         }
@@ -722,18 +918,20 @@
       {
         id: 'ohio',
         company: 'northstar',
-        name: 'Ohio house',
-        address: 'Rural Licking County, Ohio',
-        lat: 40.06, lng: -82.41,
+        name: 'Chardon farmhouse',
+        short: 'Chardon',
+        address: '11480 Aquilla Rd, Chardon, OH 44024',
+        lat: 41.5786, lng: -81.2018,
         image: 'thumbs/ohio.png',
         projects: [
           { id: 'fence', title: 'East fence', status: 'paused', budget: 2400, spent: 380, currency: 'USD' }
         ],
         contacts: [
-          { name: 'Rural Mutual', role: 'Insurance', phone: '740-555-0199', email: 'ohio@ruralmutual.com' },
-          { name: 'Hank Miller', role: 'Caretaker', phone: '740-555-0110', email: 'hank@example.com' }
+          { name: 'Hank Miller', role: 'Caretaker', phone: '440-555-0110', email: 'hank@example.com' },
+          { name: 'Rural Mutual', role: 'Insurance', phone: '440-555-0199', email: 'ohio@ruralmutual.com' },
+          { name: 'Denise Kolar', role: 'Property manager', phone: '216-555-0188', email: 'denise@hearthhold.app' }
         ],
-        tenant: { name: 'Owner occupied', unit: 'House', status: 'vacant', onTime: true, rent: '—' },
+        tenant: { name: 'Vacant', unit: 'House', status: 'vacant', onTime: true, rent: '$1,900 / mo asking', rentAmount: 0, dueDay: 1, paidThrough: '—' },
         leases: [],
         payments: [],
         gallery: [
@@ -743,7 +941,7 @@
           { src: 'thumbs/home.png', caption: 'Yard / east line' }
         ],
         maintenance: [
-          { title: 'Furnace, filter, and CO test', cadence: 'Seasonal (spring / fall)', last: '2026-04-20', next: '2026-10-05', who: 'Licking County Heat', notes: 'Fall heat check before first freeze' },
+          { title: 'Furnace, filter, and CO test', cadence: 'Seasonal (spring / fall)', last: '2026-04-20', next: '2026-10-05', who: 'Ohio Heat & Air', notes: 'Fall heat check before the first freeze' },
           { title: 'Drive gate and latch', cadence: 'Quarterly', last: '2026-06-01', next: '2026-09-08', who: 'Hank Miller', notes: 'Hinge pin was loose in June' },
           { title: 'Gutters and downspouts', cadence: 'Twice a year', last: '2026-04-22', next: '2026-10-20', who: 'Hank Miller', notes: 'East side clogs with maple seed' },
           { title: 'Well pressure and septic lid', cadence: 'Yearly', last: '2026-03-11', next: '2027-03-11', who: 'Hank Miller', notes: 'Visual only unless pressure drops' }
@@ -772,47 +970,154 @@
         }
       },
       {
-        id: 'envigado',
+        id: 'akron',
         company: 'andes',
-        name: 'Envigado retail',
-        address: 'Calle 37 Sur, Envigado, Antioquia',
-        lat: 6.169, lng: -75.586,
+        name: 'Highland Square fourplex',
+        short: 'Akron',
+        address: '820 W Market St, Akron, OH 44303',
+        lat: 41.0814, lng: -81.5419,
         image: 'thumbs/andes.png',
         projects: [
-          { id: 'fitout', title: 'Tenant fit-out', status: 'active', budget: 45000000, spent: 0, currency: 'COP' }
+          { id: 'roof', title: 'Rear roof section', status: 'active', budget: 9500, spent: 0, currency: 'USD' }
         ],
         contacts: [
-          { name: 'Taller Norte SAS', role: 'Tenant', phone: '+57 312 400 8890', email: 'ops@tallernorte.co' },
-          { name: 'Notaría 18', role: 'Notary', phone: '', email: '' },
-          { name: 'Andrés Mejía', role: 'Property manager', phone: '+57 311 800 2211', email: 'andres@andeshold.co' },
-          { name: 'Frío Andino', role: 'HVAC', phone: '+57 304 900 4411', email: 'ops@frioandino.co' }
+          { name: 'Priya Raman', role: 'Tenant', phone: '330-555-0288', email: 'priya@example.com' },
+          { name: 'Ray Vasquez', role: 'Property manager', phone: '330-555-0211', email: 'ray@cuyrentals.com' },
+          { name: 'Ohio Heat & Air', role: 'HVAC', phone: '216-555-0422', email: 'service@ohioheatair.com' }
         ],
-        tenant: { name: 'Taller Norte SAS', unit: 'Retail', status: 'expiring', onTime: false, rent: '8.400.000 COP' },
+        tenant: { name: 'Priya Raman', unit: 'Apt 3', status: 'active', onTime: true, rent: '$1,100 / mo', rentAmount: 1100, dueDay: 1, paidThrough: 'Sep 2026' },
         leases: [
-          { tenant: 'Taller Norte SAS', start: '2025-01-01', end: '2026-12-31', status: 'expiring', signed: true },
-          { title: 'Renewal 2027', tenant: 'Taller Norte SAS', start: '2027-01-01', end: '2028-12-31', status: 'to-sign', signed: false }
+          { tenant: 'Priya Raman', start: '2025-06-01', end: '2027-05-31', status: 'active', signed: true }
         ],
         payments: [
-          { month: 'Aug 2026', amount: '8.400.000 COP', onTime: false },
-          { month: 'Jul 2026', amount: '8.400.000 COP', onTime: true },
-          { month: 'Jun 2026', amount: '8.400.000 COP', onTime: false }
+          { month: 'Sep 2026', amount: '$1,100', onTime: true },
+          { month: 'Aug 2026', amount: '$1,100', onTime: true },
+          { month: 'Jul 2026', amount: '$1,100', onTime: true }
         ],
         gallery: [
-          { src: 'thumbs/andes.png', caption: 'Storefront' },
-          { src: 'thumbs/envigado-door.png', caption: 'Roll-up door' },
-          { src: 'thumbs/envigado-hvac.png', caption: 'Rooftop HVAC' }
+          { src: 'thumbs/andes.png', caption: 'Building' },
+          { src: 'thumbs/envigado-hvac.png', caption: 'Rooftop units' }
         ],
         maintenance: [
-          { title: 'Rooftop HVAC / condenser', cadence: 'Every 6 months', last: '2026-03-20', next: '2026-09-18', who: 'Frío Andino', notes: 'Service before open. Clean fins, check refrigerant' },
-          { title: 'Roll-up gate and motor', cadence: 'Quarterly', last: '2026-05-30', next: '2026-08-30', who: 'Portones del Sur', notes: 'Spring tension and safety edge' },
-          { title: 'Parking lot lights', cadence: 'Quarterly', last: '2026-07-12', next: '2026-10-12', who: 'Eléctrico Ríos', notes: 'Lamps and photocell' },
-          { title: 'Roof drains', cadence: 'Twice a year', last: '2026-04-02', next: '2026-10-15', who: 'Roof tech', notes: 'Before the October rains' }
+          { title: 'Rooftop condenser service', cadence: 'Every 6 months', last: '2026-03-20', next: '2026-09-18', who: 'Ohio Heat & Air', notes: 'Clean fins, check refrigerant' },
+          { title: 'Hall lights and stair treads', cadence: 'Quarterly', last: '2026-07-12', next: '2026-10-12', who: 'Tomas Reyna', notes: 'Second floor tread is worn' },
+          { title: 'Gutters', cadence: 'Twice a year', last: '2026-04-02', next: '2026-10-15', who: 'Tomas Reyna', notes: 'Rear section pools water' }
         ],
         inspection: {
           last: {
             date: '2026-07-09',
-            who: 'Andrés Mejía · property manager',
-            notes: 'Tenant fit-out in progress. Roll-up door safety edge failed. Condenser fins were dirty. One parking lamp out at the back. Fire exit was blocked by boxes — tenant moved them.',
+            who: 'Ray Vasquez · property manager',
+            notes: 'Three of four units walked. Rooftop condenser fins were packed with dust. Rear roof section is soft near the downspout. One hall light out.',
+            done: ['Scheduled the coil clean', 'Got a roof quote started', 'Replaced the hall bulb'],
+            photos: [
+              { src: 'thumbs/envigado-hvac.png', caption: 'Dirty condenser fins' }
+            ]
+          },
+          next: {
+            date: '2026-09-22',
+            who: 'Ray Vasquez',
+            tasks: ['Walk all four units', 'Re-check the rear roof after the quote', 'Test hall and stair lighting', 'Photograph the gutters'],
+            photos: [
+              { caption: 'Rear roof after quote' },
+              { caption: 'Hall lighting' }
+            ]
+          }
+        }
+      },
+      {
+        id: 'kent',
+        company: 'northstar',
+        name: 'Kent student rental',
+        short: 'Kent',
+        address: '331 E Summit St, Kent, OH 44240',
+        lat: 41.1537, lng: -81.3480,
+        image: 'thumbs/laureles-balcony.png',
+        projects: [],
+        contacts: [
+          { name: 'Rosa Kinsey', role: 'Tenant (lead)', phone: '330-555-0455', email: 'rosa@example.com' },
+          { name: 'Hank Miller', role: 'Caretaker', phone: '440-555-0110', email: 'hank@example.com' },
+          { name: 'Tomas Reyna', role: 'Handyman', phone: '216-555-0311', email: 'tomas@reynahandy.com' }
+        ],
+        tenant: { name: 'Rosa Kinsey +3', unit: 'Whole house', status: 'active', onTime: true, rent: '$2,300 / mo', rentAmount: 2300, dueDay: 1, paidThrough: 'Sep 2026' },
+        leases: [
+          { tenant: 'Rosa Kinsey +3', start: '2026-08-15', end: '2027-07-31', status: 'active', signed: true }
+        ],
+        payments: [
+          { month: 'Sep 2026', amount: '$2,300', onTime: true },
+          { month: 'Aug 2026', amount: '$2,300', onTime: true }
+        ],
+        gallery: [
+          { src: 'thumbs/laureles-balcony.png', caption: 'Porch' },
+          { src: 'thumbs/home.png', caption: 'Back yard' }
+        ],
+        maintenance: [
+          { title: 'Furnace and filter', cadence: 'Every 6 months', last: '2026-04-05', next: '2026-10-08', who: 'Ohio Heat & Air', notes: 'Old unit, watch the igniter' },
+          { title: 'Smoke and CO alarms', cadence: 'Twice a year', last: '2026-08-14', next: '2027-02-14', who: 'Hank Miller', notes: 'Four bedrooms plus hall' },
+          { title: 'Yard and leaves', cadence: 'Weekly in fall', last: '2026-09-08', next: '2026-09-15', who: 'Hank Miller', notes: 'Curb pickup on Tuesday' }
+        ],
+        inspection: {
+          last: {
+            date: '2026-08-14',
+            who: 'Hank Miller · caretaker',
+            notes: 'Move-in walk with all four students. Everything was clean. Back screen door does not latch. Bedroom B window sticks.',
+            done: ['Tested every alarm', 'Photographed each room', 'Logged the screen door for repair'],
+            photos: [
+              { src: 'thumbs/laureles-balcony.png', caption: 'Porch and screen door' }
+            ]
+          },
+          next: {
+            date: '2026-12-15',
+            who: 'Hank Miller',
+            tasks: ['Mid-year walk', 'Check the screen door latch', 'Bedroom B window', 'Furnace filter'],
+            photos: [
+              { caption: 'Screen door latch' },
+              { caption: 'Bedroom B window' }
+            ]
+          }
+        }
+      },
+      {
+        id: 'canton',
+        company: 'andes',
+        name: 'Canton storefront',
+        short: 'Canton',
+        address: '412 Cleveland Ave NW, Canton, OH 44702',
+        lat: 40.7989, lng: -81.3784,
+        image: 'thumbs/envigado-door.png',
+        projects: [
+          { id: 'fitout', title: 'Tenant fit-out', status: 'active', budget: 38000, spent: 0, currency: 'USD' }
+        ],
+        contacts: [
+          { name: 'Bellview Coffee LLC', role: 'Tenant', phone: '330-555-0890', email: 'nate@bellviewcoffee.com' },
+          { name: 'Ray Vasquez', role: 'Property manager', phone: '330-555-0211', email: 'ray@cuyrentals.com' },
+          { name: 'Ohio Heat & Air', role: 'HVAC', phone: '216-555-0422', email: 'service@ohioheatair.com' }
+        ],
+        tenant: { name: 'Bellview Coffee LLC', unit: 'Retail', status: 'expiring', onTime: true, rent: '$2,850 / mo', rentAmount: 2850, dueDay: 5, paidThrough: 'Sep 2026' },
+        leases: [
+          { tenant: 'Bellview Coffee LLC', start: '2025-01-01', end: '2026-12-31', status: 'expiring', signed: true },
+          { title: 'Renewal 2027', tenant: 'Bellview Coffee LLC', start: '2027-01-01', end: '2028-12-31', status: 'to-sign', signed: false }
+        ],
+        payments: [
+          { month: 'Sep 2026', amount: '$2,850', onTime: true },
+          { month: 'Aug 2026', amount: '$2,850', onTime: false },
+          { month: 'Jul 2026', amount: '$2,850', onTime: true }
+        ],
+        gallery: [
+          { src: 'thumbs/envigado-door.png', caption: 'Roll-up door' },
+          { src: 'thumbs/andes.png', caption: 'Storefront' },
+          { src: 'thumbs/envigado-hvac.png', caption: 'Rooftop HVAC' }
+        ],
+        maintenance: [
+          { title: 'Rooftop HVAC / condenser', cadence: 'Every 6 months', last: '2026-03-20', next: '2026-09-21', who: 'Ohio Heat & Air', notes: 'Service before open. Clean fins, check refrigerant' },
+          { title: 'Roll-up gate and motor', cadence: 'Quarterly', last: '2026-05-30', next: '2026-08-30', who: 'Stark Door', notes: 'Spring tension and safety edge' },
+          { title: 'Parking lot lights', cadence: 'Quarterly', last: '2026-07-12', next: '2026-10-12', who: 'Reyna Handyman', notes: 'Lamps and photocell' },
+          { title: 'Roof drains', cadence: 'Twice a year', last: '2026-04-02', next: '2026-10-09', who: 'Roof tech', notes: 'Before the October rains' }
+        ],
+        inspection: {
+          last: {
+            date: '2026-07-09',
+            who: 'Ray Vasquez · property manager',
+            notes: 'Tenant fit-out in progress. Roll-up door safety edge failed. Condenser fins were dirty. One parking lamp out at the back. Fire exit was blocked by boxes and the tenant moved them.',
             done: ['Tagged the roll-up door until the spring is replaced', 'Scheduled the HVAC coil clean', 'Told the tenant to keep the fire exit clear'],
             photos: [
               { src: 'thumbs/envigado-door.png', caption: 'Safety edge failed' },
@@ -821,7 +1126,7 @@
           },
           next: {
             date: '2026-10-09',
-            who: 'Andrés Mejía',
+            who: 'Ray Vasquez',
             tasks: ['Re-test the roll-up gate after motor service', 'Walk the fit-out against the lease drawings', 'Check roof drains before October rains', 'Photograph parking lights at night'],
             photos: [
               { caption: 'Roll-up after motor service' },
@@ -833,42 +1138,209 @@
       }
     ];
 
+    const people = [
+      {
+        id: 'bryan', name: 'Bryan Cleveland', role: 'Owner', kind: 'owner',
+        props: ['tremont', 'lakewood', 'ohio', 'akron', 'kent', 'canton'],
+        phone: '216-555-0101', email: 'you@hearthhold.app',
+        summary: 'Owns the portfolio. Approves damage quotes and signs leases.',
+        access: 'account', accessRole: 'Owner — full access', lastLogin: '2026-09-11'
+      },
+      {
+        id: 'denise', name: 'Denise Kolar', role: 'Property manager', kind: 'manager',
+        props: ['tremont', 'lakewood', 'ohio'],
+        phone: '216-555-0188', email: 'denise@hearthhold.app',
+        summary: 'Runs the Cleveland side. Inspections, showings, and tenant calls.',
+        access: 'account', accessRole: 'Manager — edit', lastLogin: '2026-09-10'
+      },
+      {
+        id: 'ray', name: 'Ray Vasquez', role: 'Property manager', kind: 'manager',
+        props: ['akron', 'canton'],
+        phone: '330-555-0211', email: 'ray@cuyrentals.com',
+        summary: 'Akron and Canton. Handles the commercial tenant and vendor scheduling.',
+        access: 'account', accessRole: 'Manager — edit', lastLogin: '2026-09-09'
+      },
+      {
+        id: 'hank', name: 'Hank Miller', role: 'Caretaker', kind: 'contractor',
+        props: ['ohio', 'kent'],
+        phone: '440-555-0110', email: 'hank@example.com',
+        summary: 'Lives ten minutes from Chardon. Gate, gutters, yard, and small repairs.',
+        access: 'record', accessRole: 'No login — record only', lastLogin: ''
+      },
+      {
+        id: 'dana', name: 'Dana Whitfield', role: 'Tenant', kind: 'tenant',
+        props: ['tremont'],
+        phone: '216-555-0144', email: 'dana@example.com',
+        summary: 'Tremont unit 1 since March 2025. Pays on time every month.',
+        access: 'record', accessRole: 'No login — record only', lastLogin: ''
+      },
+      {
+        id: 'marcus', name: 'Marcus Ellery', role: 'Tenant', kind: 'tenant',
+        props: ['lakewood'],
+        phone: '216-555-0170', email: 'marcus@example.com',
+        summary: 'Lakewood down unit. September rent is late, on a payment plan.',
+        access: 'record', accessRole: 'No login — record only', lastLogin: ''
+      },
+      {
+        id: 'priya', name: 'Priya Raman', role: 'Tenant', kind: 'tenant',
+        props: ['akron'],
+        phone: '330-555-0288', email: 'priya@example.com',
+        summary: 'Akron apt 3. Uses the tenant portal to pay and send photos.',
+        access: 'account', accessRole: 'Tenant portal — view and pay', lastLogin: '2026-09-07'
+      },
+      {
+        id: 'rosa', name: 'Rosa Kinsey', role: 'Tenant (lead)', kind: 'tenant',
+        props: ['kent'],
+        phone: '330-555-0455', email: 'rosa@example.com',
+        summary: 'Lead on the Kent house for four students. One rent payment covers all.',
+        access: 'record', accessRole: 'No login — record only', lastLogin: ''
+      },
+      {
+        id: 'nate', name: 'Nate Brill', role: 'Commercial tenant', kind: 'tenant',
+        props: ['canton'],
+        phone: '330-555-0890', email: 'nate@bellviewcoffee.com',
+        summary: 'Bellview Coffee LLC. Lease ends Dec 2026, renewal is out for signature.',
+        access: 'account', accessRole: 'Tenant portal — view', lastLogin: '2026-08-29'
+      },
+      {
+        id: 'tomas', name: 'Tomas Reyna', role: 'Handyman', kind: 'contractor',
+        props: ['tremont', 'akron', 'canton'],
+        phone: '216-555-0311', email: 'tomas@reynahandy.com',
+        summary: 'Reyna Handyman. Porch rails, gutters, lights, and general repair quotes.',
+        access: 'record', accessRole: 'No login — record only', lastLogin: ''
+      },
+      {
+        id: 'gwen', name: 'Gwen Pyle', role: 'Painter', kind: 'contractor',
+        props: ['lakewood'],
+        phone: '440-555-0290', email: 'gwen@pylepainting.com',
+        summary: 'Pyle Painting. Turnover paint and exterior trim.',
+        access: 'record', accessRole: 'No login — record only', lastLogin: ''
+      },
+      {
+        id: 'sam', name: 'Sam Ortiz', role: 'HVAC tech', kind: 'contractor',
+        props: ['tremont', 'lakewood', 'ohio', 'akron', 'canton'],
+        phone: '216-555-0422', email: 'service@ohioheatair.com',
+        summary: 'Ohio Heat & Air. Seasonal furnace checks and rooftop condenser service.',
+        access: 'record', accessRole: 'No login — record only', lastLogin: ''
+      },
+      {
+        id: 'linda', name: 'Linda Shaw', role: 'Accountant', kind: 'pro',
+        props: [],
+        phone: '216-555-0777', email: 'linda@shawcpa.com',
+        summary: 'CPA for all three entities. Reads documents, never edits property records.',
+        access: 'account', accessRole: 'Tax only — read documents', lastLogin: '2026-09-05'
+      }
+    ];
+
     const extraTasks = [
-      { text: 'Confirm Camila September rent', done: false, due: '2026-09-12', company: 'hearthhold', property: 'laureles' },
-      { text: 'Roof contractor callback', done: false, due: '2026-09-05', company: 'hearthhold', property: 'laureles' },
-      { text: 'Fit-out permit', done: false, due: '2026-09-22', company: 'andes', property: 'envigado' },
-      { text: 'Fence quote', done: false, due: '2026-10-01', company: 'northstar', property: 'ohio' },
-      { text: 'Collected August rent', done: true, due: '2026-09-01', completed: '2026-09-02', company: 'hearthhold', property: 'laureles' },
-      { text: 'Lubricated roll-up door', done: true, due: '2026-08-28', completed: '2026-08-28', company: 'andes', property: 'envigado' },
-      { text: 'Replaced hallway smoke detector battery', done: true, due: '2026-06-04', completed: '2026-06-04', company: 'hearthhold', property: 'laureles' },
+      { text: 'Confirm Dana September rent', done: false, due: '2026-09-12', company: 'hearthhold', property: 'tremont' },
+      { text: 'Roof contractor callback — Akron', done: false, due: '2026-09-05', company: 'andes', property: 'akron' },
+      { text: 'Fit-out permit — Canton', done: false, due: '2026-09-22', company: 'andes', property: 'canton' },
+      { text: 'Fence quote — Chardon', done: false, due: '2026-10-01', company: 'northstar', property: 'ohio' },
+      { text: 'Collected August rent', done: true, due: '2026-09-01', completed: '2026-09-02', company: 'hearthhold', property: 'tremont' },
+      { text: 'Lubricated roll-up door', done: true, due: '2026-08-28', completed: '2026-08-28', company: 'andes', property: 'canton' },
+      { text: 'Replaced hallway smoke detector battery', done: true, due: '2026-06-04', completed: '2026-06-04', company: 'hearthhold', property: 'tremont' },
       { text: 'Spring furnace filter swap', done: true, due: '2026-05-16', completed: '2026-05-16', company: 'northstar', property: 'ohio' },
-      { text: 'Pest control — kitchen and balcony', done: true, due: '2026-07-02', completed: '2026-07-02', company: 'hearthhold', property: 'laureles' }
+      { text: 'Move-in walk with the Kent students', done: true, due: '2026-08-14', completed: '2026-08-14', company: 'northstar', property: 'kent' }
+    ];
+
+    let workTasks = [
+      {
+        id: 't-rail', title: 'Fix the Tremont porch rail', status: 'in-progress',
+        assignee: 'Tomas Reyna', property: 'tremont', due: '2026-09-15', cost: 420,
+        detail: 'Rail pulled loose from the post. Tomas is setting a new anchor and repainting the section.',
+        photos: [{ src: 'thumbs/laureles-balcony.png', caption: 'Loose rail' }],
+        notes: [{ who: 'Denise Kolar', when: 'Sep 9', text: 'Tomas can do it Tuesday morning.' }]
+      },
+      {
+        id: 't-paint', title: 'Lakewood up unit paint', status: 'review',
+        assignee: 'Gwen Pyle', property: 'lakewood', due: '2026-09-17', cost: 900,
+        detail: 'Two coats plus ceilings before the Sep 18 pre-move-in walk. Gwen sent photos for sign-off.',
+        photos: [{ src: 'thumbs/home.png', caption: 'Up unit after coat one' }],
+        notes: [{ who: 'Gwen Pyle', when: 'Sep 10', text: 'First coat done. Second coat Friday.' }]
+      },
+      {
+        id: 't-rent', title: 'Marcus rent — September', status: 'in-progress',
+        assignee: 'Denise Kolar', property: 'lakewood', due: '2026-09-12', cost: 0,
+        detail: 'Rent is 11 days late. Payment plan is half on the 15th and half on the 30th.',
+        photos: [],
+        notes: [{ who: 'Denise Kolar', when: 'Sep 10', text: 'He answered. Half on the 15th, rest on the 30th.' }]
+      },
+      {
+        id: 't-roof', title: 'Akron rear roof quote', status: 'todo',
+        assignee: 'Ray Vasquez', property: 'akron', due: '2026-09-19', cost: 0,
+        detail: 'Rear section is soft near the downspout. Need two quotes before the owner decides.',
+        photos: [{ src: 'thumbs/andes.png', caption: 'Rear roof line' }],
+        notes: []
+      },
+      {
+        id: 't-lease', title: 'Bellview Coffee renewal signature', status: 'review',
+        assignee: 'Ray Vasquez', property: 'canton', due: '2026-09-25', cost: 0,
+        detail: 'Renewal for 2027 to 2028 is out for signature. Rent steps to $2,975 in year two.',
+        photos: [],
+        notes: [{ who: 'Ray Vasquez', when: 'Sep 8', text: 'Nate wants one change to the signage clause.' }]
+      },
+      {
+        id: 't-show', title: 'Chardon showings — three this month', status: 'todo',
+        assignee: 'Denise Kolar', property: 'ohio', due: '2026-09-24', cost: 0,
+        detail: 'Asking $1,900. Two showings booked, one more to confirm. House is clean and staged.',
+        photos: [{ src: 'thumbs/ohio.png', caption: 'Front of the house' }],
+        notes: []
+      },
+      {
+        id: 't-leaves', title: 'Kent leaf pickup schedule', status: 'draft',
+        assignee: 'Hank Miller', property: 'kent', due: '2026-09-29', cost: 60,
+        detail: 'Weekly through November. City pickup is Tuesday, bags at the curb Monday night.',
+        photos: [],
+        notes: []
+      },
+      {
+        id: 't-filters', title: 'Fall furnace filters — all six', status: 'todo',
+        assignee: 'Sam Ortiz', property: null, due: '2026-10-05', cost: 540,
+        detail: 'One visit per building. Filter sizes are on file from spring.',
+        photos: [],
+        notes: []
+      },
+      {
+        id: 't-alarms', title: 'Kent alarm test', status: 'done',
+        assignee: 'Hank Miller', property: 'kent', due: '2026-08-14', cost: 0,
+        detail: 'Every smoke and CO alarm tested at move-in. All four bedrooms plus the hall.',
+        photos: [{ src: 'thumbs/laureles-balcony.png', caption: 'Move-in walk' }],
+        notes: [{ who: 'Hank Miller', when: 'Aug 14', text: 'All good. Swapped two batteries.' }]
+      },
+      {
+        id: 't-coil', title: 'Canton rooftop coil clean', status: 'done',
+        assignee: 'Sam Ortiz', property: 'canton', due: '2026-09-08', cost: 310,
+        detail: 'Fins were packed with dust. Cleaned and refrigerant checked before the tenant opens.',
+        photos: [{ src: 'thumbs/envigado-hvac.png', caption: 'Condenser after clean' }],
+        notes: []
+      }
     ];
 
     let inbox = [
       {
         id: 'u1',
         title: 'Scan — receipt',
-        guess: 'Hardware store · 186.000 COP · Laureles kitchen',
+        guess: 'Hardware store · $186 · Tremont kitchen',
         file: 'scan.jpg',
         thumb: 'thumbs/laureles-kitchen.png',
         kind: 'photo',
         company: 'hearthhold',
-        property: 'laureles',
+        property: 'tremont',
         type: 'document',
-        text: 'Hardware store receipt, 186.000 COP. Looks like kitchen materials for Laureles.'
+        text: 'Hardware store receipt, $186. Looks like kitchen materials for the Tremont duplex.'
       },
       {
         id: 'u2',
         title: 'Voice note',
-        guess: 'Pay the gas bill twenty-four thousand · utilities · Hearthhold',
+        guess: 'Pay the gas bill ninety-four dollars · utilities · Hearthhold',
         file: 'note.m4a',
         thumb: '',
         kind: 'voice',
         company: 'hearthhold',
         property: '',
         type: 'task',
-        text: 'Pay the gas bill 24.000'
+        text: 'Pay the gas bill $94'
       },
       {
         id: 'u3',
@@ -887,58 +1359,103 @@
     const documents = [
       { title: 'Operating Agreement', company: 'hearthhold', property: null, kind: 'operating', scope: 'company', when: 'Mar 2024', thumb: 'thumbs/laureles.png' },
       { title: 'EIN letter', company: 'hearthhold', property: null, kind: 'tax', scope: 'company', when: 'Mar 2024', thumb: 'thumbs/laureles.png' },
-      { title: 'Deed — Laureles', company: 'hearthhold', property: 'laureles', kind: 'deed', scope: 'property', when: 'Jun 2024', thumb: 'thumbs/laureles.png' },
-      { title: 'Lease — Camila', company: 'hearthhold', property: 'laureles', kind: 'lease', scope: 'property', when: 'Mar 2025', thumb: 'thumbs/laureles.png' },
-      { title: 'Andes OA', company: 'andes', property: null, kind: 'operating', scope: 'company', when: 'Jan 2025', thumb: 'thumbs/andes.png' },
-      { title: 'Envigado lease', company: 'andes', property: 'envigado', kind: 'lease', scope: 'property', when: 'Jan 2025', thumb: 'thumbs/andes.png' },
+      { title: 'Deed — Tremont duplex', company: 'hearthhold', property: 'tremont', kind: 'deed', scope: 'property', when: 'Jun 2024', thumb: 'thumbs/laureles.png' },
+      { title: 'Lease — Dana Whitfield', company: 'hearthhold', property: 'tremont', kind: 'lease', scope: 'property', when: 'Mar 2025', thumb: 'thumbs/laureles.png' },
+      { title: 'Lease — Marcus Ellery', company: 'hearthhold', property: 'lakewood', kind: 'lease', scope: 'property', when: 'Sep 2024', thumb: 'thumbs/home.png' },
+      { title: 'Cuyahoga Rentals OA', company: 'andes', property: null, kind: 'operating', scope: 'company', when: 'Jan 2025', thumb: 'thumbs/andes.png' },
+      { title: 'Canton storefront lease', company: 'andes', property: 'canton', kind: 'lease', scope: 'property', when: 'Jan 2025', thumb: 'thumbs/andes.png' },
+      { title: 'Kent house lease', company: 'northstar', property: 'kent', kind: 'lease', scope: 'property', when: 'Aug 2026', thumb: 'thumbs/laureles-balcony.png' },
       { title: 'Trust instrument', company: 'northstar', property: null, kind: 'other', scope: 'company', when: '2019', thumb: 'thumbs/ohio.png' },
       { title: 'Portfolio insurance binder', company: null, property: null, kind: 'other', scope: 'global', when: 'Jan 2026', thumb: 'thumbs/home.png' }
     ];
 
     const expenses = [
-      { title: 'Kitchen cabinets', amount: '3.200.000 COP', property: 'laureles', company: 'hearthhold', status: 'paid', when: 'Aug 28' },
-      { title: 'Plumber — roof', amount: '420.000 COP', property: 'laureles', company: 'hearthhold', status: 'paid', when: 'Aug 10' },
-      { title: 'Admin fee Envigado', amount: '1.100.000 COP', property: 'envigado', company: 'andes', status: 'upcoming', when: 'Sep 20' },
-      { title: 'Fence materials', amount: '380 USD', property: 'ohio', company: 'northstar', status: 'paid', when: 'Jul 19' },
-      { title: 'HOA Laureles', amount: '450.000 COP', property: 'laureles', company: 'hearthhold', status: 'upcoming', when: 'Oct 1' }
+      { title: 'Kitchen cabinets', amount: '$3,800', property: 'tremont', company: 'hearthhold', status: 'paid', when: 'Aug 28' },
+      { title: 'Reyna Handyman — porch rail', amount: '$420', property: 'tremont', company: 'hearthhold', status: 'paid', when: 'Sep 5' },
+      { title: 'Pyle Painting — up unit', amount: '$900', property: 'lakewood', company: 'hearthhold', status: 'upcoming', when: 'Sep 18' },
+      { title: 'Rooftop coil clean', amount: '$310', property: 'canton', company: 'andes', status: 'paid', when: 'Sep 8' },
+      { title: 'Fence materials', amount: '$380', property: 'ohio', company: 'northstar', status: 'paid', when: 'Jul 19' },
+      { title: 'Akron rear roof', amount: '$9,500', property: 'akron', company: 'andes', status: 'upcoming', when: 'Oct 1' }
+    ];
+
+    const ledger = [
+      { date: '2026-09-01', kind: 'income', title: 'Rent — Tremont unit 1', amount: 1450, property: 'tremont', status: 'received' },
+      { date: '2026-09-01', kind: 'income', title: 'Rent — Kent house', amount: 2300, property: 'kent', status: 'received' },
+      { date: '2026-09-02', kind: 'income', title: 'Rent — Akron apt 3', amount: 1100, property: 'akron', status: 'received' },
+      { date: '2026-09-05', kind: 'income', title: 'Rent — Canton storefront', amount: 2850, property: 'canton', status: 'received' },
+      { date: '2026-09-01', kind: 'income', title: 'Rent — Lakewood down unit', amount: 1250, property: 'lakewood', status: 'late' },
+      { date: '2026-10-01', kind: 'income', title: 'Rent — October, all units', amount: 8950, property: null, status: 'due' },
+      { date: '2026-09-03', kind: 'expense', title: 'Ohio Heat & Air — Tremont furnace', amount: 180, property: 'tremont', status: 'paid' },
+      { date: '2026-09-05', kind: 'expense', title: 'Reyna Handyman — porch rail', amount: 420, property: 'tremont', status: 'paid' },
+      { date: '2026-09-06', kind: 'expense', title: 'Water and sewer — Lakewood', amount: 132, property: 'lakewood', status: 'paid' },
+      { date: '2026-09-08', kind: 'expense', title: 'Rooftop coil clean — Canton', amount: 310, property: 'canton', status: 'paid' },
+      { date: '2026-09-09', kind: 'expense', title: 'Insurance — portfolio binder', amount: 640, property: null, status: 'paid' },
+      { date: '2026-09-18', kind: 'expense', title: 'Pyle Painting — Lakewood up unit', amount: 900, property: 'lakewood', status: 'upcoming' },
+      { date: '2026-09-21', kind: 'expense', title: 'Ohio Heat & Air — Canton rooftop', amount: 290, property: 'canton', status: 'upcoming' },
+      { date: '2026-10-01', kind: 'expense', title: 'Akron rear roof', amount: 9500, property: 'akron', status: 'upcoming' },
+      { date: '2026-08-01', kind: 'income', title: 'Rent — August, all units', amount: 8950, property: null, status: 'received' },
+      { date: '2026-08-14', kind: 'expense', title: 'August repairs and vendors', amount: 2140, property: null, status: 'paid' }
     ];
 
     const governance = [
-      { title: 'Board minutes — cabinet approval', company: 'hearthhold', property: 'laureles', kind: 'minutes', when: 'Aug 20, 2026' },
-      { title: 'Decision record — tenant fit-out', company: 'andes', property: 'envigado', kind: 'decision', when: 'Sep 4, 2026' },
+      { title: 'Board minutes — cabinet approval', company: 'hearthhold', property: 'tremont', kind: 'minutes', when: 'Aug 20, 2026' },
+      { title: 'Decision record — Canton fit-out', company: 'andes', property: 'canton', kind: 'decision', when: 'Sep 4, 2026' },
       { title: 'Trustee note — fence pause', company: 'northstar', property: 'ohio', kind: 'decision', when: 'Jul 2, 2026' }
     ];
 
     const activity = [
-      { who: 'Bryan', what: 'Uploaded deed — Laureles', when: '2h ago', company: 'Hearthhold LLC', property: 'laureles' },
+      { who: 'Bryan', what: 'Uploaded deed — Tremont duplex', when: '2h ago', company: 'Hearthhold LLC', property: 'tremont' },
       { who: 'Bryan', what: 'Voice capture — gas bill', when: 'Yesterday', company: 'Inbox' },
-      { who: 'Ana', what: 'Filed kitchen receipt to Laureles', when: 'Sep 8', company: 'Hearthhold LLC', property: 'laureles' },
-      { who: 'CPA', what: 'Viewed EIN letter', when: 'Sep 7', company: 'Hearthhold LLC' },
-      { who: 'Bryan', what: 'Opened Envigado lease for renewal', when: 'Sep 4', company: 'Andes Holdings LLC', property: 'envigado' },
+      { who: 'Denise Kolar', what: 'Filed kitchen receipt to Tremont', when: 'Sep 8', company: 'Hearthhold LLC', property: 'tremont' },
+      { who: 'Linda Shaw', what: 'Viewed EIN letter', when: 'Sep 7', company: 'Hearthhold LLC' },
+      { who: 'Ray Vasquez', what: 'Opened Canton lease for renewal', when: 'Sep 4', company: 'Cuyahoga Rentals LLC', property: 'canton' },
       { who: 'Bryan', what: 'Paused east fence', when: 'Jul 2', company: 'Northstar Trust', property: 'ohio' }
     ];
 
     const audit = [
       { who: 'Bryan', action: 'Uploaded', target: 'scan.jpg', where: 'Inbox', at: 'Today 18:02' },
-      { who: 'Bryan', action: 'Created company', target: 'Andes Holdings LLC', where: 'Companies', at: 'Jan 2025' },
-      { who: 'Ana', action: 'Edited task', target: 'Send OA to accountant', where: 'Hearthhold LLC', at: 'Sep 8 09:11' },
-      { who: 'CPA', action: 'Downloaded', target: 'EIN letter', where: 'Hearthhold LLC', at: 'Sep 7 11:40' },
-      { who: 'Bryan', action: 'Assigned user', target: 'ana@hearthhold.app', where: 'Hearthhold LLC', at: 'Mar 2024' }
+      { who: 'Bryan', action: 'Created company', target: 'Cuyahoga Rentals LLC', where: 'Companies', at: 'Jan 2025' },
+      { who: 'Denise Kolar', action: 'Edited task', target: 'Fix the Tremont porch rail', where: 'Hearthhold LLC', at: 'Sep 9 09:11' },
+      { who: 'Linda Shaw', action: 'Downloaded', target: 'EIN letter', where: 'Hearthhold LLC', at: 'Sep 7 11:40' },
+      { who: 'Bryan', action: 'Assigned user', target: 'denise@hearthhold.app', where: 'Hearthhold LLC', at: 'Mar 2024' }
     ];
 
     const calEvents = [
-      { day: 11, title: 'Today', company: 'all' },
-      { day: 12, title: 'Tenant check-in', company: 'hearthhold', time: '9:30', property: 'laureles' },
-      { day: 15, title: 'Laureles HOA', company: 'hearthhold', time: '10:00', property: 'laureles' },
-      { day: 18, title: 'Board call', company: 'hearthhold', time: '14:00' },
-      { day: 20, title: 'Envigado fee', company: 'andes', time: '—', property: 'envigado' },
-      { day: 22, title: 'Fit-out walkthrough', company: 'andes', time: '11:00', property: 'envigado' },
-      { day: 30, title: 'Member consents', company: 'andes', time: '16:00' }
+      { date: '2026-09-08', time: '8:00', title: 'Gutter walk', kind: 'visit', property: 'akron', who: 'Ray Vasquez' },
+      { date: '2026-09-09', time: '16:30', title: 'Showing — asking $1,900', kind: 'showing', property: 'ohio', who: 'Denise Kolar' },
+      { date: '2026-09-10', time: '11:00', title: 'Rent call with Marcus', kind: 'appointment', property: 'lakewood', who: 'Denise Kolar' },
+      { date: '2026-09-11', time: '13:00', title: 'Storefront inspection', kind: 'inspection', property: 'canton', who: 'Ray Vasquez' },
+      { date: '2026-09-12', time: '9:30', title: 'General inspection', kind: 'inspection', property: 'ohio', who: 'Hank Miller' },
+      { date: '2026-09-14', time: '10:00', title: 'Move-out — up unit', kind: 'move-out', property: 'lakewood', who: 'Denise Kolar' },
+      { date: '2026-09-15', time: '9:00', title: 'Porch rail repair', kind: 'visit', property: 'tremont', who: 'Tomas Reyna' },
+      { date: '2026-09-16', time: '17:30', title: 'Showing — up unit', kind: 'showing', property: 'lakewood', who: 'Denise Kolar' },
+      { date: '2026-09-17', time: '8:00', title: 'Gutter crew', kind: 'visit', property: 'ohio', who: 'Hank Miller' },
+      { date: '2026-09-18', time: '9:00', title: 'Pre-move-in inspection', kind: 'inspection', property: 'lakewood', who: 'Denise Kolar' },
+      { date: '2026-09-21', time: '8:30', title: 'Rooftop HVAC service', kind: 'visit', property: 'canton', who: 'Sam Ortiz' },
+      { date: '2026-09-22', time: '10:00', title: 'General inspection', kind: 'inspection', property: 'akron', who: 'Ray Vasquez' },
+      { date: '2026-09-24', time: '16:00', title: 'Showing — second visit', kind: 'showing', property: 'ohio', who: 'Denise Kolar' },
+      { date: '2026-09-25', time: '15:00', title: 'Lease signing — Bellview renewal', kind: 'appointment', property: 'canton', who: 'Ray Vasquez' },
+      { date: '2026-09-28', time: '11:00', title: 'Move-in — up unit', kind: 'move-in', property: 'lakewood', who: 'Denise Kolar' },
+      { date: '2026-09-30', time: '16:00', title: 'Owner call — September numbers', kind: 'appointment', property: null, who: 'Bryan Cleveland' },
+      { date: '2026-10-02', time: '9:00', title: 'Furnace check — both units', kind: 'visit', property: 'tremont', who: 'Sam Ortiz' },
+      { date: '2026-10-05', time: '8:00', title: 'Furnace and CO test', kind: 'visit', property: 'ohio', who: 'Sam Ortiz' },
+      { date: '2026-10-09', time: '9:30', title: 'Roof drains before the rains', kind: 'visit', property: 'canton', who: 'Ray Vasquez' },
+      { date: '2026-10-12', time: '13:00', title: 'Parking lot lights', kind: 'visit', property: 'canton', who: 'Tomas Reyna' },
+      { date: '2026-10-15', time: '10:00', title: 'Move-out — unit 2', kind: 'move-out', property: 'tremont', who: 'Denise Kolar' },
+      { date: '2026-10-20', time: '8:00', title: 'Gutters, second pass', kind: 'visit', property: 'ohio', who: 'Hank Miller' }
+    ];
+
+    const gcalEvents = [
+      { date: '2026-09-11', time: '12:00', title: 'Lunch — Ohio landlord meetup', kind: 'appointment', property: null, who: 'Google Calendar' },
+      { date: '2026-09-15', time: '18:00', title: 'Soccer practice', kind: 'appointment', property: null, who: 'Google Calendar' },
+      { date: '2026-09-19', time: '10:00', title: 'Dentist', kind: 'appointment', property: null, who: 'Google Calendar' },
+      { date: '2026-09-23', time: '13:00', title: 'Bank — refi paperwork', kind: 'appointment', property: null, who: 'Google Calendar' },
+      { date: '2026-10-03', time: '9:00', title: 'Family weekend', kind: 'appointment', property: null, who: 'Google Calendar' }
     ];
 
     let screen = 'home';
     let companyId = 'hearthhold';
-    let propertyId = 'laureles';
+    let propertyId = 'tremont';
     let companyTab = 'dashboard';
         let propertyTab = 'dashboard';
         let docKind = 'all';
@@ -960,6 +1477,18 @@
         let damagePopOpen = false;
         let dmgRec = null;
         let inspRec = null;
+        let personId = 'denise';
+        let calView = 'month';
+        let calMonth = '2026-09';
+        let calWeek = '2026-09-06';
+        let calKind = 'all';
+        let googleCal = false;
+        let taskView = 'list';
+        let taskStatus = 'open';
+        let taskWho = 'all';
+        let taskPopId = null;
+        let hubMap = null;
+        let peopleKind = 'all';
 
     const inspectCatalog = {
       inside: [
@@ -1012,7 +1541,7 @@
         who: 'Hank Miller',
         status: 'in-progress',
         skip: ['pool'],
-        note: 'Spring walk started. Gate hinge still loose. Septic last pumped Mar 11, 2026 — card is in the well house.',
+        note: 'Pre-listing walk started. Gate hinge still loose. Septic last pumped Mar 11, 2026 — card is in the well house.',
         inventory: [
           { name: 'Fridge', detail: 'Whirlpool 2-door · stainless', photo: 'thumbs/ohio.png', ai: true },
           { name: 'Stove', detail: 'GE gas range', photo: 'thumbs/home.png', ai: true },
@@ -1021,45 +1550,58 @@
         checks: null
       },
       {
-        id: 'i-laureles-pre',
-        property: 'laureles',
-        type: 'pre-move-in',
-        title: 'Pre-move-in inspection',
-        due: '2026-09-18',
-        who: 'Marisol Cárdenas',
-        status: 'todo',
-        skip: skipApt,
-        note: '',
-        inventory: [],
-        checks: null
-      },
-      {
-        id: 'i-envigado',
-        property: 'envigado',
+        id: 'i-canton',
+        property: 'canton',
         type: 'general',
-        title: 'General inspection',
-        due: '2026-09-22',
-        who: 'Andrés Mejía',
-        status: 'todo',
+        title: 'Storefront inspection',
+        due: '2026-09-11',
+        who: 'Ray Vasquez',
+        status: 'in-progress',
         skip: skipRetail,
         note: '',
         inventory: [],
         checks: null
       },
       {
-        id: 'i-laureles-done',
-        property: 'laureles',
+        id: 'i-lakewood-pre',
+        property: 'lakewood',
+        type: 'pre-move-in',
+        title: 'Pre-move-in inspection',
+        due: '2026-09-18',
+        who: 'Denise Kolar',
+        status: 'todo',
+        skip: skipApt,
+        note: '',
+        inventory: [],
+        checks: null
+      },
+      {
+        id: 'i-akron',
+        property: 'akron',
+        type: 'general',
+        title: 'General inspection',
+        due: '2026-09-22',
+        who: 'Ray Vasquez',
+        status: 'todo',
+        skip: skipApt,
+        note: '',
+        inventory: [],
+        checks: null
+      },
+      {
+        id: 'i-tremont-done',
+        property: 'tremont',
         type: 'general',
         title: 'General inspection',
         due: '2026-06-04',
-        who: 'Marisol Cárdenas',
+        who: 'Denise Kolar',
         status: 'done',
         skip: skipApt,
-        note: 'Walked the unit with Camila. Gate motor noisy on close. Small rust on the balcony railing. HVAC drain clear.',
+        note: 'Walked both units with Dana. Porch rail is loose. Small rust on the back stair. Furnace drain clear.',
         inventory: [
-          { name: 'Fridge', detail: 'Mabe · working', photo: 'thumbs/laureles-kitchen.png', ai: true },
-          { name: 'Stove', detail: 'Electric cooktop', photo: 'thumbs/laureles-kitchen.png', ai: true },
-          { name: 'AC', detail: 'Minisplit living room', photo: 'thumbs/laureles.png', ai: true }
+          { name: 'Fridge', detail: 'Whirlpool · working', photo: 'thumbs/laureles-kitchen.png', ai: true },
+          { name: 'Stove', detail: 'Electric range', photo: 'thumbs/laureles-kitchen.png', ai: true },
+          { name: 'Furnace', detail: 'Two units, one per side', photo: 'thumbs/laureles.png', ai: true }
         ],
         checks: null
       }
@@ -1067,22 +1609,22 @@
     let damages = [
       {
         id: 'd-rail',
-        property: 'laureles',
-        inspection: 'i-laureles-done',
-        title: 'Balcony railing rust / paint',
+        property: 'tremont',
+        inspection: 'i-tremont-done',
+        title: 'Porch rail loose / paint',
         status: 'pending-approval',
-        cost: '420.000 COP',
-        company: 'Pinturas Laureles',
-        handyman: 'Luis Pinto',
-        phone: '+57 310 882 4411',
-        note: 'Small rust on the balcony railing.\nQuote: grind, prime, and repaint.\nCost: 420.000 COP\nPinturas Laureles / Luis Pinto\n+57 310 882 4411\nWaiting on owner approval before scheduling.',
+        cost: '$420',
+        company: 'Reyna Handyman',
+        handyman: 'Tomas Reyna',
+        phone: '216-555-0311',
+        note: 'Front porch rail pulled loose from the post.\nQuote: reset the anchor, sand, prime, and repaint.\nCost: $420\nReyna Handyman / Tomas Reyna\n216-555-0311\nWaiting on owner approval before scheduling.',
         photos: [
-          { src: 'thumbs/laureles-balcony.png', caption: 'Railing rust' }
+          { src: 'thumbs/laureles-balcony.png', caption: 'Loose porch rail' }
         ],
-        quote: { src: 'thumbs/laureles.png', caption: 'Quote — Pinturas Laureles' },
+        quote: { src: 'thumbs/laureles.png', caption: 'Quote — Reyna Handyman' },
         bill: null,
         updates: [
-          { when: 'Sep 8', who: 'Marisol', text: 'Quote in. 420.000 COP. Sent for approval.' }
+          { when: 'Sep 8', who: 'Denise Kolar', text: 'Quote in. $420. Sent for approval.' }
         ]
       },
       {
@@ -1091,11 +1633,11 @@
         inspection: 'i-ohio',
         title: 'Drive gate hinge pin',
         status: 'scheduled',
-        cost: '180 USD',
+        cost: '$180',
         company: 'Hank Miller',
         handyman: 'Hank Miller',
-        phone: '740-555-0110',
-        note: 'Hinge pin was loose in June.\nCost: 180 USD\nHank Miller\n740-555-0110\nOwner approved. Hank is on site Tuesday with a new pin.',
+        phone: '440-555-0110',
+        note: 'Hinge pin was loose in June.\nCost: $180\nHank Miller\n440-555-0110\nOwner approved. Hank is on site Tuesday with a new pin.',
         photos: [
           { src: 'thumbs/ohio-gate.png', caption: 'Drive gate hinge' }
         ],
@@ -1103,54 +1645,55 @@
         bill: null,
         updates: [
           { when: 'Sep 10', who: 'Bryan', text: 'Approved. Schedule this week.' },
-          { when: 'Sep 9', who: 'Hank', text: 'Quote 180 USD parts and labor.' }
+          { when: 'Sep 9', who: 'Hank', text: 'Quote $180 parts and labor.' }
         ]
       },
       {
         id: 'd-door',
-        property: 'envigado',
-        inspection: 'i-envigado',
+        property: 'canton',
+        inspection: 'i-canton',
         title: 'Roll-up door safety edge',
         status: 'fixed',
-        cost: '1.100.000 COP',
-        company: 'Portones del Sur',
-        handyman: 'Diego Portones',
-        phone: '+57 304 119 2200',
-        note: 'Safety edge failed. Spring replaced.\nCost: 1.100.000 COP\nPortones del Sur / Diego Portones\n+57 304 119 2200\nBill photographed after the visit.',
+        cost: '$1,100',
+        company: 'Stark Door',
+        handyman: 'Dale Kurtz',
+        phone: '330-555-0620',
+        note: 'Safety edge failed. Spring replaced.\nCost: $1,100\nStark Door / Dale Kurtz\n330-555-0620\nBill photographed after the visit.',
         photos: [
           { src: 'thumbs/envigado-door.png', caption: 'Safety edge failed' }
         ],
-        quote: { src: 'thumbs/andes.png', caption: 'Quote — Portones del Sur' },
+        quote: { src: 'thumbs/andes.png', caption: 'Quote — Stark Door' },
         bill: { src: 'thumbs/andes.png', caption: 'Paid bill — Sep 2' },
         updates: [
-          { when: 'Sep 2', who: 'Andrés', text: 'Fixed. Bill on file.' },
+          { when: 'Sep 2', who: 'Ray Vasquez', text: 'Fixed. Bill on file.' },
           { when: 'Aug 28', who: 'Bryan', text: 'Approved and scheduled.' }
         ]
       },
       {
-        id: 'd-hvac',
-        property: 'envigado',
-        inspection: 'i-envigado',
-        title: 'Rooftop HVAC fins dirty',
+        id: 'd-roof',
+        property: 'akron',
+        inspection: 'i-akron',
+        title: 'Rear roof section soft',
         status: 'needs-quote',
         cost: '',
         company: '',
         handyman: '',
         phone: '',
-        note: 'Condenser fins were packed with dust.\nNeed a coil-clean quote. Say the cost and the company, then take a picture of the quote paper.',
+        note: 'Rear roof deck is soft near the downspout.\nNeed two quotes. Say the cost and the company, then take a picture of the quote paper.',
         photos: [
-          { src: 'thumbs/envigado-hvac.png', caption: 'Dirty condenser fins' }
+          { src: 'thumbs/andes.png', caption: 'Rear roof line' }
         ],
         quote: null,
         bill: null,
         updates: [
-          { when: 'Jul 9', who: 'Andrés', text: 'Flagged on inspection. Waiting on quote.' }
+          { when: 'Jul 9', who: 'Ray Vasquez', text: 'Flagged on inspection. Waiting on quote.' }
         ]
       }
     ];
     const serviceSchedules = [
-      { property: 'ohio', kind: 'gardener', who: 'Green Thumb Lawn', day: 'Tue', time: '8:00', cost: '85 USD', cadence: 'Weekly', notes: 'Mow, edge, check the apple and pear trees, bag clippings.' },
-      { property: 'laureles', kind: 'gardener', who: 'Jardines del 70', day: 'Thu', time: '9:30', cost: '80.000 COP', cadence: 'Weekly', notes: 'Common garden and the balcony planters Camila asked us to keep.' }
+      { property: 'ohio', kind: 'lawn crew', who: 'Green Thumb Lawn', day: 'Tue', time: '8:00', cost: '$85', cadence: 'Weekly', notes: 'Mow, edge, check the apple and pear trees, bag clippings.' },
+      { property: 'kent', kind: 'yard and leaves', who: 'Hank Miller', day: 'Thu', time: '9:30', cost: '$60', cadence: 'Weekly in fall', notes: 'Bags at the curb Monday night for Tuesday city pickup.' },
+      { property: 'canton', kind: 'lot sweep', who: 'Reyna Handyman', day: 'Mon', time: '7:00', cost: '$75', cadence: 'Every two weeks', notes: 'Parking lot and sidewalk in front of the storefront.' }
     ];
     inspections[0].checks = makeChecks(['pool'], {
       locks: { state: 'ok', photos: [{ src: 'thumbs/ohio-gate.png', caption: 'Door locks' }] },
@@ -1172,11 +1715,21 @@
       septic: { state: 'ok', photos: [{ src: 'thumbs/ohio-well.png', caption: 'Septic lid' }], note: 'Last pumped Mar 11, 2026. Card in the well house.' },
       shots: { state: '', photos: [{ src: 'thumbs/ohio.png', caption: 'House' }, { src: 'thumbs/ohio-gate.png', caption: 'Drive' }] }
     });
-    inspections[1].checks = makeChecks(skipApt);
-    inspections[2].checks = makeChecks(skipRetail);
-    inspections[3].checks = makeChecks(skipApt, {
+    inspections[1].checks = makeChecks(skipRetail, {
+      locks: { state: 'ok', photos: [{ src: 'thumbs/envigado-door.png', caption: 'Front and rear locks' }] },
+      doors: { state: 'issue', photos: [{ src: 'thumbs/envigado-door.png', caption: 'Roll-up safety edge' }], note: 'Roll-up door is tagged until the spring is replaced.' },
+      walls: { state: 'ok', photos: [] },
+      water: { state: 'ok', photos: [] },
+      ac: { state: 'issue', photos: [{ src: 'thumbs/envigado-hvac.png', caption: 'Rooftop condenser' }], note: 'Fins were packed with dust. Coil clean is booked for Sep 21.' },
+      clean: { state: 'ok', photos: [] },
+      windows: { state: 'ok', photos: [] },
+      shots: { state: 'ok', photos: [{ src: 'thumbs/andes.png', caption: 'Storefront' }, { src: 'thumbs/envigado-door.png', caption: 'Roll-up door' }] }
+    });
+    inspections[2].checks = makeChecks(skipApt);
+    inspections[3].checks = makeChecks(skipApt);
+    inspections[4].checks = makeChecks(skipApt, {
       locks: { state: 'ok', photos: [] },
-      walls: { state: 'issue', photos: [{ src: 'thumbs/laureles-balcony.png', caption: 'Railing rust' }], note: 'Opened a damage report for paint.' },
+      walls: { state: 'issue', photos: [{ src: 'thumbs/laureles-balcony.png', caption: 'Porch rail' }], note: 'Opened a damage report for paint.' },
       doors: { state: 'ok', photos: [] },
       water: { state: 'ok', photos: [] },
       fridge: { state: 'ok', photos: [{ src: 'thumbs/laureles-kitchen.png', caption: 'Kitchen' }] },
@@ -1190,9 +1743,9 @@
       garden: { state: 'ok', photos: [] },
       plants: { state: 'ok', photos: [] },
       shots: { state: 'ok', photos: [
-        { src: 'thumbs/laureles.png', caption: 'Facade' },
-        { src: 'thumbs/laureles-kitchen.png', caption: 'Kitchen' },
-        { src: 'thumbs/laureles-balcony.png', caption: 'Balcony' }
+        { src: 'thumbs/laureles.png', caption: 'Front of the duplex' },
+        { src: 'thumbs/laureles-kitchen.png', caption: 'Unit 1 kitchen' },
+        { src: 'thumbs/laureles-balcony.png', caption: 'Back porch' }
       ] }
     });
 
@@ -1270,7 +1823,7 @@
     }
     function tenantLabel(p) {
       if (!p.tenant) return 'No tenant';
-      if (p.tenant.status === 'vacant') return 'Owner occupied';
+      if (p.tenant.status === 'vacant') return 'Vacant · showing now';
       if (p.tenant.status === 'expiring') return p.tenant.name + ' · lease ending';
       return p.tenant.name + (p.tenant.onTime ? ' · on time' : ' · late');
     }
@@ -1389,13 +1942,12 @@
       }
       if (name === 'damage') {
         if (extra) damageId = extra;
-        if (screen !== 'manage' && screen !== 'inspection') {
-          screen = 'manage';
-          manageTab = 'damages';
+        if (screen !== 'manage' && screen !== 'inspection' && screen !== 'tasks') {
+          screen = 'tasks';
         }
         document.querySelectorAll('.nav-item').forEach(b => {
           const g = b.getAttribute('data-go');
-          b.classList.toggle('on', g === 'manage' || g === screen);
+          b.classList.toggle('on', g === 'tasks');
         });
         closeNav();
         render();
@@ -1403,19 +1955,24 @@
         return;
       }
       if (damagePopOpen) closeDamage();
+      if (taskPopId) closeTask();
       if (name !== 'inspection') stopInspMic();
       screen = name;
       if (name === 'company' && extra) { companyId = extra; companyTab = 'dashboard'; }
       if (name === 'property' && extra) { propertyId = extra; propertyTab = 'dashboard'; }
       if (name === 'project' && extra) { propertyId = extra.property; window._projectId = extra.project; }
       if (name === 'inspection' && extra) inspectionId = extra;
+      if (name === 'person' && extra) personId = extra;
       document.querySelectorAll('.nav-item').forEach(b => {
         const g = b.getAttribute('data-go');
         const on = g === name
-          || (name === 'company' && g === 'companies')
           || (name === 'property' && g === 'properties')
           || (name === 'project' && g === 'properties')
-          || (name === 'inspection' && g === 'manage');
+          || (name === 'map' && g === 'properties')
+          || (name === 'person' && g === 'people')
+          || (name === 'inbox' && g === 'capture')
+          || (name === 'manage' && g === 'tasks')
+          || (name === 'inspection' && g === 'tasks');
         b.classList.toggle('on', on);
       });
       closeNav();
@@ -1459,7 +2016,7 @@
       }
       if (q.indexOf('new project') !== -1 || q.indexOf('remodel') !== -1) {
         const p = propertyBy(propertyId);
-        p.projects.push({ id: 'p' + Date.now(), title: 'New remodel', status: 'active', budget: 0, spent: 0, currency: 'COP' });
+        p.projects.push({ id: 'p' + Date.now(), title: 'New remodel', status: 'active', budget: 0, spent: 0, currency: 'USD' });
         document.getElementById('ask').value = '';
         go('property', p.id);
         propertyTab = 'projects';
@@ -1477,14 +2034,17 @@
 
     function render() {
       document.getElementById('inbox-count').textContent = inbox.length;
-      const openManage = inspections.filter(i => i.status === 'todo' || i.status === 'in-progress').length
+      const pc = document.getElementById('prop-count');
+      if (pc) pc.textContent = properties.length;
+      const openWork = workTasks.filter(t => t.status !== 'done').length
         + damages.filter(d => d.status === 'pending-approval' || d.status === 'needs-quote').length;
-      const mc = document.getElementById('manage-count');
-      if (mc) mc.textContent = openManage;
+      const tc = document.getElementById('task-count');
+      if (tc) tc.textContent = openWork;
       const fn = screens[screen] || screens.home;
       document.getElementById('content').innerHTML = fn();
       bind();
       if (screen === 'map') initMap();
+      if (screen === 'properties') initHubMap();
       if (screen === 'property' && (propertyTab === 'dashboard' || propertyTab === 'overview' || propertyTab === 'map')) initPropMap();
       if (screen === 'capture') setupDrop();
     }
@@ -1542,8 +2102,10 @@
     }
     function statusLabel(s) {
       const map = {
+        draft: 'Draft',
         todo: 'To do',
         'in-progress': 'In progress',
+        review: 'Review',
         done: 'Done',
         'needs-quote': 'Needs quote',
         'pending-approval': 'Needs approval',
@@ -1684,7 +2246,7 @@
     function mockWalkLine(insp) {
       const p = propertyBy(insp.property) || {};
       if (p.id === 'ohio') return 'Everything is OK besides the lawn — it needs cut on the east line — and a faint stain on the sofa. Kitchen floor needs a mop.';
-      if (p.id === 'envigado') return 'Everything is OK. HVAC fins are dirty. The roll-up door already has a damage report.';
+      if (p.id === 'canton') return 'Everything is OK. HVAC fins are dirty. The roll-up door already has a damage report.';
       return 'Everything is OK. One bedroom window is sticky and needs a look.';
     }
     function stopInspMic() {
@@ -1823,8 +2385,10 @@
     }
     function parseDamageNote(d) {
       if (!d || !d.note) return;
-      const cost = d.note.match(/([\d.]+)\s*(COP|USD)/i);
-      if (cost) d.cost = cost[1] + ' ' + cost[2].toUpperCase();
+      const dollars = d.note.match(/\$\s?([\d,]+(?:\.\d{2})?)/);
+      const plain = d.note.match(/([\d,.]+)\s*(USD|dollars)/i);
+      if (dollars) d.cost = '$' + dollars[1];
+      else if (plain) d.cost = '$' + plain[1];
       const phone = d.note.match(/(\+?\d[\d\s-]{7,}\d)/);
       if (phone) d.phone = phone[1].trim();
     }
@@ -1869,9 +2433,10 @@
     }
     function mockQuoteLine(d) {
       const p = propertyBy(d.property) || {};
-      if (p.id === 'ohio') return 'Hank Miller, 740-555-0110. Quote 180 USD for the hinge pin and labor.';
-      if (p.id === 'envigado') return 'Frío Andino, +57 304 119 2200. Quote 380.000 COP to wash the rooftop coils.';
-      return 'Luis Pinto at Pinturas Laureles, +57 310 882 4411. Quote 420.000 COP to grind, prime, and repaint.';
+      if (p.id === 'ohio') return 'Hank Miller, 440-555-0110. Quote $180 for the hinge pin and labor.';
+      if (p.id === 'akron') return 'Stark Roofing, 330-555-0733. Quote $9,500 to tear off and redeck the rear section.';
+      if (p.id === 'canton') return 'Stark Door, 330-555-0620. Quote $1,100 to replace the spring and the safety edge.';
+      return 'Tomas Reyna at Reyna Handyman, 216-555-0311. Quote $420 to reset the anchor, prime, and repaint.';
     }
     function appendDamageNote(text) {
       const d = damageBy(damageId);
@@ -2012,81 +2577,384 @@
       '</div>';
     }
 
+    function ordinal(n) {
+      const d = Number(n);
+      const v = d % 100;
+      const sfx = (v >= 11 && v <= 13) ? 'th' : (d % 10 === 1 ? 'st' : d % 10 === 2 ? 'nd' : d % 10 === 3 ? 'rd' : 'th');
+      return 'the ' + d + sfx;
+    }
+    function initials(name) {
+      return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+    }
+    function personBy(id) { return people.find(x => x.id === id); }
+    function isoParts(iso) {
+      const a = String(iso).split('-');
+      return new Date(+a[0], +a[1] - 1, +a[2]);
+    }
+    function isoOf(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function shiftDays(iso, delta) {
+      const d = isoParts(iso);
+      d.setDate(d.getDate() + delta);
+      return isoOf(d);
+    }
+    function shiftMonth(ym, delta) {
+      const d = new Date(+ym.slice(0, 4), +ym.slice(5, 7) - 1 + delta, 1);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    }
+    function weekStart(iso) { return shiftDays(iso, -isoParts(iso).getDay()); }
+    function dowShort(iso) { return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][isoParts(iso).getDay()]; }
+    function monthName(ym) {
+      const ms = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      return ms[+ym.slice(5, 7) - 1] + ' ' + ym.slice(0, 4);
+    }
+    function fmtLongDate(iso) {
+      const d = isoParts(iso);
+      const dows = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      return dows[d.getDay()] + ', ' + fmtIsoDate(iso) + ' ' + d.getFullYear();
+    }
+    function cityOf(p) {
+      const bits = String(p.address || '').split(',');
+      const city = (bits[1] || '').trim();
+      const st = (bits[2] || '').trim().split(' ')[0];
+      return city + (st ? ', ' + st : '');
+    }
+    function costNumber(s) {
+      const m = String(s || '').match(/[\d,]+/);
+      return m ? Number(m[0].replace(/,/g, '')) : 0;
+    }
+    const kindColors = {
+      inspection: '#2f6a4a',
+      showing: '#2c5f78',
+      visit: '#8b6240',
+      appointment: '#5c6b64',
+      'move-in': '#3f8f5e',
+      'move-out': '#b98130'
+    };
+    function kindLabel(k) {
+      const m = {
+        inspection: 'Inspection',
+        showing: 'Showing',
+        visit: 'Site visit',
+        appointment: 'Appointment',
+        'move-in': 'Move in',
+        'move-out': 'Move out'
+      };
+      return m[k] || k;
+    }
+    function allCalEvents() { return googleCal ? calEvents.concat(gcalEvents) : calEvents; }
+    function timeKey(s) {
+      const m = String(s || '').match(/(\d+):(\d+)/);
+      return m ? (+m[1]) * 60 + (+m[2]) : 0;
+    }
+    function eventsOn(iso) {
+      return allCalEvents()
+        .filter(e => e.date === iso && (calKind === 'all' || e.kind === calKind))
+        .sort((a, b) => timeKey(a.time) - timeKey(b.time));
+    }
+    function evAction(e) {
+      const insp = inspections.find(i => i.property === e.property && i.due === e.date);
+      if (insp) return "go('inspection','" + insp.id + "')";
+      if (e.property) return "go('property','" + e.property + "')";
+      return "go('calendar')";
+    }
+    function evChip(e) {
+      const p = e.property ? propertyBy(e.property) : null;
+      return '<button type="button" class="ev ' + e.kind + '" onclick="' + evAction(e) + '">' +
+        '<b>' + esc(e.title) + '</b>' +
+        '<span>' + esc(e.time) + (p ? ' · ' + esc(p.short || p.name) : '') + '</span></button>';
+    }
+    function evRow(e) {
+      const p = e.property ? propertyBy(e.property) : null;
+      return '<button type="button" class="wrow" onclick="' + evAction(e) + '">' +
+        '<span style="width:40px;flex-shrink:0;text-align:center;">' +
+          '<span class="muted" style="display:block;">' + dowShort(e.date) + '</span>' +
+          '<b style="font-size:16px;">' + (+e.date.slice(8)) + '</b></span>' +
+        '<span style="flex:1;min-width:0;"><b>' + esc(e.title) + '</b>' +
+          '<span class="muted" style="display:block;">' + esc(e.time) + (p ? ' · ' + esc(p.name) : '') + (e.who ? ' · ' + esc(e.who) : '') + '</span></span>' +
+        '<span class="tag" style="background:' + (kindColors[e.kind] || '#5c6b64') + '1a;">' + kindLabel(e.kind) + '</span>' +
+      '</button>';
+    }
+    function propCard(p) {
+      const rent = p.tenant && p.tenant.rentAmount ? usd(p.tenant.rentAmount) + '/mo' : 'Vacant';
+      const vacant = p.tenant && p.tenant.status === 'vacant';
+      return '<button type="button" class="card click p-card" data-prop-row="' + p.id + '" data-property="' + p.id + '">' +
+        '<span class="thumb" style="background-image:url(\'' + p.image + '\')"></span>' +
+        '<span style="flex:1;min-width:0;"><b>' + esc(p.name) + '</b>' +
+          '<span class="muted" style="display:block;">' + esc(cityOf(p)) + ' · ' + esc(tenantLabel(p)) + '</span></span>' +
+        '<span class="p-rent' + (vacant ? ' late' : '') + '">' + rent + '</span>' +
+      '</button>';
+    }
+
+    function damageColumn(s) {
+      if (s === 'needs-quote') return 'todo';
+      if (s === 'pending-approval') return 'review';
+      if (s === 'approved' || s === 'scheduled') return 'in-progress';
+      if (s === 'fixed') return 'done';
+      if (s === 'rejected') return 'draft';
+      return 'todo';
+    }
+    function allWork() {
+      const fromTasks = workTasks.map(t => ({
+        id: t.id,
+        kind: 'task',
+        title: t.title,
+        status: t.status,
+        assignee: t.assignee,
+        property: t.property,
+        due: t.due,
+        cost: t.cost,
+        thumb: (t.photos[0] || {}).src || '',
+        approval: false,
+        raw: t
+      }));
+      const fromDamages = damages.map(d => ({
+        id: d.id,
+        kind: 'damage',
+        title: d.title,
+        status: damageColumn(d.status),
+        assignee: d.handyman || d.company || 'Unassigned',
+        property: d.property,
+        due: '',
+        cost: costNumber(d.cost),
+        thumb: (d.photos[0] || {}).src || '',
+        approval: true,
+        raw: d
+      }));
+      return fromTasks.concat(fromDamages);
+    }
+    function workRow(w) {
+      const p = w.property ? propertyBy(w.property) : null;
+      const tag = w.approval
+        ? '<span class="tag approval">' + statusLabel(w.raw.status) + '</span>'
+        : '<span class="tag">' + statusLabel(w.status) + '</span>';
+      return '<button type="button" class="wrow" onclick="openWork(\'' + w.kind + '\',\'' + w.id + '\')">' +
+        (w.thumb ? '<span class="thumb" style="background-image:url(\'' + w.thumb + '\')"></span>' : '') +
+        '<span style="flex:1;min-width:0;"><b>' + esc(w.title) + '</b>' +
+          '<span class="muted" style="display:block;">' + (p ? esc(p.name) + ' · ' : '') + esc(w.assignee) +
+          (w.due ? ' · due ' + fmtIsoDate(w.due) : '') + (w.cost ? ' · ' + usd(w.cost) : '') + '</span></span>' +
+        tag +
+      '</button>';
+    }
+    function taskCard(w) {
+      const p = w.property ? propertyBy(w.property) : null;
+      const tag = w.approval
+        ? '<span class="tag approval">' + statusLabel(w.raw.status) + '</span>'
+        : '<span class="tag">' + statusLabel(w.status) + '</span>';
+      return '<button type="button" class="tcard" onclick="openWork(\'' + w.kind + '\',\'' + w.id + '\')">' +
+        (w.thumb ? '<span class="tthumb" style="background-image:url(\'' + w.thumb + '\')"></span>' : '') +
+        '<b>' + esc(w.title) + '</b>' +
+        '<span class="tmeta">' + (p ? esc(p.short || p.name) + ' · ' : '') + esc(w.assignee) + (w.due ? ' · ' + fmtIsoDate(w.due) : '') + '</span>' +
+        '<span class="tmeta">' + (w.cost ? '<span class="tcost">' + usd(w.cost) + '</span> · ' : '') + tag + '</span>' +
+      '</button>';
+    }
+    function openWork(kind, id) {
+      if (kind === 'damage') { go('damage', id); return; }
+      openTask(id);
+    }
+    function taskBy(id) { return workTasks.find(t => t.id === id); }
+    function openTask(id) {
+      taskPopId = id;
+      fillTaskPop();
+    }
+    function closeTask() {
+      taskPopId = null;
+      const o = document.getElementById('task-pop');
+      if (!o) return;
+      o.classList.remove('on');
+      o.innerHTML = '';
+    }
+    function fillTaskPop() {
+      const o = document.getElementById('task-pop');
+      if (!o) return;
+      o.classList.add('on');
+      o.innerHTML = taskPopHtml();
+      o.querySelectorAll('.gal-item:not(.empty)').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); openPhoto(el.getAttribute('data-src'), el.getAttribute('data-cap')); };
+      });
+    }
+    function setTaskStatus(id, status) {
+      const t = taskBy(id);
+      if (!t) return;
+      t.status = status;
+      audit.unshift({ who: 'Bryan', action: 'Moved task', target: t.title, where: statusLabel(status), at: 'Just now' });
+      render();
+      fillTaskPop();
+    }
+    function addTaskNote(id) {
+      const t = taskBy(id);
+      const el = document.getElementById('task-note');
+      if (!t || !el) return;
+      const text = (el.value || '').trim();
+      if (!text) return;
+      t.notes.unshift({ who: 'Bryan', when: 'Just now', text: text });
+      el.value = '';
+      render();
+      fillTaskPop();
+    }
+    function taskPopHtml() {
+      const t = taskBy(taskPopId);
+      if (!t) return '<div class="card task-pop" onclick="event.stopPropagation()"><p class="empty">Task not found.</p></div>';
+      const p = t.property ? propertyBy(t.property) : null;
+      return '<div class="card task-pop" onclick="event.stopPropagation()">' +
+        '<div class="row"><div><div class="kicker">Task</div><b>' + esc(t.title) + '</b>' +
+          '<div class="muted">' + (p ? esc(p.name) + ' · ' : '') + esc(t.assignee) + ' · due ' + fmtIsoDate(t.due) + '</div></div>' +
+          '<button class="btn btn-ghost" type="button" onclick="closeTask()">Close</button></div>' +
+        '<p style="font-size:13px;line-height:1.5;margin:10px 0 0;">' + esc(t.detail) + '</p>' +
+        (t.cost ? '<div class="kv" style="margin-top:10px;"><span>Cost</span><span>' + usd(t.cost) + '</span></div>' : '') +
+        galleryBlock(t.photos, 'No photos on this task.') +
+        '<div class="chips" style="margin:14px 0 0;">' +
+          ['draft', 'todo', 'in-progress', 'review', 'done'].map(s =>
+            '<button class="pill' + (t.status === s ? ' on' : '') + '" type="button" onclick="setTaskStatus(\'' + t.id + '\',\'' + s + '\')">' + statusLabel(s) + '</button>'
+          ).join('') +
+        '</div>' +
+        '<label for="task-note">Add a note</label>' +
+        '<textarea id="task-note" placeholder="What changed, what you told them, what is next…"></textarea>' +
+        '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="addTaskNote(\'' + t.id + '\')">Save note</button></div>' +
+        (t.notes.length
+          ? '<div class="kicker" style="margin-top:16px;">Notes</div>' + t.notes.map(n =>
+              '<div class="note-item">' + esc(n.text) + '<span class="muted">' + esc(n.who) + ' · ' + esc(n.when) + '</span></div>'
+            ).join('')
+          : '<p class="empty">No notes yet.</p>') +
+      '</div>';
+    }
+
+    function calStep(delta) {
+      if (calView === 'month') calMonth = shiftMonth(calMonth, delta);
+      else calWeek = shiftDays(calWeek, delta * 7);
+      render();
+    }
+    function calToday() {
+      calMonth = TODAY.slice(0, 7);
+      calWeek = weekStart(TODAY);
+      render();
+    }
+    function calTitle() {
+      if (calView === 'month') return monthName(calMonth);
+      const end = shiftDays(calWeek, 6);
+      return fmtIsoDate(calWeek) + ' – ' + fmtIsoDate(end) + ', ' + end.slice(0, 4);
+    }
+    function toggleGoogleCal() {
+      googleCal = !googleCal;
+      activity.unshift({
+        who: 'Bryan',
+        what: googleCal ? 'Connected Google Calendar (simulated)' : 'Removed Google Calendar',
+        when: 'Just now',
+        company: 'Calendar'
+      });
+      render();
+    }
+    function monthHtml() {
+      const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const y = +calMonth.slice(0, 4);
+      const m = +calMonth.slice(5, 7) - 1;
+      const pad = new Date(y, m, 1).getDay();
+      const days = new Date(y, m + 1, 0).getDate();
+      let html = '<div class="cal2">' + labels.map(d => '<div class="dow2">' + d + '</div>').join('');
+      for (let i = 0; i < pad; i++) html += '<div class="cell off"></div>';
+      for (let d = 1; d <= days; d++) {
+        const iso = calMonth + '-' + String(d).padStart(2, '0');
+        html += '<div class="cell' + (iso === TODAY ? ' now' : '') + '">' +
+          '<span class="num">' + d + '</span>' + eventsOn(iso).map(evChip).join('') + '</div>';
+      }
+      const tail = (pad + days) % 7;
+      if (tail) for (let i = tail; i < 7; i++) html += '<div class="cell off"></div>';
+      return html + '</div>';
+    }
+    function weekHtml() {
+      const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      let head = '';
+      let body = '';
+      for (let i = 0; i < 7; i++) {
+        const iso = shiftDays(calWeek, i);
+        const evs = eventsOn(iso);
+        head += '<div class="dow2">' + labels[i] + ' ' + fmtIsoDate(iso) + '</div>';
+        body += '<div class="cell' + (iso === TODAY ? ' now' : '') + '">' +
+          (evs.length ? evs.map(evChip).join('') : '<span class="muted">Nothing booked</span>') + '</div>';
+      }
+      return '<div class="calw">' + head + body + '</div>';
+    }
+    function initHubMap() {
+      const el = document.getElementById('hub-map');
+      if (!el || typeof L === 'undefined') return;
+      if (hubMap) { hubMap.remove(); hubMap = null; }
+      hubMap = L.map(el, { scrollWheelZoom: false }).setView([41.25, -81.55], 8);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(hubMap);
+      properties.forEach(p => {
+        const m = L.marker([p.lat, p.lng]).addTo(hubMap);
+        m.bindTooltip('<b>' + p.name + '</b><br>' + cityOf(p) + ' · ' + tenantLabel(p));
+        m.on('mouseover', () => highlightProp(p.id, true));
+        m.on('mouseout', () => highlightProp(p.id, false));
+        m.on('click', () => go('property', p.id));
+      });
+      hubMap.fitBounds(L.latLngBounds(properties.map(p => [p.lat, p.lng])).pad(0.2));
+      setTimeout(() => hubMap.invalidateSize(), 80);
+    }
+    function highlightProp(id, on) {
+      const el = document.querySelector('[data-prop-row="' + id + '"]');
+      if (!el) return;
+      el.classList.toggle('hot', on);
+      if (on && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+    }
+
     const screens = {
       sitemap() {
-        return '<h1 class="page">Sitemap</h1><p class="sub">Web portal for running a property portfolio. Left nav is the map of the app. The bar at the top is how you run it: voice, photo, or a sentence.</p>' +
+        return '<h1 class="page">Sitemap</h1><p class="sub">Eight things in the left nav. The bar at the top is always there: voice, photo, or a sentence. Everything else hangs off one of the eight.</p>' +
           '<div class="grid g-2">' +
-            card('Get in', '<b>Home</b> — companies, upcoming appointments, and recently completed property tasks. Opens on demo data. No keys needed.<br><b>Settings</b> — paste a Supabase URL and anon key later, if you want your own project.') +
-            card('Capture', '<b>Capture</b> — voice, photo, files, a folder from the desktop, or Google Drive / Dropbox.<br><b>Inbox</b> — thumbnail and file, then company, property, type (task / note / document), and text. AI fills what it can.<br><b>Activity</b> — recent uploads.') +
-            card('Portfolio', '<b>Companies</b> — one row each, with a thumbnail. Click for a dashboard.<br><b>Company</b> — dashboard, plus records for that company only: documents, expenses, board notes. Also tax, filings, users, tasks, properties.<br><b>Properties</b> — scrolling dashboard: tenant, lease, maintenance schedule, inspections, contacts, money.<br><b>Map</b> — filter or sort by company.') +
-            card('Work', '<b>Manage</b> — property manager home: inspections to do, damage popups (one note, mic, camera), gardener schedule.<br><b>Calendar</b> — all companies, or one.<br><b>Tasks</b> — tree by company and property, with counts.') +
-            card('System', '<b>Audit</b> — who did what.<br><b>Settings</b> — your database keys, how to get them.<br><b>Feedback</b> — button in the corner. Screenshot plus text, voice, video, or a photo.') +
+            card('Home', 'Click Hearthhold at the top of the nav. Money in this month, what needs you, what is next, and the six properties. Nothing else.') +
+            card('Property', 'Map of northeast Ohio plus the list. Hover a pin to find the row, click either to open the place: tenant, lease, maintenance, inspections, contacts, photos, money.') +
+            card('Calendar', 'Month or week. Appointments, site visits, inspections, showings, and move in / move out. Google Calendar can be added (simulated).') +
+            card('Tasks', 'List or a board with draft, to do, in progress, review, done. Damage reports needing a decision sit in Review with cost, thumbnail, and gallery. Open one for the full note.<br><b>Inspections</b> lives here too — the walk list, checklists, and damage popups.') +
+            card('Money', 'In and out for the month, rent due per property, who is late, and what is coming.') +
+            card('People', 'Owner, property managers, tenants, contractors. Who they are, which property, and whether they can sign in or are only a record.') +
+            card('Upload · News · Settings', '<b>Upload</b> — voice, photo, files, a folder, or Google Drive / Dropbox, then Inbox to file it.<br><b>News</b> — what happened lately.<br><b>Settings</b> — optional database keys. Entities, audit, and this page are linked at the bottom of the nav.') +
           '</div>';
       },
       home() {
-        const due = expenses.filter(e => e.status === 'upcoming');
-        const tasks = allTasks();
-        const openTasks = tasks.filter(t => !t.done);
-        const todayDay = 11;
-        const upcomingCal = calEvents
-          .filter(e => e.day >= todayDay && e.title !== 'Today')
-          .slice()
-          .sort((a, b) => a.day - b.day);
-        const donePm = tasks
-          .filter(t => t.done && t.property)
-          .sort((a, b) => String(b.completed || b.due).localeCompare(String(a.completed || a.due)))
+        const ym = TODAY.slice(0, 7);
+        const sum = a => a.reduce((n, x) => n + x.amount, 0);
+        const inNow = ledger.filter(l => l.kind === 'income' && l.date.slice(0, 7) === ym && l.status === 'received');
+        const outNow = ledger.filter(l => l.kind === 'expense' && l.date.slice(0, 7) === ym && l.status === 'paid');
+        const lateRent = ledger.filter(l => l.kind === 'income' && l.status === 'late');
+        const work = allWork();
+        const needsApproval = work.filter(w => w.approval && (w.raw.status === 'pending-approval' || w.raw.status === 'needs-quote'));
+        const overdue = work.filter(w => !w.approval && w.status !== 'done' && w.due && w.due < TODAY);
+        const attention = needsApproval.concat(overdue);
+        const soon = allCalEvents()
+          .filter(e => e.date >= TODAY)
+          .sort((a, b) => a.date.localeCompare(b.date) || timeKey(a.time) - timeKey(b.time))
           .slice(0, 6);
-        function calWhen(e) {
-          return 'Sep ' + e.day + (e.time && e.time !== '—' ? ' · ' + e.time : '');
-        }
-        function prettyDate(iso) {
-          if (!iso) return '';
-          const parts = String(iso).split('-');
-          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-          return months[+parts[1] - 1] + ' ' + (+parts[2]);
-        }
-        return '<h1 class="page">Home</h1><p class="sub">Say it, shoot it, or drop it. The harness files it to a company or property. You only touch the leftovers.</p>' +
+        return '<h1 class="page">Today</h1>' +
+          '<p class="sub">' + fmtLongDate(TODAY) + ' · ' + properties.length + ' places in northeast Ohio. Use the bar at the top to talk, shoot, or type.</p>' +
           '<div class="grid g-3" style="margin-bottom:12px;">' +
-            stat('Inbox', inbox.length, 'to index', 'inbox') +
-            stat('Upcoming', due.length, 'property bills', 'expenses') +
-            stat('Open tasks', openTasks.length, 'across companies', 'tasks') +
+            '<div class="card click" data-go="money"><div class="kicker">Money in this month</div>' +
+              '<div class="big">' + usd(sum(inNow)) + '</div>' +
+              '<div class="muted">' + usd(sum(outNow)) + ' out · ' +
+              (lateRent.length ? '<span class="late">' + lateRent.length + ' rent late</span>' : 'nothing late') + '</div></div>' +
+            '<div class="card click" data-go="tasks"><div class="kicker">Needs you</div>' +
+              '<div class="big">' + attention.length + '</div>' +
+              '<div class="muted">' + needsApproval.length + ' to decide · ' + overdue.length + ' overdue</div></div>' +
+            '<div class="card click" data-go="calendar"><div class="kicker">Next up</div>' +
+              '<div class="big">' + (soon[0] ? fmtIsoDate(soon[0].date) : '—') + '</div>' +
+              '<div class="muted">' + (soon[0] ? esc(soon[0].title) : 'Nothing booked') + '</div></div>' +
           '</div>' +
           '<div class="grid g-main" style="margin-bottom:12px;">' +
             '<div class="card">' +
-              '<div class="row" style="margin-bottom:8px;"><div class="kicker">Companies</div><button class="pill" type="button" onclick="go(\'companies\')">All</button></div>' +
-              companies.map(c => {
-                const n = properties.filter(p => p.company === c.id).length;
-                const overdue = tasks.filter(t => t.company === c.id && t.overdue).length;
-                return '<div class="row click" data-company="' + c.id + '" style="padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;">' +
-                  '<div class="thumb" style="background-image:url(\'' + (c.image || 'thumbs/andes.png') + '\')"></div>' +
-                  '<div style="flex:1;"><b>' + c.name + '</b><div class="muted">' + c.jurisdiction + ' · ' + n + ' properties</div></div>' +
-                  (overdue ? '<span class="late">' + overdue + ' overdue</span>' : '<span class="ok">On track</span>') +
-                '</div>';
-              }).join('') +
-              '<div style="margin-top:12px;"><button class="btn btn-primary" type="button" onclick="go(\'capture\')">Capture something</button></div>' +
+              '<div class="row" style="margin-bottom:6px;"><div class="kicker">Needs you</div>' +
+                '<button class="pill" type="button" onclick="go(\'tasks\')">All tasks</button></div>' +
+              (attention.length ? attention.map(workRow).join('') : '<p class="empty">Nothing waiting on you.</p>') +
             '</div>' +
             '<div class="card">' +
-              '<div class="row" style="margin-bottom:8px;"><div class="kicker">Upcoming</div><button class="pill" type="button" onclick="go(\'calendar\')">Calendar</button></div>' +
-              (upcomingCal.length ? upcomingCal.map(e => {
-                const co = e.company && e.company !== 'all' ? companyBy(e.company) : null;
-                const pr = e.property ? propertyBy(e.property) : null;
-                const extra = [co && co.name, pr && pr.name].filter(Boolean).join(' · ');
-                const attr = pr ? ' data-property="' + pr.id + '"' : (co ? ' data-company="' + co.id + '"' : ' data-go="calendar"');
-                return '<div class="check click"' + attr + ' style="cursor:pointer;"><div><b>' + e.title + '</b><div class="muted">' + calWhen(e) + (extra ? ' · ' + extra : '') + '</div></div></div>';
-              }).join('') : '<p class="empty">Nothing on the calendar.</p>') +
+              '<div class="row" style="margin-bottom:6px;"><div class="kicker">Coming up</div>' +
+                '<button class="pill" type="button" onclick="go(\'calendar\')">Calendar</button></div>' +
+              (soon.length ? soon.map(evRow).join('') : '<p class="empty">Nothing booked.</p>') +
             '</div>' +
           '</div>' +
-          '<div class="grid g-main">' +
-            '<div class="card">' +
-              '<div class="row" style="margin-bottom:8px;"><div class="kicker">Recently completed</div><button class="pill" type="button" onclick="go(\'tasks\')">Tasks</button></div>' +
-              (donePm.length ? donePm.map(t =>
-                '<div class="check"><input type="checkbox" checked onchange="toggleTask(\'' + t.company + '\',\'' + t.text.replace(/'/g, '\\\'') + '\')"><div>' + t.text + '<div class="muted">' + t.propertyName + ' · ' + t.companyName + ' · ' + prettyDate(t.completed || t.due) + '</div></div></div>'
-              ).join('') : '<p class="empty">No completed property tasks yet.</p>') +
-            '</div>' +
-            '<div class="card">' +
-              '<div class="row" style="margin-bottom:8px;"><div class="kicker">Properties</div><button class="pill" type="button" onclick="go(\'properties\')">All</button></div>' +
-              properties.map(p => propRow(p)).join('') +
-            '</div>' +
+          '<div class="card">' +
+            '<div class="row" style="margin-bottom:10px;"><div class="kicker">Properties</div>' +
+              '<button class="pill" type="button" onclick="go(\'properties\')">Map and list</button></div>' +
+            '<div class="list">' + properties.map(propCard).join('') + '</div>' +
           '</div>';
       },
       manage() {
@@ -2212,7 +3080,7 @@
           '</div>';
       },
       capture() {
-        return '<h1 class="page">Capture</h1><p class="sub">Talk, photograph, drop files or a whole folder from the desktop, or pull from Google Drive / Dropbox. AI proposes company, property, and type. If it is unsure, it lands in Inbox.</p>' +
+        return '<h1 class="page">Upload</h1><p class="sub">Talk, photograph, drop files or a whole folder from the desktop, or pull from Google Drive / Dropbox. AI proposes company, property, and type. If it is unsure, it lands in Inbox.</p>' +
           '<div class="card">' +
             '<div class="btn-row">' +
               '<button class="btn btn-primary" type="button" onclick="mockCapture(\'voice\')">🎤 Voice</button>' +
@@ -2229,6 +3097,7 @@
               '<button class="icon-btn" type="button" onclick="showCloud(\'dropbox\')">' + (clouds.dropbox ? 'Dropbox · connected' : 'Connect Dropbox') + '</button>' +
             '</div>' +
             '<div id="capture-out">' + (captured.length ? foundBlock() : '<p class="empty">Nothing in this batch yet.</p>') + '</div>' +
+            '<div class="btn-row"><button class="pill" type="button" onclick="go(\'inbox\')">Inbox (' + inbox.length + ')</button></div>' +
           '</div>';
       },
       inbox() {
@@ -2276,7 +3145,7 @@
           }).join('') + (rows.length ? '' : '<p class="empty">Inbox is clear.</p>') + '</div>';
       },
       activity() {
-        return '<h1 class="page">Activity</h1><p class="sub">Documents and captures that just landed. Whole portfolio.</p>' +
+        return '<h1 class="page">News</h1><p class="sub">What just happened across the portfolio. Uploads, filings, and edits.</p>' +
           '<div class="list">' + activity.map(a =>
             '<div class="card"><div class="row"><b>' + a.what + '</b><span class="muted">' + a.when + '</span></div><div class="muted">' + a.who + ' · ' + a.company + '</div></div>'
           ).join('') + '</div>';
@@ -2365,11 +3234,23 @@
           '<div class="card">' + body + '</div>';
       },
       properties() {
-        return '<h1 class="page">Properties</h1><p class="sub">Held by a company. Contacts, tenants, and lease status live on each house.</p>' +
-          '<div class="grid g-3">' + properties.map(p => {
-            const c = companyBy(p.company);
-            return '<div class="card click" data-property="' + p.id + '"><div class="hero" style="background-image:url(\'' + p.image + '\')"></div><b>' + p.name + '</b><div class="muted">' + p.address + '<br>' + c.name + '<br>' + tenantLabel(p) + '</div></div>';
-          }).join('') + '</div>';
+        const occupied = properties.filter(p => p.tenant && p.tenant.status !== 'vacant').length;
+        const roll = properties.reduce((n, p) => n + ((p.tenant && p.tenant.rentAmount) || 0), 0);
+        const openInsp = inspections.filter(i => i.status !== 'done').length;
+        return '<h1 class="page">Property</h1>' +
+          '<p class="sub">Everything is in northeast Ohio. Hover a pin to find it in the list, click either one to open the place.</p>' +
+          '<div class="grid g-3" style="margin-bottom:12px;">' +
+            '<div class="card"><div class="kicker">Places</div><div class="big">' + properties.length + '</div>' +
+              '<div class="muted">' + occupied + ' occupied · ' + (properties.length - occupied) + ' vacant</div></div>' +
+            '<div class="card click" data-go="money"><div class="kicker">Rent roll</div><div class="big">' + usd(roll) + '</div>' +
+              '<div class="muted">per month, units on lease</div></div>' +
+            '<div class="card click" data-go="manage"><div class="kicker">Inspections open</div><div class="big">' + openInsp + '</div>' +
+              '<div class="muted">walk list for the manager</div></div>' +
+          '</div>' +
+          '<div class="hub">' +
+            '<div class="card" style="padding:8px;"><div id="hub-map"></div></div>' +
+            '<div class="hub-list">' + properties.map(propCard).join('') + '</div>' +
+          '</div>';
       },
       property() {
         const p = propertyBy(propertyId);
@@ -2474,40 +3355,176 @@
           '<div class="grid g-main"><div id="map-root"></div><div class="list">' + list.map(p => propRow(p)).join('') + '</div></div>';
       },
       calendar() {
-        const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        const start = new Date(2026, 8, 1).getDay();
-        const upcoming = calEvents
-          .filter(e => e.title !== 'Today' && (calCompany === 'all' || e.company === calCompany || e.company === 'all'))
-          .slice()
-          .sort((a, b) => a.day - b.day);
-        let html = '<h1 class="page">Calendar</h1><p class="sub">September 2026. Complete view, or one company.</p>' +
-          '<div class="chips"><button class="pill' + (calCompany === 'all' ? ' on' : '') + '" onclick="calCompany=\'all\';render()">All</button>' +
-          companies.map(c => '<button class="pill' + (calCompany === c.id ? ' on' : '') + '" onclick="calCompany=\'' + c.id + '\';render()">' + c.name + '</button>').join('') + '</div>' +
-          '<div class="cal-list card">' +
-            (upcoming.length ? upcoming.map(e => {
-              const co = e.company && e.company !== 'all' ? companyBy(e.company) : null;
-              const pr = e.property ? propertyBy(e.property) : null;
-              const extra = [co && co.name, pr && pr.name].filter(Boolean).join(' · ');
-              return '<div class="check"><div><b>' + e.title + '</b><div class="muted">Sep ' + e.day + (e.time && e.time !== '—' ? ' · ' + e.time : '') + (extra ? ' · ' + extra : '') + '</div></div></div>';
-            }).join('') : '<p class="empty">Nothing this month.</p>') +
+        const kinds = ['all', 'inspection', 'showing', 'visit', 'appointment', 'move-in', 'move-out'];
+        return '<h1 class="page">Calendar</h1>' +
+          '<p class="sub">Appointments, site visits, inspections, showings, and move dates. One month at a glance or one week up close.</p>' +
+          '<div class="chips">' +
+            '<button class="pill' + (calView === 'month' ? ' on' : '') + '" type="button" onclick="calView=\'month\';render()">Month</button>' +
+            '<button class="pill' + (calView === 'week' ? ' on' : '') + '" type="button" onclick="calView=\'week\';render()">Week</button>' +
+            '<button class="pill" type="button" onclick="calStep(-1)">← Back</button>' +
+            '<button class="pill" type="button" onclick="calToday()">Today</button>' +
+            '<button class="pill" type="button" onclick="calStep(1)">Next →</button>' +
+            '<b style="font-size:13px;align-self:center;padding-left:6px;">' + calTitle() + '</b>' +
           '</div>' +
-          '<div class="cal">';
-        labels.forEach(d => { html += '<div class="dow">' + d + '</div>'; });
-        for (let i = 0; i < start; i++) html += '<div></div>';
-        for (let d = 1; d <= 30; d++) {
-          const ev = calEvents.filter(e => e.day === d && (calCompany === 'all' || e.company === calCompany || e.company === 'all'));
-          html += '<div><b>' + d + '</b>' + ev.map(e => '<span class="dot">' + e.title + '</span>').join('') + '</div>';
-        }
-        return html + '</div>';
+          '<div class="chips">' +
+            kinds.map(k => '<button class="pill' + (calKind === k ? ' on' : '') + '" type="button" onclick="calKind=\'' + k + '\';render()">' +
+              (k === 'all' ? 'Everything' : kindLabel(k)) + '</button>').join('') +
+            '<button class="pill' + (googleCal ? ' on' : '') + '" type="button" onclick="toggleGoogleCal()">' +
+              (googleCal ? '✓ Google Calendar on' : '+ Add Google Calendar') + '</button>' +
+          '</div>' +
+          '<div class="legend">' +
+            Object.keys(kindColors).map(k => '<span><i style="background:' + kindColors[k] + '"></i>' + kindLabel(k) + '</span>').join('') +
+            (googleCal ? '<span>Google events show as appointments.</span>' : '') +
+          '</div>' +
+          (calView === 'month' ? monthHtml() : weekHtml());
       },
       tasks() {
-        const rows = allTasks().filter(t => taskMatches(t, taskNode));
-        return '<h1 class="page">Tasks</h1><p class="sub">Tree by company, then property. The number on each node is how many tasks sit there.</p>' +
-          '<div class="grid g-tree">' +
-            treeHtml('task') +
-            '<div class="card">' +
-              (rows.length ? rows.map(t => '<div class="check"><input type="checkbox"' + (t.done ? ' checked' : '') + ' onchange="toggleTask(\'' + t.company + '\',\'' + t.text.replace(/'/g, '\\\'') + '\')"><div>' + t.text + '<div class="muted">' + t.companyName + ' · ' + t.propertyName + ' · ' + t.due + (t.overdue ? ' · <span class="late">overdue</span>' : '') + '</div></div></div>').join('') : '<p class="empty">No tasks in this branch.</p>') +
+        const cols = [
+          { id: 'draft', label: 'Draft' },
+          { id: 'todo', label: 'To do' },
+          { id: 'in-progress', label: 'In progress' },
+          { id: 'review', label: 'Review' },
+          { id: 'done', label: 'Done' }
+        ];
+        const all = allWork();
+        const whoList = ['all'].concat(Array.from(new Set(all.map(w => w.assignee))).sort());
+        let rows = all;
+        if (taskStatus === 'open') rows = rows.filter(w => w.status !== 'done');
+        if (taskStatus === 'approvals') rows = rows.filter(w => w.approval);
+        if (taskStatus === 'done') rows = rows.filter(w => w.status === 'done');
+        if (taskWho !== 'all') rows = rows.filter(w => w.assignee === taskWho);
+        const head = '<h1 class="page">Tasks</h1>' +
+          '<p class="sub">Every open job, who has it, and what it costs. Damage reports waiting on your decision sit in Review — open one to see the quote, the photos, and approve it.</p>' +
+          '<div class="chips">' +
+            '<button class="pill' + (taskView === 'list' ? ' on' : '') + '" type="button" onclick="taskView=\'list\';render()">List</button>' +
+            '<button class="pill' + (taskView === 'board' ? ' on' : '') + '" type="button" onclick="taskView=\'board\';render()">Board</button>' +
+            [['open', 'Open'], ['approvals', 'Approvals'], ['done', 'Done'], ['all', 'Everything']].map(f =>
+              '<button class="pill' + (taskStatus === f[0] ? ' on' : '') + '" type="button" onclick="taskStatus=\'' + f[0] + '\';render()">' + f[1] + '</button>'
+            ).join('') +
+            '<button class="pill" type="button" onclick="go(\'manage\')">Inspections</button>' +
+          '</div>' +
+          '<div class="chips">' +
+            whoList.map(w => '<button class="pill' + (taskWho === w ? ' on' : '') + '" type="button" onclick="taskWho=\'' + w.replace(/'/g, "\\'") + '\';render()">' +
+              (w === 'all' ? 'Anyone' : esc(w)) + '</button>').join('') +
+          '</div>';
+        if (taskView === 'board') {
+          return head + '<div class="board">' + cols.map(c => {
+            const items = rows.filter(w => w.status === c.id);
+            return '<div class="col"><div class="col-head"><b>' + c.label + '</b><span>' + items.length + '</span></div>' +
+              (items.length ? items.map(taskCard).join('') : '<p class="muted">Empty</p>') + '</div>';
+          }).join('') + '</div>';
+        }
+        return head + '<div class="card">' +
+          (rows.length ? rows.map(workRow).join('') : '<p class="empty">Nothing in this filter.</p>') + '</div>';
+      },
+      money() {
+        const ym = TODAY.slice(0, 7);
+        const sum = a => a.reduce((n, x) => n + x.amount, 0);
+        const inNow = ledger.filter(l => l.kind === 'income' && l.date.slice(0, 7) === ym && l.status === 'received');
+        const outNow = ledger.filter(l => l.kind === 'expense' && l.date.slice(0, 7) === ym && l.status === 'paid');
+        const late = ledger.filter(l => l.status === 'late');
+        const coming = ledger.filter(l => l.status === 'due' || l.status === 'upcoming').sort((a, b) => a.date.localeCompare(b.date));
+        const thisMonth = ledger
+          .filter(l => l.date.slice(0, 7) === ym && l.status !== 'due' && l.status !== 'upcoming')
+          .sort((a, b) => b.date.localeCompare(a.date));
+        const net = sum(inNow) - sum(outNow);
+        const roll = properties.reduce((n, p) => n + ((p.tenant && p.tenant.rentAmount) || 0), 0);
+        function line(l) {
+          const p = l.property ? propertyBy(l.property) : null;
+          const cls = l.kind === 'income' ? 'in' : 'out';
+          const flag = l.status === 'late' ? ' <span class="late">late</span>' : '';
+          return '<div class="money-row">' +
+            '<div><b>' + esc(l.title) + '</b><div class="muted">' + fmtIsoDate(l.date) + (p ? ' · ' + esc(p.name) : '') + flag + '</div></div>' +
+            '<div class="amt ' + cls + '">' + (l.kind === 'income' ? '+' : '−') + usd(l.amount) + '</div>' +
+          '</div>';
+        }
+        return '<h1 class="page">Money</h1>' +
+          '<p class="sub">' + monthName(ym) + ' so far. Rent in, bills out, and who still owes you.</p>' +
+          '<div class="grid g-3" style="margin-bottom:12px;">' +
+            '<div class="card"><div class="kicker">In this month</div><div class="big amt in">' + usd(sum(inNow)) + '</div>' +
+              '<div class="muted">of ' + usd(roll) + ' expected</div></div>' +
+            '<div class="card"><div class="kicker">Out this month</div><div class="big amt out">' + usd(sum(outNow)) + '</div>' +
+              '<div class="muted">' + outNow.length + ' payments</div></div>' +
+            '<div class="card"><div class="kicker">Net</div><div class="big">' + usd(net) + '</div>' +
+              '<div class="muted">' + (late.length ? '<span class="late">' + usd(sum(late)) + ' still owed</span>' : 'everything collected') + '</div></div>' +
+          '</div>' +
+          '<div class="card" style="margin-bottom:12px;">' +
+            '<div class="kicker">Rent due</div>' +
+            '<table><tr><th>Property</th><th>Tenant</th><th>Rent</th><th>Due</th><th>Status</th></tr>' +
+            properties.map(p => {
+              const tn = p.tenant || {};
+              const vacant = tn.status === 'vacant';
+              const paid = tn.paidThrough && tn.paidThrough.indexOf('Sep') === 0;
+              const status = vacant ? 'Vacant' : (paid ? 'Paid through ' + tn.paidThrough : 'Late — paid through ' + tn.paidThrough);
+              return '<tr><td><button class="btn btn-ghost" type="button" data-property="' + p.id + '">' + esc(p.name) + '</button></td>' +
+                '<td>' + esc(tn.name || '—') + '</td>' +
+                '<td>' + (tn.rentAmount ? usd(tn.rentAmount) : '—') + '</td>' +
+                '<td>' + (vacant ? '—' : ordinal(tn.dueDay)) + '</td>' +
+                '<td class="' + (vacant ? '' : (paid ? 'ok' : 'late')) + '">' + status + '</td></tr>';
+            }).join('') + '</table>' +
+          '</div>' +
+          '<div class="grid g-main">' +
+            '<div class="card"><div class="kicker">' + monthName(ym) + ' — in and out</div>' +
+              (thisMonth.length ? thisMonth.map(line).join('') : '<p class="empty">Nothing yet.</p>') + '</div>' +
+            '<div class="card"><div class="kicker">Coming up</div>' +
+              (coming.length ? coming.map(line).join('') : '<p class="empty">Nothing scheduled.</p>') +
+              '<div class="btn-row"><button class="pill" type="button" onclick="go(\'properties\')">By property</button></div>' +
             '</div>' +
+          '</div>';
+      },
+      people() {
+        const kinds = [['all', 'Everyone'], ['owner', 'Me'], ['manager', 'Property managers'], ['tenant', 'Tenants'], ['contractor', 'Contractors'], ['pro', 'Other']];
+        const rows = people.filter(x => peopleKind === 'all' || x.kind === peopleKind);
+        const withLogin = people.filter(x => x.access === 'account').length;
+        return '<h1 class="page">People</h1>' +
+          '<p class="sub">' + people.length + ' people on file. ' + withLogin + ' can sign in, the rest are just records — most tenants and contractors never need an account.</p>' +
+          '<div class="chips">' +
+            kinds.map(k => '<button class="pill' + (peopleKind === k[0] ? ' on' : '') + '" type="button" onclick="peopleKind=\'' + k[0] + '\';render()">' + k[1] + '</button>').join('') +
+          '</div>' +
+          '<div class="card">' + rows.map(x => {
+            const props = x.props.map(id => (propertyBy(id) || {}).short || '').filter(Boolean);
+            const where = props.length > 3 ? 'All ' + props.length + ' properties' : (props.join(' · ') || 'No property');
+            return '<button type="button" class="wrow" onclick="go(\'person\',\'' + x.id + '\')">' +
+              '<span class="avatar ' + x.kind + '">' + initials(x.name) + '</span>' +
+              '<span style="flex:1;min-width:0;"><b>' + esc(x.name) + '</b>' +
+                '<span class="muted" style="display:block;">' + esc(x.role) + ' · ' + esc(where) + '</span>' +
+                '<span class="muted" style="display:block;">' + esc(x.summary) + '</span></span>' +
+              (x.access === 'account'
+                ? '<span class="tag" style="background:#eaf3ee;color:#2f6a4a;">Last in ' + fmtIsoDate(x.lastLogin) + '</span>'
+                : '<span class="tag">Record only</span>') +
+            '</button>';
+          }).join('') + '</div>';
+      },
+      person() {
+        const x = personBy(personId);
+        if (!x) return '<p class="empty">Person not found.</p>';
+        const props = x.props.map(id => propertyBy(id)).filter(Boolean);
+        const theirTasks = allWork().filter(w => w.assignee === x.name);
+        const theirEvents = allCalEvents().filter(e => e.who === x.name && e.date >= TODAY)
+          .sort((a, b) => a.date.localeCompare(b.date)).slice(0, 5);
+        return '<div class="muted"><button class="btn btn-ghost" type="button" onclick="go(\'people\')">← People</button></div>' +
+          '<div class="row" style="justify-content:flex-start;gap:14px;margin:12px 0 4px;">' +
+            '<div class="avatar lg ' + x.kind + '">' + initials(x.name) + '</div>' +
+            '<div><h1 class="page" style="margin:0;">' + esc(x.name) + '</h1>' +
+              '<p class="sub" style="margin:2px 0 0;">' + esc(x.role) + '</p></div>' +
+          '</div>' +
+          '<p class="sub">' + esc(x.summary) + '</p>' +
+          '<div class="grid g-2" style="margin-bottom:12px;">' +
+            '<div class="card"><div class="kicker">Contact</div>' +
+              '<div class="kv" style="margin-top:8px;"><span>Phone</span><span>' + esc(x.phone) + '</span>' +
+              '<span>Email</span><span>' + esc(x.email) + '</span></div></div>' +
+            '<div class="card"><div class="kicker">System access</div>' +
+              '<div class="kv" style="margin-top:8px;"><span>Account</span><span>' + (x.access === 'account' ? 'Yes' : 'No — record only') + '</span>' +
+              '<span>Role</span><span>' + esc(x.accessRole) + '</span>' +
+              '<span>Last login</span><span>' + (x.lastLogin ? fmtIsoDate(x.lastLogin) + ', ' + x.lastLogin.slice(0, 4) : 'Never signed in') + '</span></div></div>' +
+          '</div>' +
+          '<div class="card" style="margin-bottom:12px;"><div class="kicker">Properties</div>' +
+            (props.length ? '<div class="list" style="margin-top:8px;">' + props.map(propCard).join('') + '</div>' : '<p class="empty">Not tied to a property.</p>') + '</div>' +
+          '<div class="grid g-main">' +
+            '<div class="card"><div class="kicker">Their tasks</div>' +
+              (theirTasks.length ? theirTasks.map(workRow).join('') : '<p class="empty">Nothing assigned.</p>') + '</div>' +
+            '<div class="card"><div class="kicker">On the calendar</div>' +
+              (theirEvents.length ? theirEvents.map(evRow).join('') : '<p class="empty">Nothing booked.</p>') + '</div>' +
           '</div>';
       },
       documents() {
@@ -2642,13 +3659,22 @@
       let property = '';
       let type = 'document';
       let text = (c.meta || c.title || '').replace(/[“”]/g, '').trim();
-      if (/laureles|hardware|kitchen|camila|hoa/.test(blob)) {
+      if (/tremont|hardware|kitchen|dana|porch/.test(blob)) {
         company = 'hearthhold';
-        property = 'laureles';
-      } else if (/envigado|andes|taller/.test(blob)) {
+        property = 'tremont';
+      } else if (/lakewood|marcus|paint/.test(blob)) {
+        company = 'hearthhold';
+        property = 'lakewood';
+      } else if (/canton|bellview|roll-up|storefront/.test(blob)) {
         company = 'andes';
-        property = 'envigado';
-      } else if (/ohio|northstar|fence/.test(blob)) {
+        property = 'canton';
+      } else if (/akron|highland|roof/.test(blob)) {
+        company = 'andes';
+        property = 'akron';
+      } else if (/kent|students|rosa/.test(blob)) {
+        company = 'northstar';
+        property = 'kent';
+      } else if (/chardon|northstar|fence|well|septic/.test(blob)) {
         company = 'northstar';
         property = 'ohio';
       } else if (/hearthhold|gas|utilities|home\//.test(blob)) {
@@ -2663,9 +3689,9 @@
     function mockCapture(kind) {
       captured.push(
         kind === 'voice'
-          ? { title: 'Gas bill', meta: 'Pay the gas bill 24.000 COP · utilities · Hearthhold', file: 'note.m4a', kind: 'voice', thumb: '' }
+          ? { title: 'Gas bill', meta: 'Pay the gas bill $94 · utilities · Hearthhold', file: 'note.m4a', kind: 'voice', thumb: '' }
           : kind === 'photo'
-            ? { title: 'Receipt photo', meta: 'Hardware store · 186.000 COP · Laureles', file: 'photo.jpg', kind: 'photo', thumb: 'thumbs/laureles-kitchen.png' }
+            ? { title: 'Receipt photo', meta: 'Hardware store · $186 · Tremont kitchen', file: 'photo.jpg', kind: 'photo', thumb: 'thumbs/laureles-kitchen.png' }
             : { title: 'Minutes.pdf', meta: 'Board minutes · Hearthhold LLC', file: 'Minutes.pdf', kind: 'file', thumb: '' }
       );
       activity.unshift({ who: 'Bryan', what: 'Captured ' + captured[captured.length - 1].title, when: 'Just now', company: 'Inbox' });
@@ -2843,10 +3869,10 @@
       clouds[which] = true;
       if (which === 'google') {
         captured.push({ title: 'gas-ago.jpg', file: 'gas-ago.jpg', meta: 'Google Drive / Receipts · utilities · Hearthhold', thumb: 'thumbs/home.png', kind: 'photo' });
-        captured.push({ title: 'lease-camila.pdf', file: 'lease-camila.pdf', meta: 'Google Drive / Laureles · lease', thumb: 'thumbs/laureles.png', kind: 'file' });
+        captured.push({ title: 'lease-dana.pdf', file: 'lease-dana.pdf', meta: 'Google Drive / Tremont · lease', thumb: 'thumbs/laureles.png', kind: 'file' });
       } else {
-        captured.push({ title: 'lease-2025.pdf', file: 'lease-2025.pdf', meta: 'Dropbox / Andes · Envigado lease', thumb: 'thumbs/andes.png', kind: 'file' });
-        captured.push({ title: '2025-franchise.pdf', file: '2025-franchise.pdf', meta: 'Dropbox / Taxes · Andes franchise', thumb: 'thumbs/andes.png', kind: 'file' });
+        captured.push({ title: 'lease-2025.pdf', file: 'lease-2025.pdf', meta: 'Dropbox / Cuyahoga Rentals · Canton lease', thumb: 'thumbs/andes.png', kind: 'file' });
+        captured.push({ title: '2025-annual-report.pdf', file: '2025-annual-report.pdf', meta: 'Dropbox / Taxes · Ohio annual report', thumb: 'thumbs/andes.png', kind: 'file' });
       }
       hideOverlay();
       render();
@@ -3058,6 +4084,7 @@
       const photo = document.getElementById('overlay');
       if (photo && photo.classList.contains('on')) { hideOverlay(); return; }
       if (damagePopOpen) { closeDamage(); return; }
+      if (taskPopId) { closeTask(); return; }
       closeNav();
     });
     enterApp();
