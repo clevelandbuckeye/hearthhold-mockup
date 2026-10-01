@@ -387,8 +387,9 @@
       #hub-map, #home-map { height: 300px; }
       .wrow { min-height: 48px; padding: 12px 0; }
       .wrow .thumb { width: 48px; height: 48px; }
-      .ls-card { flex-wrap: wrap; }
-      .ls-card .thumb { width: 100%; height: 120px; }
+      .ls-head { grid-template-columns: 72px 1fr; }
+      .ls-head .thumb { width: 72px; height: 72px; }
+      .ch-actions { width: 100%; }
       .pin-go { min-height: 44px; }
       .map-picked .pin-card { flex-wrap: wrap; }
       .map-picked .pin-go { width: 100%; justify-content: center; margin-left: 0; }
@@ -579,37 +580,86 @@
     .p-card { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; padding: 10px; }
     .p-card.hot { outline: 2px solid var(--forest-2); }
     .p-rent { font-weight: 700; font-size: 13px; white-space: nowrap; }
-    .ls-card { display: flex; gap: 12px; align-items: stretch; text-align: left; width: 100%; }
-    .ls-card .thumb { width: 92px; height: 72px; border-radius: 10px; }
-    .ls-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-    .ch-pill {
+    .ls-wrap { padding: 0; overflow: hidden; }
+    .ls-head {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 12px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      text-align: left;
+      align-items: center;
+      cursor: pointer;
+      min-height: 96px;
+    }
+    .ls-head:hover b { color: var(--forest-2); }
+    .ls-head .thumb { width: 92px; height: 72px; border-radius: 10px; }
+    .ls-kicker {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      border: 1px solid var(--line);
-      background: #fff;
+      min-height: 22px;
+      padding: 2px 8px;
       border-radius: 99px;
-      padding: 6px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--mute);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
     }
-    .ch-pill.on { color: var(--forest); border-color: #cfe3d6; background: #eaf3ee; }
-    .ch-pill.syncing { color: var(--warn); border-color: #ead9c0; background: #f7f1e6; }
-    .ch-pill.off { opacity: .7; }
-    .ch-dot { width: 8px; height: 8px; border-radius: 99px; background: var(--line); }
-    .ch-pill.on .ch-dot { background: var(--forest-2); }
-    .ch-pill.syncing .ch-dot { background: var(--warn); }
+    .ls-kicker.active { background: #eaf3ee; color: #2f6a4a; }
+    .ls-kicker.draft { background: var(--mist); color: var(--mute); }
+    .ls-kicker.paused { background: #f7f1e6; color: var(--warn); }
+    .ls-kicker.filled { background: #e9f0f4; color: var(--river); }
+    .ls-exp {
+      display: flex;
+      width: 100%;
+      min-height: 44px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: none;
+      border-top: 1px solid var(--line);
+      background: #fafbfa;
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 650;
+      color: var(--forest);
+    }
+    .ls-exp:hover { background: var(--mist); }
+    .ls-ch { background: #fafbfa; padding: 0 12px 8px; }
+    .ch-line { padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
+    .ch-stats { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 4px; }
     .ch-row {
       display: flex;
-      gap: 10px;
-      align-items: center;
-      padding: 10px 0;
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 12px 0;
       border-bottom: 1px solid var(--line);
     }
     .ch-row:last-child { border-bottom: none; }
-    .inq { padding: 10px 0; border-bottom: 1px solid var(--line); }
-    .inq:last-child { border-bottom: none; }
+    .ch-main { flex: 1 1 240px; min-width: 0; }
+    .ch-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .ch-actions .btn, .ch-actions .pill { min-height: 44px; }
+    .flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+    .flow .step {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 8px;
+      border-radius: 99px;
+      background: var(--mist);
+      color: var(--mute);
+    }
+    .step.on { background: var(--forest); color: #fff; }
+    .step.bad { background: #f8ece9; color: var(--bad); }
+    .msg { background: var(--mist); border-radius: 10px; padding: 8px 10px; margin-top: 6px; font-size: 13px; }
+    .msg.mine { background: #eaf3ee; }
+    .msg b { display: block; font-size: 12px; }
+    .reply { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+    .reply input { flex: 1; min-width: 0; width: auto; }
 
     /* Calendar */
     .cal2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--line); border-radius: 12px; overflow: hidden; }
@@ -1322,13 +1372,50 @@
         furnished: 'No',
         manager: 'Denise Kolar',
         channels: {
-          facebook: { on: true, status: 'synced', last: '2026-09-10' },
-          apartments: { on: true, status: 'synced', last: '2026-09-09' },
-          airbnb: { on: false, status: 'off', last: null }
+          facebook: { on: true, status: 'synced', last: '2026-09-10', posted: '2026-09-08', unread: 2, contacts: 5 },
+          apartments: { on: true, status: 'synced', last: '2026-09-09', posted: '2026-09-09', unread: 1, contacts: 3 },
+          airbnb: { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 }
         },
         inquiries: [
-          { name: 'Elena Ruiz', when: 'Sep 10', channel: 'apartments', status: 'tour', note: 'Saturday showing on the 12th. Two kids, one cat.' },
-          { name: 'Chris Palumbo', when: 'Sep 9', channel: 'facebook', status: 'new', note: 'Asked about the well and internet.' }
+          {
+            id: 'a-elena',
+            name: 'Elena Ruiz',
+            phone: '440-555-0162',
+            email: 'elena@example.com',
+            when: 'Sep 10',
+            channel: 'apartments',
+            interested: true,
+            stage: 'review',
+            note: 'Saturday showing on the 12th. Two kids, one cat. Income looks fine.',
+            application: {
+              sent: '2026-09-10',
+              income: '$5,200 / mo',
+              occupants: '2 adults, 2 kids',
+              pets: 'One cat',
+              employer: 'UH Geauga',
+              moveIn: '2026-10-01',
+              decision: null
+            },
+            messages: [
+              { who: 'Elena Ruiz', when: 'Sep 10', text: 'Can we see it Saturday? Two kids and one cat.' },
+              { who: 'Denise Kolar', when: 'Sep 10', text: 'Saturday at 9:30. I will meet you at the drive.' }
+            ]
+          },
+          {
+            id: 'a-chris',
+            name: 'Chris Palumbo',
+            phone: '216-555-0194',
+            email: 'chris@example.com',
+            when: 'Sep 9',
+            channel: 'facebook',
+            interested: true,
+            stage: 'interested',
+            note: 'Asked about the well and internet. No application yet.',
+            application: null,
+            messages: [
+              { who: 'Chris Palumbo', when: 'Sep 9', text: 'Is the well tested, and is there cable at the road?' }
+            ]
+          }
         ]
       },
       {
@@ -1353,12 +1440,34 @@
         furnished: 'No',
         manager: 'Denise Kolar',
         channels: {
-          facebook: { on: true, status: 'synced', last: '2026-09-08' },
-          apartments: { on: true, status: 'synced', last: '2026-09-08' },
-          airbnb: { on: false, status: 'off', last: null }
+          facebook: { on: true, status: 'synced', last: '2026-09-08', posted: '2026-09-08', unread: 1, contacts: 4 },
+          apartments: { on: true, status: 'synced', last: '2026-09-08', posted: '2026-09-08', unread: 0, contacts: 2 },
+          airbnb: { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 }
         },
         inquiries: [
-          { name: 'Jamie Cole', when: 'Sep 10', channel: 'facebook', status: 'tour', note: 'Showing Wed 16 at 5:30. Wants to see after paint.' }
+          {
+            id: 'a-jamie',
+            name: 'Jamie Cole',
+            phone: '216-555-0133',
+            email: 'jamie@example.com',
+            when: 'Sep 10',
+            channel: 'facebook',
+            interested: true,
+            stage: 'applied',
+            note: 'Showing Wed 16 at 5:30. Wants to see it after the paint.',
+            application: {
+              sent: '2026-09-11',
+              income: '$3,400 / mo',
+              occupants: '1 adult',
+              pets: 'None',
+              employer: 'Cleveland Clinic',
+              moveIn: '2026-09-20',
+              decision: null
+            },
+            messages: [
+              { who: 'Jamie Cole', when: 'Sep 10', text: 'Application is in. Can I see it Wednesday after work?' }
+            ]
+          }
         ]
       },
       {
@@ -1383,9 +1492,9 @@
         furnished: 'No',
         manager: 'Ray Vasquez',
         channels: {
-          facebook: { on: false, status: 'off', last: null },
-          apartments: { on: false, status: 'off', last: null },
-          airbnb: { on: false, status: 'off', last: null }
+          facebook: { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 },
+          apartments: { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 },
+          airbnb: { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 }
         },
         inquiries: []
       }
@@ -1756,6 +1865,7 @@
         let peopleKind = 'all';
         let listingId = 'l-ohio';
         let listingFilter = 'all';
+        let openChannels = {};
 
     const inspectCatalog = {
       inside: [
@@ -2021,7 +2131,7 @@
     function listingBy(id) { return listings.find(l => l.id === id); }
     function listingsFor(propId) { return listings.filter(l => l.property === propId); }
     function listingStatusLabel(s) {
-      return { live: 'Live', draft: 'Draft', paused: 'Paused', filled: 'Filled' }[s] || s;
+      return { live: 'Active', draft: 'Draft', paused: 'Paused', filled: 'Filled' }[s] || s;
     }
     function channelBy(id) { return listingChannels.find(c => c.id === id); }
     function needsListing(p) {
@@ -3462,42 +3572,143 @@
       if (on && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
     }
 
+    function listingStatusClass(s) {
+      if (s === 'live') return 'active';
+      if (s === 'paused') return 'paused';
+      if (s === 'filled') return 'filled';
+      return 'draft';
+    }
+    function liveChannels(l) {
+      return listingChannels.filter(c => l.channels[c.id] && l.channels[c.id].on);
+    }
+    function channelStats(st) {
+      if (!st || !st.on) return '<span>Not posted</span>';
+      return '<span>Posted ' + (st.posted ? fmtIsoDate(st.posted) : '—') + '</span>' +
+        '<span>' + (st.contacts || 0) + ' contacts</span>' +
+        '<span>' + (st.unread || 0) + ' unread</span>';
+    }
     function listingCard(l) {
       const p = propertyBy(l.property);
-      const ch = listingChannels.map(c => {
-        const st = (l.channels[c.id] || {}).status || 'off';
-        return '<span class="ch-pill ' + st + '"><i class="ch-dot"></i>' + esc(c.short) + '</span>';
-      }).join('');
-      return '<button type="button" class="card click ls-card" data-listing="' + l.id + '">' +
-        '<span class="thumb" style="background-image:url(\'' + listingCover(l) + '\')"></span>' +
-        '<span style="flex:1;min-width:0;"><b>' + esc(l.title) + '</b>' +
-          '<span class="muted" style="display:block;">' + esc(p ? p.name : '') + ' · ' + esc(l.unit) + ' · ' + usd(l.rent) + '/mo</span>' +
-          '<span class="ls-meta">' + ch + '</span></span>' +
-        '<span class="tag' + (l.status === 'live' ? ' live' : '') + '">' + listingStatusLabel(l.status) + '</span>' +
-      '</button>';
-    }
-    function channelRow(l, c) {
-      const st = l.channels[c.id] || { on: false, status: 'off', last: null };
-      const cls = st.status === 'synced' ? 'on' : st.status;
-      const last = st.last ? 'Last ' + fmtIsoDate(st.last) : 'Not posted';
-      const action = st.on ? 'Unlist' : 'Sync';
-      return '<div class="ch-row">' +
-        '<div style="flex:1;min-width:0;"><b>' + esc(c.name) + '</b><div class="muted">' + esc(c.hint) + '</div></div>' +
-        '<span class="ch-pill ' + cls + '"><i class="ch-dot"></i>' + (st.status === 'syncing' ? 'Syncing…' : (st.on ? 'On this channel' : 'Off')) + '</span>' +
-        '<span class="muted">' + last + '</span>' +
-        '<button class="pill" type="button" onclick="toggleListingChannel(\'' + l.id + '\',\'' + c.id + '\')">' + action + '</button>' +
+      const live = liveChannels(l);
+      const unread = live.reduce((n, c) => n + ((l.channels[c.id].unread) || 0), 0);
+      const open = !!openChannels[l.id];
+      const summary = live.length
+        ? live.length + ' channel' + (live.length === 1 ? '' : 's') + (unread ? ' · ' + unread + ' unread' : '')
+        : 'Not on a channel';
+      return '<div class="card ls-wrap">' +
+        '<button type="button" class="ls-head" data-listing="' + l.id + '">' +
+          '<span class="thumb" style="background-image:url(\'' + listingCover(l) + '\')"></span>' +
+          '<span style="min-width:0;"><span class="ls-kicker ' + listingStatusClass(l.status) + '">' + listingStatusLabel(l.status) + '</span>' +
+            '<b style="display:block;">' + esc(l.title) + '</b>' +
+            '<span class="muted" style="display:block;">' + esc(p ? p.name : '') + ' · ' + esc(l.unit) + ' · ' + usd(l.rent) + '/mo</span></span>' +
+        '</button>' +
+        '<button type="button" class="ls-exp" onclick="toggleListingChannels(\'' + l.id + '\')">' +
+          '<span>Channels</span><span class="muted">' + summary + ' ' + (open ? '▴' : '▾') + '</span></button>' +
+        (open
+          ? '<div class="ls-ch">' + (live.length
+              ? live.map(c => {
+                  const st = l.channels[c.id];
+                  return '<div class="ch-line"><b>' + esc(c.name) + '</b><div class="ch-stats muted">' + channelStats(st) + '</div></div>';
+                }).join('')
+              : '<div class="ch-line muted">Nothing posted. Open the listing to sync a channel.</div>') + '</div>'
+          : '') +
       '</div>';
     }
-    function inquiryRow(l, i, idx) {
-      const ch = channelBy(i.channel);
-      return '<div class="inq"><div class="row"><div><b>' + esc(i.name) + '</b>' +
-        '<div class="muted">' + esc(i.when) + ' · ' + esc(ch ? ch.short : i.channel) + ' · ' + esc(i.note) + '</div></div>' +
-        '<span class="tag">' + esc(i.status) + '</span></div>' +
-        '<div class="btn-row" style="margin-top:6px;">' +
-          '<button class="pill" type="button" onclick="setInquiryStatus(\'' + l.id + '\',' + idx + ',\'tour\')">Tour</button>' +
-          '<button class="pill" type="button" onclick="setInquiryStatus(\'' + l.id + '\',' + idx + ',\'applied\')">Applied</button>' +
-          '<button class="pill" type="button" onclick="setInquiryStatus(\'' + l.id + '\',' + idx + ',\'passed\')">Passed</button>' +
+    function channelRow(l, c) {
+      const st = l.channels[c.id] || { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 };
+      const on = !!st.on;
+      return '<div class="ch-row">' +
+        '<div class="ch-main"><b>' + esc(c.name) + '</b><div class="muted">' + esc(c.hint) + '</div>' +
+          '<div class="ch-stats muted">' + channelStats(st) + '</div></div>' +
+        '<div class="ch-actions">' +
+          '<span class="ls-kicker ' + (st.status === 'syncing' ? 'paused' : (on ? 'active' : 'draft')) + '">' +
+            (st.status === 'syncing' ? 'Syncing' : (on ? 'On' : 'Off')) + '</span>' +
+          '<button class="' + (on ? 'pill' : 'btn btn-primary') + '" type="button" onclick="toggleListingChannel(\'' + l.id + '\',\'' + c.id + '\')">' +
+            (on ? 'Unlist' : 'Sync') + '</button>' +
         '</div></div>';
+    }
+    function stageLabel(s) {
+      return {
+        interested: 'Interested',
+        applied: 'Application sent',
+        review: 'In review',
+        approved: 'Approved',
+        denied: 'Denied',
+        signed: 'Contract signed',
+        tenant: 'Tenant',
+        out: 'Not interested'
+      }[s] || s;
+    }
+    function flowHtml(a) {
+      const path = ['interested', 'applied', 'review', 'approved', 'signed', 'tenant'];
+      if (a.stage === 'denied') {
+        return path.slice(0, 3).map(id => '<span class="step on">' + stageLabel(id) + '</span>').join('') +
+          '<span class="step bad">Denied</span>';
+      }
+      if (!a.interested && a.stage !== 'tenant') {
+        return '<span class="step bad">Not interested</span>';
+      }
+      const at = Math.max(0, path.indexOf(a.stage));
+      return path.map((id, i) => '<span class="step' + (i <= at ? ' on' : '') + '">' + stageLabel(id) + '</span>').join('');
+    }
+    function applicantCard(l, a, idx) {
+      const ch = channelBy(a.channel);
+      const app = a.application;
+      let actions = '';
+      if (a.stage === 'interested' && a.interested) {
+        actions = '<button class="btn btn-primary" type="button" onclick="markApplicationSent(\'' + l.id + '\',' + idx + ')">Application received</button>';
+      } else if (a.stage === 'applied') {
+        actions = '<button class="btn btn-primary" type="button" onclick="setApplicantStage(\'' + l.id + '\',' + idx + ',\'review\')">Review application</button>';
+      } else if (a.stage === 'review') {
+        actions = '<button class="btn btn-primary" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'approved\')">Approve</button>' +
+          '<button class="pill" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'denied\')">Deny</button>';
+      } else if (a.stage === 'approved') {
+        actions = '<button class="btn btn-primary" type="button" onclick="signAndMoveIn(\'' + l.id + '\',' + idx + ')">Contract signed — add as tenant</button>';
+      } else if (a.stage === 'tenant') {
+        actions = '<button class="pill" type="button" data-property="' + l.property + '">Open property</button>';
+      }
+      const facts = app
+        ? '<div class="kv" style="margin-top:8px;">' +
+            '<span>Sent</span><span>' + esc(app.sent) + '</span>' +
+            '<span>Income</span><span>' + esc(app.income) + '</span>' +
+            '<span>People</span><span>' + esc(app.occupants) + '</span>' +
+            '<span>Pets</span><span>' + esc(app.pets) + '</span>' +
+            '<span>Work</span><span>' + esc(app.employer) + '</span>' +
+            '<span>Move-in</span><span>' + esc(app.moveIn) + '</span>' +
+            (app.decision ? '<span>Decision</span><span>' + esc(app.decision) + '</span>' : '') +
+          '</div>'
+        : '<p class="empty">No application yet.</p>';
+      const thread = (a.messages || []).map(m =>
+        '<div class="msg' + (m.who === 'You' || m.who === 'Denise Kolar' || m.who === 'Bryan' ? ' mine' : '') + '"><b>' + esc(m.who) + ' · ' + esc(m.when) + '</b>' + esc(m.text) + '</div>'
+      ).join('');
+      return '<div class="card app-card">' +
+        '<div class="row" style="align-items:flex-start;">' +
+          '<div><span class="ls-kicker ' + (a.stage === 'denied' || !a.interested ? 'paused' : 'active') + '">' + stageLabel(a.interested || a.stage === 'tenant' ? a.stage : 'out') + '</span>' +
+            '<b style="display:block;margin-top:4px;">' + esc(a.name) + '</b>' +
+            '<div class="muted">' + esc(ch ? ch.short : a.channel) + ' · ' + esc(a.when) +
+              (a.phone ? ' · ' + esc(a.phone) : '') + '</div></div>' +
+          (a.stage === 'tenant' || a.stage === 'denied' ? '' :
+            '<button class="pill' + (a.interested ? ' on' : '') + '" type="button" onclick="toggleInterested(\'' + l.id + '\',' + idx + ')">' +
+              (a.interested ? 'Still interested' : 'Mark interested') + '</button>') +
+        '</div>' +
+        '<div class="flow">' + flowHtml(a) + '</div>' +
+        (a.stage === 'tenant'
+          ? '<p class="muted">' + (propertyBy(l.property) && propertyBy(l.property).tenant && propertyBy(l.property).tenant.name === a.name
+              ? 'They are the tenant on this property. The lease is on file.'
+              : 'The lease for ' + esc(l.unit) + ' is signed. The other unit keeps its tenant.') + '</p>'
+          : '') +
+        '<div class="kicker">Messages</div>' +
+        (thread || '<p class="empty">No messages yet.</p>') +
+        '<div class="reply">' +
+          '<input id="msg-' + l.id + '-' + idx + '" type="text" placeholder="Reply…">' +
+          '<button class="btn btn-primary" type="button" onclick="sendApplicantMessage(\'' + l.id + '\',' + idx + ')">Send</button>' +
+        '</div>' +
+        '<div class="kicker" style="margin-top:14px;">Application</div>' + facts +
+        '<div class="btn-row">' + actions + '</div>' +
+        '<label>Note</label>' +
+        '<textarea id="note-' + l.id + '-' + idx + '" style="min-height:72px;">' + esc(a.note || '') + '</textarea>' +
+        '<div class="btn-row"><button class="pill" type="button" onclick="saveApplicantNote(\'' + l.id + '\',' + idx + ')">Save note</button></div>' +
+      '</div>';
     }
     function listingManage(l) {
       const p = propertyBy(l.property);
@@ -3530,8 +3741,9 @@
           '<p class="muted" style="margin:6px 0 8px;">Demo only — nothing actually posts. Sync pretends to push the same copy and photos.</p>' +
           listingChannels.map(c => channelRow(l, c)).join('') +
         '</div>' +
-        '<div class="card"><div class="kicker">People who asked</div>' +
-          (l.inquiries.length ? l.inquiries.map((i, idx) => inquiryRow(l, i, idx)).join('') : '<p class="empty">Nobody yet. Sync a channel to start getting inquiries.</p>') +
+        '<div class="card" style="margin-bottom:12px;"><div class="kicker">Applicants</div>' +
+          '<p class="muted" style="margin:6px 0 10px;">Message them, mark interest, review the application, then sign the lease. A signed contract writes them onto the property as the tenant.</p>' +
+          (l.inquiries.length ? l.inquiries.map((a, idx) => applicantCard(l, a, idx)).join('') : '<p class="empty">Nobody yet. Sync a channel and contacts show up here.</p>') +
         '</div>';
     }
     function listingTabBody(p) {
@@ -3579,9 +3791,9 @@
         furnished: 'No',
         manager: mgr ? mgr.name : 'Bryan Cleveland',
         channels: {
-          facebook: { on: false, status: 'off', last: null },
-          apartments: { on: false, status: 'off', last: null },
-          airbnb: { on: false, status: 'off', last: null }
+          facebook: { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 },
+          apartments: { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 },
+          airbnb: { on: false, status: 'off', last: null, posted: null, unread: 0, contacts: 0 }
         },
         inquiries: []
       });
@@ -3638,14 +3850,174 @@
         if (!again || !again.channels[channelId]) return;
         again.channels[channelId].status = 'synced';
         again.channels[channelId].last = TODAY;
+        again.channels[channelId].posted = again.channels[channelId].posted || TODAY;
+        if (again.channels[channelId].unread == null) again.channels[channelId].unread = 0;
+        if (again.channels[channelId].contacts == null) again.channels[channelId].contacts = 0;
         audit.unshift({ who: 'Bryan', action: 'Synced', target: (c ? c.short : channelId), where: again.title, at: 'Just now' });
         if (screen === 'listing' || screen === 'listings' || (screen === 'property' && propertyTab === 'listing')) render();
       }, 800);
     }
-    function setInquiryStatus(listingId, idx, status) {
+    function keepScroll(fn) {
+      const box = document.getElementById('content');
+      const y = box ? box.scrollTop : 0;
+      const win = window.scrollY || 0;
+      fn();
+      requestAnimationFrame(function () {
+        const again = document.getElementById('content');
+        if (again) again.scrollTop = y;
+        window.scrollTo(0, win);
+      });
+    }
+    function toggleListingChannels(id) {
+      keepScroll(function () {
+        openChannels[id] = !openChannels[id];
+        render();
+      });
+    }
+    function applicantAt(listingId, idx) {
       const l = listingBy(listingId);
-      if (!l || !l.inquiries[idx]) return;
-      l.inquiries[idx].status = status;
+      if (!l || !l.inquiries[idx]) return null;
+      return { listing: l, person: l.inquiries[idx] };
+    }
+    function toggleInterested(listingId, idx) {
+      const row = applicantAt(listingId, idx);
+      if (!row || row.person.stage === 'tenant' || row.person.stage === 'denied') return;
+      row.person.interested = !row.person.interested;
+      if (!row.person.interested && row.person.stage !== 'denied') row.person.stage = 'out';
+      if (row.person.interested && row.person.stage === 'out') row.person.stage = 'interested';
+      render();
+    }
+    function setApplicantStage(listingId, idx, stage) {
+      const row = applicantAt(listingId, idx);
+      if (!row) return;
+      row.person.stage = stage;
+      row.person.interested = stage !== 'denied' && stage !== 'out';
+      render();
+    }
+    function markApplicationSent(listingId, idx) {
+      const row = applicantAt(listingId, idx);
+      if (!row) return;
+      const a = row.person;
+      if (!a.application) {
+        a.application = {
+          sent: TODAY,
+          income: '—',
+          occupants: '1',
+          pets: 'Ask',
+          employer: '—',
+          moveIn: row.listing.available || TODAY,
+          decision: null
+        };
+      }
+      a.stage = 'applied';
+      a.interested = true;
+      a.messages = a.messages || [];
+      a.messages.push({ who: a.name, when: 'Just now', text: 'Application sent.' });
+      render();
+    }
+    function decideApplication(listingId, idx, decision) {
+      const row = applicantAt(listingId, idx);
+      if (!row) return;
+      const a = row.person;
+      if (!a.application) a.application = { sent: TODAY, income: '—', occupants: '—', pets: '—', employer: '—', moveIn: '—', decision: null };
+      a.application.decision = decision;
+      a.stage = decision === 'approved' ? 'approved' : 'denied';
+      a.interested = decision === 'approved';
+      audit.unshift({ who: 'Bryan', action: decision === 'approved' ? 'Approved application' : 'Denied application', target: a.name, where: row.listing.title, at: 'Just now' });
+      render();
+    }
+    function addYear(iso) {
+      const p = String(iso || TODAY).split('-');
+      if (p.length < 3) return TODAY;
+      return (+p[0] + 1) + '-' + p[1] + '-' + p[2];
+    }
+    function signAndMoveIn(listingId, idx) {
+      const row = applicantAt(listingId, idx);
+      if (!row) return;
+      const l = row.listing;
+      const a = row.person;
+      const p = propertyBy(l.property);
+      if (!p) return;
+      const start = (a.application && a.application.moveIn) || l.available || TODAY;
+      const end = addYear(start);
+      const rentLabel = usd(l.rent) + ' / mo';
+      const vacant = !p.tenant || p.tenant.status === 'vacant' || p.tenant.name === 'Vacant';
+      const sameUnit = p.tenant && p.tenant.unit === l.unit;
+      if (vacant || sameUnit) {
+        p.tenant = {
+          name: a.name,
+          unit: l.unit,
+          status: 'active',
+          onTime: true,
+          rent: rentLabel,
+          rentAmount: l.rent,
+          dueDay: 1,
+          paidThrough: '—'
+        };
+      }
+      p.leases = p.leases || [];
+      p.leases.unshift({
+        tenant: a.name,
+        title: l.unit + ' lease',
+        start: start,
+        end: end,
+        status: 'active',
+        signed: true
+      });
+      p.contacts = p.contacts || [];
+      if (!p.contacts.some(c => c.name === a.name)) {
+        p.contacts.unshift({ name: a.name, role: 'Tenant', phone: a.phone || '', email: a.email || '' });
+      }
+      let person = people.find(x => x.name === a.name);
+      if (!person) {
+        person = {
+          id: 'tn' + Date.now(),
+          name: a.name,
+          role: 'Tenant',
+          kind: 'tenant',
+          props: [p.id],
+          phone: a.phone || '',
+          email: a.email || '',
+          summary: 'Signed from the ' + l.title + ' listing.',
+          access: 'record',
+          accessRole: 'No login — record only',
+          lastLogin: ''
+        };
+        people.push(person);
+      } else {
+        if (person.props.indexOf(p.id) === -1) person.props.push(p.id);
+        person.kind = 'tenant';
+        person.role = 'Tenant';
+      }
+      a.stage = 'tenant';
+      a.interested = true;
+      a.contractSigned = TODAY;
+      l.status = 'filled';
+      listingChannels.forEach(c => {
+        const ch = l.channels[c.id];
+        if (!ch) return;
+        ch.on = false;
+        ch.status = 'off';
+      });
+      activity.unshift({ who: 'Bryan', what: 'Signed ' + a.name + ' onto ' + l.unit, when: 'Just now', company: '', property: p.id });
+      audit.unshift({ who: 'Bryan', action: 'Lease signed', target: a.name, where: p.name, at: 'Just now' });
+      render();
+    }
+    function sendApplicantMessage(listingId, idx) {
+      const row = applicantAt(listingId, idx);
+      const el = document.getElementById('msg-' + listingId + '-' + idx);
+      if (!row || !el) return;
+      const text = (el.value || '').trim();
+      if (!text) return;
+      row.person.messages = row.person.messages || [];
+      row.person.messages.push({ who: 'You', when: 'Just now', text: text });
+      render();
+    }
+    function saveApplicantNote(listingId, idx) {
+      const row = applicantAt(listingId, idx);
+      const el = document.getElementById('note-' + listingId + '-' + idx);
+      if (!row || !el) return;
+      row.person.note = el.value;
       render();
     }
 
@@ -3740,16 +4112,16 @@
         const draft = listings.filter(l => l.status === 'draft');
         const vacantNeed = properties.filter(needsListing);
         const shown = listingFilter === 'all' ? listings : listings.filter(l => l.status === listingFilter);
-        const asks = listings.reduce((n, l) => n + l.inquiries.filter(i => i.status === 'new' || i.status === 'tour').length, 0);
+        const asks = listings.reduce((n, l) => n + l.inquiries.filter(i => i.stage !== 'tenant' && i.stage !== 'denied' && i.stage !== 'out').length, 0);
         return '<h1 class="page">Listings</h1>' +
-          '<p class="sub">Ads tied to a unit. Vacant places can have one. Sync is fake — Marketplace, Apartments.com, Airbnb.</p>' +
+          '<p class="sub">Ads tied to a unit. Open Channels on a card to see where it is posted.</p>' +
           '<div class="grid g-3" style="margin-bottom:12px;">' +
-            '<div class="card"><div class="kicker">Live</div><div class="stat">' + live.length + '</div><div class="muted">on at least one channel</div></div>' +
+            '<div class="card"><div class="kicker">Active</div><div class="stat">' + live.length + '</div><div class="muted">on at least one channel</div></div>' +
             '<div class="card"><div class="kicker">Drafts</div><div class="stat">' + draft.length + '</div><div class="muted">not posted yet</div></div>' +
-            '<div class="card"><div class="kicker">Inquiries</div><div class="stat">' + asks + '</div><div class="muted">new or tour</div></div>' +
+            '<div class="card"><div class="kicker">Applicants</div><div class="stat">' + asks + '</div><div class="muted">still in the pipeline</div></div>' +
           '</div>' +
           '<div class="chips">' +
-            [['all','All'],['live','Live'],['draft','Draft'],['paused','Paused']].map(x =>
+            [['all','All'],['live','Active'],['draft','Draft'],['paused','Paused']].map(x =>
               '<button class="pill' + (listingFilter === x[0] ? ' on' : '') + '" type="button" onclick="listingFilter=\'' + x[0] + '\';render()">' + x[1] + '</button>'
             ).join('') +
           '</div>' +
@@ -3772,9 +4144,9 @@
         return backBar('listings', 'Listings') +
           '<div class="hero" style="background-image:url(\'' + listingCover(l) + '\')"></div>' +
           '<div class="row" style="align-items:flex-start;margin:4px 0 10px;">' +
-            '<div><h1 class="page">' + esc(l.title) + '</h1>' +
+            '<div><span class="ls-kicker ' + listingStatusClass(l.status) + '">' + listingStatusLabel(l.status) + '</span>' +
+              '<h1 class="page" style="margin-top:6px;">' + esc(l.title) + '</h1>' +
               '<p class="sub">' + esc(p ? p.name : '') + ' · ' + esc(l.unit) + ' · ' + usd(l.rent) + '/mo</p></div>' +
-            '<span class="tag' + (l.status === 'live' ? ' live' : '') + '">' + listingStatusLabel(l.status) + '</span>' +
           '</div>' +
           '<div class="btn-row" style="margin:0 0 14px;">' +
             (l.status !== 'live' ? '<button class="btn btn-primary" type="button" onclick="setListingStatus(\'' + l.id + '\',\'live\')">Go live</button>' : '') +
