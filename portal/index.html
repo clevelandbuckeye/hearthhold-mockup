@@ -387,7 +387,8 @@
       #hub-map, #home-map { height: 300px; }
       .wrow { min-height: 48px; padding: 12px 0; }
       .wrow .thumb { width: 48px; height: 48px; }
-      .pin-card { min-height: 88px; padding: 12px; }
+      .ls-card { flex-wrap: wrap; }
+      .ls-card .thumb { width: 100%; height: 120px; }
       .pin-go { min-height: 44px; }
       .map-picked .pin-card { flex-wrap: wrap; }
       .map-picked .pin-go { width: 100%; justify-content: center; margin-left: 0; }
@@ -578,6 +579,37 @@
     .p-card { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; padding: 10px; }
     .p-card.hot { outline: 2px solid var(--forest-2); }
     .p-rent { font-weight: 700; font-size: 13px; white-space: nowrap; }
+    .ls-card { display: flex; gap: 12px; align-items: stretch; text-align: left; width: 100%; }
+    .ls-card .thumb { width: 92px; height: 72px; border-radius: 10px; }
+    .ls-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .ch-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 99px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--mute);
+    }
+    .ch-pill.on { color: var(--forest); border-color: #cfe3d6; background: #eaf3ee; }
+    .ch-pill.syncing { color: var(--warn); border-color: #ead9c0; background: #f7f1e6; }
+    .ch-pill.off { opacity: .7; }
+    .ch-dot { width: 8px; height: 8px; border-radius: 99px; background: var(--line); }
+    .ch-pill.on .ch-dot { background: var(--forest-2); }
+    .ch-pill.syncing .ch-dot { background: var(--warn); }
+    .ch-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .ch-row:last-child { border-bottom: none; }
+    .inq { padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .inq:last-child { border-bottom: none; }
 
     /* Calendar */
     .cal2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--line); border-radius: 12px; overflow: hidden; }
@@ -629,6 +661,7 @@
     .tcard .tcost { font-weight: 700; font-size: 12px; color: var(--ink); }
     .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; border-radius: 99px; padding: 2px 7px; background: var(--mist); color: var(--mute); }
     .tag.approval { background: #f7f1e6; color: var(--warn); }
+    .tag.live { background: #eaf3ee; color: #2f6a4a; }
     .trow { display: flex; gap: 12px; align-items: center; padding: 10px; text-align: left; width: 100%; }
     .task-pop { width: min(560px, calc(100vw - 24px)); }
     .task-pop textarea { min-height: 80px; resize: vertical; }
@@ -779,6 +812,7 @@
         <button class="nav-close" type="button" onclick="closeNav()" aria-label="Close menu">Close</button>
       </div>
       <button class="nav-item" data-go="properties">Property <span class="badge" id="prop-count">0</span></button>
+      <button class="nav-item" data-go="listings">Listings <span class="badge" id="list-count">0</span></button>
       <button class="nav-item" data-go="calendar">Calendar</button>
       <button class="nav-item" data-go="tasks">Tasks <span class="badge" id="task-count">0</span></button>
       <button class="nav-item" data-go="money">Money</button>
@@ -1260,6 +1294,103 @@
       }
     ];
 
+    const listingChannels = [
+      { id: 'facebook', name: 'Facebook Marketplace', short: 'Marketplace', hint: 'Local rentals and rooms. Good for Cleveland and Lakewood.' },
+      { id: 'apartments', name: 'Apartments.com', short: 'Apartments.com', hint: 'Long-term leases. Best for the duplex, fourplex, and student house.' },
+      { id: 'airbnb', name: 'Airbnb', short: 'Airbnb', hint: 'Short stays. Only if the unit can turn over, not a 12-month lease.' }
+    ];
+    let listings = [
+      {
+        id: 'l-ohio',
+        property: 'ohio',
+        unit: 'Whole house',
+        status: 'live',
+        kind: 'long-term',
+        title: 'Chardon farmhouse — 3 bed on an acre',
+        description: 'Quiet house on Aquilla Road. Three bedrooms, two baths, a real dining room, and a two-car garage. Well and septic. East fence is paused so the back line is still open — we tell people that. Available now. 12-month lease, $1,900 plus deposit. Cats ok, dogs by approval. Denise walks showings.',
+        rent: 1900,
+        deposit: 1900,
+        beds: 3,
+        baths: 2,
+        sqft: 1680,
+        available: '2026-09-12',
+        leaseMin: '12 months',
+        pets: 'Cats ok. Dogs by approval.',
+        parking: 'Driveway and garage',
+        laundry: 'Hookups in the mud room',
+        heat: 'Gas furnace',
+        furnished: 'No',
+        manager: 'Denise Kolar',
+        channels: {
+          facebook: { on: true, status: 'synced', last: '2026-09-10' },
+          apartments: { on: true, status: 'synced', last: '2026-09-09' },
+          airbnb: { on: false, status: 'off', last: null }
+        },
+        inquiries: [
+          { name: 'Elena Ruiz', when: 'Sep 10', channel: 'apartments', status: 'tour', note: 'Saturday showing on the 12th. Two kids, one cat.' },
+          { name: 'Chris Palumbo', when: 'Sep 9', channel: 'facebook', status: 'new', note: 'Asked about the well and internet.' }
+        ]
+      },
+      {
+        id: 'l-lakewood',
+        property: 'lakewood',
+        unit: 'Up unit',
+        status: 'live',
+        kind: 'long-term',
+        title: 'Lakewood up unit — 2 bed after paint',
+        description: 'Upper unit of a two-family on Mars Ave. Two bedrooms, one bath, eat-in kitchen. Paint finishes this week. Down unit is occupied. Street parking plus a shared driveway. $1,280 / month, first month and deposit. Available Sep 18 after the walk. No short stays.',
+        rent: 1280,
+        deposit: 1280,
+        beds: 2,
+        baths: 1,
+        sqft: 900,
+        available: '2026-09-18',
+        leaseMin: '12 months',
+        pets: 'No pets',
+        parking: 'Shared driveway, street overnight',
+        laundry: 'Basement coin-free for tenants',
+        heat: 'Separate furnace',
+        furnished: 'No',
+        manager: 'Denise Kolar',
+        channels: {
+          facebook: { on: true, status: 'synced', last: '2026-09-08' },
+          apartments: { on: true, status: 'synced', last: '2026-09-08' },
+          airbnb: { on: false, status: 'off', last: null }
+        },
+        inquiries: [
+          { name: 'Jamie Cole', when: 'Sep 10', channel: 'facebook', status: 'tour', note: 'Showing Wed 16 at 5:30. Wants to see after paint.' }
+        ]
+      },
+      {
+        id: 'l-akron',
+        property: 'akron',
+        unit: 'Apt 2',
+        status: 'draft',
+        kind: 'long-term',
+        title: 'Highland Square — 1 bed, Apt 2',
+        description: 'One bedroom in the fourplex on W Market. Apt 3 is occupied. Rear roof quote is still open so this stays a draft until Ray says the roof is safe to show. Asking $950. Heat included.',
+        rent: 950,
+        deposit: 950,
+        beds: 1,
+        baths: 1,
+        sqft: 620,
+        available: '2026-10-01',
+        leaseMin: '12 months',
+        pets: 'Cats only',
+        parking: 'Rear lot, one space',
+        laundry: 'Shared in basement',
+        heat: 'Included',
+        furnished: 'No',
+        manager: 'Ray Vasquez',
+        channels: {
+          facebook: { on: false, status: 'off', last: null },
+          apartments: { on: false, status: 'off', last: null },
+          airbnb: { on: false, status: 'off', last: null }
+        },
+        inquiries: []
+      }
+    ];
+
     const people = [
       {
         id: 'bryan', name: 'Bryan Cleveland', role: 'Owner', kind: 'owner',
@@ -1534,7 +1665,9 @@
       { who: 'Ray Vasquez', what: 'Started two quotes on the Akron rear roof', when: 'Yesterday', company: 'Cuyahoga Rentals LLC', property: 'akron' },
       { who: 'Ray Vasquez', what: 'Walked the Canton storefront before today\'s inspection', when: 'This morning', company: 'Cuyahoga Rentals LLC', property: 'canton' },
       { who: 'Ray Vasquez', what: 'Opened Canton lease for renewal', when: 'Sep 4', company: 'Cuyahoga Rentals LLC', property: 'canton' },
-      { who: 'Bryan', what: 'Paused east fence', when: 'Jul 2', company: 'Northstar Trust', property: 'ohio' }
+      { who: 'Bryan', what: 'Paused east fence', when: 'Jul 2', company: 'Northstar Trust', property: 'ohio' },
+      { who: 'Denise Kolar', what: 'Pushed Chardon listing to Apartments.com', when: 'Sep 9', company: 'Northstar Trust', property: 'ohio' },
+      { who: 'Denise Kolar', what: 'Listed Lakewood up unit on Marketplace', when: 'Sep 8', company: 'Hearthhold LLC', property: 'lakewood' }
     ];
 
     const audit = [
@@ -1621,6 +1754,8 @@
         let popping = false;
         let pendingScroll = null;
         let peopleKind = 'all';
+        let listingId = 'l-ohio';
+        let listingFilter = 'all';
 
     const inspectCatalog = {
       inside: [
@@ -1883,6 +2018,22 @@
 
     function companyBy(id) { return companies.find(c => c.id === id); }
     function propertyBy(id) { return properties.find(p => p.id === id); }
+    function listingBy(id) { return listings.find(l => l.id === id); }
+    function listingsFor(propId) { return listings.filter(l => l.property === propId); }
+    function listingStatusLabel(s) {
+      return { live: 'Live', draft: 'Draft', paused: 'Paused', filled: 'Filled' }[s] || s;
+    }
+    function channelBy(id) { return listingChannels.find(c => c.id === id); }
+    function needsListing(p) {
+      if (!p) return false;
+      const open = listingsFor(p.id).filter(l => l.status !== 'filled');
+      if (open.length) return false;
+      return p.tenant && p.tenant.status === 'vacant';
+    }
+    function listingCover(l) {
+      const p = propertyBy(l.property);
+      return (p && p.image) || 'thumbs/home.png';
+    }
     function money(n, c) {
       if (c === 'USD') return '$' + n.toLocaleString('en-US');
       return n.toLocaleString('es-CO') + ' ' + c;
@@ -2088,6 +2239,7 @@
         propertyId: propertyId,
         personId: personId,
         inspectionId: inspectionId,
+        listingId: listingId,
         companyTab: companyTab,
         propertyTab: propertyTab,
         manageTab: manageTab,
@@ -2116,7 +2268,9 @@
         company: 'Company',
         inbox: 'Inbox',
         project: 'Project',
-        map: 'Map'
+        map: 'Map',
+        listings: 'Listings',
+        listing: 'Listing'
       };
       if (s === 'property' && st && st.propertyId) {
         const p = propertyBy(st.propertyId);
@@ -2139,6 +2293,7 @@
           || (name === 'person' && g === 'people')
           || (name === 'inbox' && g === 'capture')
           || (name === 'manage' && g === 'tasks')
+          || (name === 'listing' && g === 'listings')
           || (name === 'inspection' && g === 'tasks');
         b.classList.toggle('on', on);
       });
@@ -2174,6 +2329,7 @@
       if (st.propertyId) propertyId = st.propertyId;
       if (st.personId) personId = st.personId;
       if (st.inspectionId) inspectionId = st.inspectionId;
+      if (st.listingId) listingId = st.listingId;
       if (st.companyTab) companyTab = st.companyTab;
       if (st.propertyTab) propertyTab = st.propertyTab;
       if (st.manageTab) manageTab = st.manageTab;
@@ -2214,7 +2370,8 @@
       const same = !extra && screen === name;
       const sameProp = name === 'property' && extra && extra === propertyId && screen === 'property';
       const samePerson = name === 'person' && extra && extra === personId && screen === 'person';
-      if (!opts.replace && (same || sameProp || samePerson)) return;
+      const sameListing = name === 'listing' && extra && extra === listingId && screen === 'listing';
+      if (!opts.replace && (same || sameProp || samePerson || sameListing)) return;
       beginNav(opts);
       if (name === 'damage') {
         if (extra) damageId = extra;
@@ -2237,6 +2394,7 @@
       if (name === 'project' && extra) { propertyId = extra.property; window._projectId = extra.project; }
       if (name === 'inspection' && extra) inspectionId = extra;
       if (name === 'person' && extra) personId = extra;
+      if (name === 'listing' && extra) listingId = extra;
       syncNav(name);
       closeNav();
       render();
@@ -2315,6 +2473,8 @@
         + damages.filter(d => d.status === 'pending-approval' || d.status === 'needs-quote').length;
       const tc = document.getElementById('task-count');
       if (tc) tc.textContent = openWork;
+      const lc = document.getElementById('list-count');
+      if (lc) lc.textContent = listings.filter(l => l.status === 'live').length;
       const fn = screens[screen] || screens.home;
       try {
         document.getElementById('content').innerHTML = fn();
@@ -2359,6 +2519,9 @@
       });
       document.querySelectorAll('.gal-item:not(.empty)').forEach(el => {
         el.onclick = (e) => { e.stopPropagation(); openPhoto(el.getAttribute('data-src'), el.getAttribute('data-cap')); };
+      });
+      document.querySelectorAll('[data-listing]').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); go('listing', el.getAttribute('data-listing')); };
       });
       document.querySelectorAll('[data-insp]').forEach(el => {
         el.onclick = (e) => { e.stopPropagation(); go('inspection', el.getAttribute('data-insp')); };
@@ -3299,12 +3462,200 @@
       if (on && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
     }
 
+    function listingCard(l) {
+      const p = propertyBy(l.property);
+      const ch = listingChannels.map(c => {
+        const st = (l.channels[c.id] || {}).status || 'off';
+        return '<span class="ch-pill ' + st + '"><i class="ch-dot"></i>' + esc(c.short) + '</span>';
+      }).join('');
+      return '<button type="button" class="card click ls-card" data-listing="' + l.id + '">' +
+        '<span class="thumb" style="background-image:url(\'' + listingCover(l) + '\')"></span>' +
+        '<span style="flex:1;min-width:0;"><b>' + esc(l.title) + '</b>' +
+          '<span class="muted" style="display:block;">' + esc(p ? p.name : '') + ' · ' + esc(l.unit) + ' · ' + usd(l.rent) + '/mo</span>' +
+          '<span class="ls-meta">' + ch + '</span></span>' +
+        '<span class="tag' + (l.status === 'live' ? ' live' : '') + '">' + listingStatusLabel(l.status) + '</span>' +
+      '</button>';
+    }
+    function channelRow(l, c) {
+      const st = l.channels[c.id] || { on: false, status: 'off', last: null };
+      const cls = st.status === 'synced' ? 'on' : st.status;
+      const last = st.last ? 'Last ' + fmtIsoDate(st.last) : 'Not posted';
+      const action = st.on ? 'Unlist' : 'Sync';
+      return '<div class="ch-row">' +
+        '<div style="flex:1;min-width:0;"><b>' + esc(c.name) + '</b><div class="muted">' + esc(c.hint) + '</div></div>' +
+        '<span class="ch-pill ' + cls + '"><i class="ch-dot"></i>' + (st.status === 'syncing' ? 'Syncing…' : (st.on ? 'On this channel' : 'Off')) + '</span>' +
+        '<span class="muted">' + last + '</span>' +
+        '<button class="pill" type="button" onclick="toggleListingChannel(\'' + l.id + '\',\'' + c.id + '\')">' + action + '</button>' +
+      '</div>';
+    }
+    function inquiryRow(l, i, idx) {
+      const ch = channelBy(i.channel);
+      return '<div class="inq"><div class="row"><div><b>' + esc(i.name) + '</b>' +
+        '<div class="muted">' + esc(i.when) + ' · ' + esc(ch ? ch.short : i.channel) + ' · ' + esc(i.note) + '</div></div>' +
+        '<span class="tag">' + esc(i.status) + '</span></div>' +
+        '<div class="btn-row" style="margin-top:6px;">' +
+          '<button class="pill" type="button" onclick="setInquiryStatus(\'' + l.id + '\',' + idx + ',\'tour\')">Tour</button>' +
+          '<button class="pill" type="button" onclick="setInquiryStatus(\'' + l.id + '\',' + idx + ',\'applied\')">Applied</button>' +
+          '<button class="pill" type="button" onclick="setInquiryStatus(\'' + l.id + '\',' + idx + ',\'passed\')">Passed</button>' +
+        '</div></div>';
+    }
+    function listingManage(l) {
+      const p = propertyBy(l.property);
+      return '<div class="grid g-2" style="margin-bottom:12px;">' +
+          '<div class="card"><div class="kicker">The listing</div>' +
+            '<label>Title</label><input id="ls-title" type="text" value="' + esc(l.title) + '">' +
+            '<label>Description</label><textarea id="ls-desc" style="min-height:120px;">' + esc(l.description) + '</textarea>' +
+            '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="saveListing(\'' + l.id + '\')">Save copy</button></div>' +
+          '</div>' +
+          '<div class="card"><div class="kicker">Facts for the ad</div>' +
+            '<div class="kv" style="margin-top:8px;">' +
+              '<span>Property</span><span><button class="btn btn-ghost" type="button" data-property="' + l.property + '">' + esc(p ? p.name : '') + '</button></span>' +
+              '<span>Unit</span><span>' + esc(l.unit) + '</span>' +
+              '<span>Kind</span><span>' + (l.kind === 'short-stay' ? 'Short stay' : 'Long-term lease') + '</span>' +
+              '<span>Rent</span><span><input id="ls-rent" type="text" value="' + l.rent + '" style="max-width:120px;"></span>' +
+              '<span>Deposit</span><span><input id="ls-deposit" type="text" value="' + l.deposit + '" style="max-width:120px;"></span>' +
+              '<span>Beds / baths</span><span>' + l.beds + ' / ' + l.baths + '</span>' +
+              '<span>Sq ft</span><span>' + (l.sqft || '—') + '</span>' +
+              '<span>Available</span><span>' + l.available + '</span>' +
+              '<span>Lease</span><span>' + esc(l.leaseMin) + '</span>' +
+              '<span>Pets</span><span>' + esc(l.pets) + '</span>' +
+              '<span>Parking</span><span>' + esc(l.parking) + '</span>' +
+              '<span>Laundry</span><span>' + esc(l.laundry) + '</span>' +
+              '<span>Heat</span><span>' + esc(l.heat) + '</span>' +
+              '<span>Furnished</span><span>' + esc(l.furnished) + '</span>' +
+              '<span>Manager</span><span>' + esc(l.manager) + '</span>' +
+            '</div></div>' +
+        '</div>' +
+        '<div class="card" style="margin-bottom:12px;"><div class="kicker">Channels</div>' +
+          '<p class="muted" style="margin:6px 0 8px;">Demo only — nothing actually posts. Sync pretends to push the same copy and photos.</p>' +
+          listingChannels.map(c => channelRow(l, c)).join('') +
+        '</div>' +
+        '<div class="card"><div class="kicker">People who asked</div>' +
+          (l.inquiries.length ? l.inquiries.map((i, idx) => inquiryRow(l, i, idx)).join('') : '<p class="empty">Nobody yet. Sync a channel to start getting inquiries.</p>') +
+        '</div>';
+    }
+    function listingTabBody(p) {
+      const rows = listingsFor(p.id);
+      const vacant = p.tenant && p.tenant.status === 'vacant';
+      let html = '<p class="muted" style="margin:0 0 10px;">' +
+        (vacant
+          ? 'This place is vacant. The listing is the ad you post to find a tenant.'
+          : 'This lease is occupied. You can still keep a listing for a unit that is empty or coming free.') +
+        '</p>';
+      if (rows.length) html += '<div class="list">' + rows.map(listingCard).join('') + '</div>';
+      else {
+        html += '<p class="empty">No listing tied to this property yet.</p>' +
+          '<div class="btn-row"><button class="btn btn-primary" type="button" onclick="startListing(\'' + p.id + '\')">Start a listing</button></div>';
+      }
+      return html;
+    }
+    function startListing(propId) {
+      const p = propertyBy(propId);
+      if (!p) return;
+      const open = listingsFor(propId).filter(l => l.status !== 'filled');
+      if (open.length) { go('listing', open[0].id); return; }
+      const mgr = (p.contacts || []).find(c => c.role === 'Property manager');
+      const asking = (p.tenant && p.tenant.rentAmount) || 0;
+      const id = 'l' + Date.now();
+      listings.unshift({
+        id: id,
+        property: propId,
+        unit: (p.tenant && p.tenant.unit) || 'Unit',
+        status: 'draft',
+        kind: 'long-term',
+        title: p.name,
+        description: p.address + '. Add the rooms, parking, and what a tenant needs to know.',
+        rent: asking || 0,
+        deposit: asking || 0,
+        beds: 2,
+        baths: 1,
+        sqft: 0,
+        available: TODAY,
+        leaseMin: '12 months',
+        pets: 'Ask',
+        parking: 'Street',
+        laundry: 'Ask',
+        heat: 'Ask',
+        furnished: 'No',
+        manager: mgr ? mgr.name : 'Bryan Cleveland',
+        channels: {
+          facebook: { on: false, status: 'off', last: null },
+          apartments: { on: false, status: 'off', last: null },
+          airbnb: { on: false, status: 'off', last: null }
+        },
+        inquiries: []
+      });
+      audit.unshift({ who: 'Bryan', action: 'Started listing', target: p.name, where: 'Listings', at: 'Just now' });
+      go('listing', id);
+    }
+    function saveListing(id) {
+      const l = listingBy(id);
+      if (!l) return;
+      const title = document.getElementById('ls-title');
+      const desc = document.getElementById('ls-desc');
+      const rent = document.getElementById('ls-rent');
+      const dep = document.getElementById('ls-deposit');
+      if (title) l.title = title.value.trim() || l.title;
+      if (desc) l.description = desc.value;
+      if (rent) l.rent = Number(String(rent.value).replace(/[^\d.]/g, '')) || 0;
+      if (dep) l.deposit = Number(String(dep.value).replace(/[^\d.]/g, '')) || 0;
+      audit.unshift({ who: 'Bryan', action: 'Edited listing', target: l.title, where: 'Listings', at: 'Just now' });
+      render();
+    }
+    function setListingStatus(id, status) {
+      const l = listingBy(id);
+      if (!l) return;
+      l.status = status;
+      if (status !== 'live') {
+        listingChannels.forEach(c => {
+          if (l.channels[c.id] && l.channels[c.id].on) {
+            l.channels[c.id].on = false;
+            l.channels[c.id].status = 'off';
+          }
+        });
+      }
+      audit.unshift({ who: 'Bryan', action: 'Listing ' + listingStatusLabel(status), target: l.title, where: 'Listings', at: 'Just now' });
+      render();
+    }
+    function toggleListingChannel(listingId, channelId) {
+      const l = listingBy(listingId);
+      if (!l) return;
+      const ch = l.channels[channelId] || (l.channels[channelId] = { on: false, status: 'off', last: null });
+      const c = channelBy(channelId);
+      if (ch.on) {
+        ch.on = false;
+        ch.status = 'off';
+        audit.unshift({ who: 'Bryan', action: 'Unlisted', target: (c ? c.short : channelId), where: l.title, at: 'Just now' });
+        render();
+        return;
+      }
+      if (l.status === 'draft') l.status = 'live';
+      ch.on = true;
+      ch.status = 'syncing';
+      render();
+      setTimeout(function () {
+        const again = listingBy(listingId);
+        if (!again || !again.channels[channelId]) return;
+        again.channels[channelId].status = 'synced';
+        again.channels[channelId].last = TODAY;
+        audit.unshift({ who: 'Bryan', action: 'Synced', target: (c ? c.short : channelId), where: again.title, at: 'Just now' });
+        if (screen === 'listing' || screen === 'listings' || (screen === 'property' && propertyTab === 'listing')) render();
+      }, 800);
+    }
+    function setInquiryStatus(listingId, idx, status) {
+      const l = listingBy(listingId);
+      if (!l || !l.inquiries[idx]) return;
+      l.inquiries[idx].status = status;
+      render();
+    }
+
     const screens = {
       sitemap() {
-        return '<h1 class="page">Sitemap</h1><p class="sub">Eight things in the left nav. The bar at the top is always there: voice, photo, or a sentence. Everything else hangs off one of the eight.</p>' +
+        return '<h1 class="page">Sitemap</h1><p class="sub">Nine things in the left nav. The bar at the top is always there: voice, photo, or a sentence. Everything else hangs off one of those.</p>' +
           '<div class="grid g-2">' +
             card('Home', 'A map of the six Ohio places. Pins change color: red rent late, wrench if a repair still needs a decision, vacant, a calendar if something is on this week, green if it is fine. Tap a pin to hold the photo open. Tap the card to open the place. Back returns you to the same map. Then needs you, coming up, and what the managers did this week.') +
-            card('Property', 'Map of northeast Ohio plus the list. Tap a pin for a photo, tap the card or a row to open the place: tenant, lease, maintenance, inspections, contacts, photos, money.') +
+            card('Property', 'Map of northeast Ohio plus the list. Tap a pin for a photo, tap the card or a row to open the place: tenant, listing, lease, maintenance, inspections, contacts, photos, money.') +
+            card('Listings', 'Ads tied to a vacant unit. Copy, rent, beds, pets, parking. Sync a demo to Facebook Marketplace, Apartments.com, or Airbnb. Inquiries land here. Each property also has a listing tab.') +
             card('Calendar', 'Month or week. Appointments, site visits, inspections, showings, and move in / move out. Google Calendar can be added (simulated).') +
             card('Tasks', 'List or a board with draft, to do, in progress, review, done. Damage reports needing a decision sit in Review with cost, thumbnail, and gallery. Open one for the full note.<br><b>Inspections</b> lives here too — the walk list, checklists, and damage popups.') +
             card('Money', 'In and out for the month, rent due per property, who is late, and what is coming.') +
@@ -3383,6 +3734,56 @@
               '<div class="kicker">Activity</div>' + mgrFeed(mgr) +
             '</div>'
           ).join('') + '</div>';
+      },
+      listings() {
+        const live = listings.filter(l => l.status === 'live');
+        const draft = listings.filter(l => l.status === 'draft');
+        const vacantNeed = properties.filter(needsListing);
+        const shown = listingFilter === 'all' ? listings : listings.filter(l => l.status === listingFilter);
+        const asks = listings.reduce((n, l) => n + l.inquiries.filter(i => i.status === 'new' || i.status === 'tour').length, 0);
+        return '<h1 class="page">Listings</h1>' +
+          '<p class="sub">Ads tied to a unit. Vacant places can have one. Sync is fake — Marketplace, Apartments.com, Airbnb.</p>' +
+          '<div class="grid g-3" style="margin-bottom:12px;">' +
+            '<div class="card"><div class="kicker">Live</div><div class="stat">' + live.length + '</div><div class="muted">on at least one channel</div></div>' +
+            '<div class="card"><div class="kicker">Drafts</div><div class="stat">' + draft.length + '</div><div class="muted">not posted yet</div></div>' +
+            '<div class="card"><div class="kicker">Inquiries</div><div class="stat">' + asks + '</div><div class="muted">new or tour</div></div>' +
+          '</div>' +
+          '<div class="chips">' +
+            [['all','All'],['live','Live'],['draft','Draft'],['paused','Paused']].map(x =>
+              '<button class="pill' + (listingFilter === x[0] ? ' on' : '') + '" type="button" onclick="listingFilter=\'' + x[0] + '\';render()">' + x[1] + '</button>'
+            ).join('') +
+          '</div>' +
+          (vacantNeed.length
+            ? '<div class="card" style="margin-bottom:12px;"><div class="kicker">Vacant, no listing yet</div>' +
+              vacantNeed.map(p =>
+                '<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line);">' +
+                  '<div class="thumb" style="background-image:url(\'' + p.image + '\')"></div>' +
+                  '<div style="flex:1;"><b>' + esc(p.name) + '</b><div class="muted">' + esc(p.address) + '</div></div>' +
+                  '<button class="btn btn-primary" type="button" onclick="startListing(\'' + p.id + '\')">Start listing</button>' +
+                '</div>'
+              ).join('') + '</div>'
+            : '') +
+          '<div class="list">' + (shown.length ? shown.map(listingCard).join('') : '<p class="empty">Nothing in this filter.</p>') + '</div>';
+      },
+      listing() {
+        const l = listingBy(listingId);
+        if (!l) return '<p class="empty">Listing not found.</p>';
+        const p = propertyBy(l.property);
+        return backBar('listings', 'Listings') +
+          '<div class="hero" style="background-image:url(\'' + listingCover(l) + '\')"></div>' +
+          '<div class="row" style="align-items:flex-start;margin:4px 0 10px;">' +
+            '<div><h1 class="page">' + esc(l.title) + '</h1>' +
+              '<p class="sub">' + esc(p ? p.name : '') + ' · ' + esc(l.unit) + ' · ' + usd(l.rent) + '/mo</p></div>' +
+            '<span class="tag' + (l.status === 'live' ? ' live' : '') + '">' + listingStatusLabel(l.status) + '</span>' +
+          '</div>' +
+          '<div class="btn-row" style="margin:0 0 14px;">' +
+            (l.status !== 'live' ? '<button class="btn btn-primary" type="button" onclick="setListingStatus(\'' + l.id + '\',\'live\')">Go live</button>' : '') +
+            (l.status === 'live' ? '<button class="pill" type="button" onclick="setListingStatus(\'' + l.id + '\',\'paused\')">Pause</button>' : '') +
+            (l.status === 'draft' ? '' : '<button class="pill" type="button" onclick="setListingStatus(\'' + l.id + '\',\'draft\')">Back to draft</button>') +
+            '<button class="pill" type="button" onclick="setListingStatus(\'' + l.id + '\',\'filled\')">Mark filled</button>' +
+            '<button class="pill" type="button" data-property="' + l.property + '">Open property</button>' +
+          '</div>' +
+          listingManage(l);
       },
       manage() {
         const tabs = [
@@ -3683,7 +4084,7 @@
         const p = propertyBy(propertyId);
         if (!p) return '';
         const c = companyBy(p.company);
-        const tabs = ['dashboard', 'gallery', 'map', 'contacts', 'tenant', 'leases', 'maintenance', 'inspection', 'projects', 'expenses', 'documents'];
+        const tabs = ['dashboard', 'gallery', 'map', 'contacts', 'tenant', 'listing', 'leases', 'maintenance', 'inspection', 'projects', 'expenses', 'documents'];
         const tasks = allTasks().filter(t => t.property === p.id);
         const overdue = tasks.filter(t => t.overdue);
         const upcoming = tasks.filter(t => t.upcoming);
@@ -3702,7 +4103,7 @@
         if (propertyTab === 'dashboard' || propertyTab === 'overview') {
           body =
             '<div class="chips">' +
-              [['prop-gallery','Gallery'],['prop-map-sec','Map'],['prop-tenant','Tenant'],['prop-maint','Maintenance'],['prop-inspect','Inspection'],['prop-leases','Leases'],['prop-contacts','Contacts'],['prop-tasks','Tasks'],['prop-expenses','Expenses'],['prop-projects','Projects'],['prop-docs','Documents']].map(x =>
+              [['prop-gallery','Gallery'],['prop-map-sec','Map'],['prop-tenant','Tenant'],['prop-listing','Listing'],['prop-maint','Maintenance'],['prop-inspect','Inspection'],['prop-leases','Leases'],['prop-contacts','Contacts'],['prop-tasks','Tasks'],['prop-expenses','Expenses'],['prop-projects','Projects'],['prop-docs','Documents']].map(x =>
                 '<button class="pill" type="button" onclick="jumpTo(\'' + x[0] + '\')">' + x[1] + '</button>'
               ).join('') +
             '</div>' +
@@ -3718,6 +4119,7 @@
                 '<div class="card dash-sec" id="prop-map-sec"><div class="kicker">Map</div><div id="prop-map"></div><div class="kv" style="margin-top:12px;"><span>Address</span><span>' + p.address + '</span><span>Owner</span><span><button class="btn btn-ghost" type="button" data-company="' + c.id + '">' + c.name + '</button></span><span>Lat/lng</span><span>' + p.lat + ', ' + p.lng + '</span></div></div>' +
                 '<div class="card dash-sec" id="prop-tenant"><div class="kicker">Tenant</div>' + tenantBlock(p) + '</div>' +
               '</div>' +
+              '<div class="card dash-sec" id="prop-listing"><div class="kicker">Listing</div>' + listingTabBody(p) + '</div>' +
               '<div class="card dash-sec" id="prop-maint"><div class="kicker">Maintenance schedule</div><p class="muted" style="margin:6px 0 8px;">Recurring work a maintenance person runs on this building.</p>' + maintBlock(p) + '</div>' +
               '<div class="card dash-sec" id="prop-inspect"><div class="kicker">Inspections</div>' + inspectBlock(p) + '</div>' +
               (toSign.length ? '<div class="card dash-sec"><div class="kicker">Contracts to sign</div>' + toSign.map(l => '<div class="check"><div><b>' + (l.title || 'Lease') + '</b><div class="muted">' + l.tenant + ' · starts ' + l.start + '</div></div></div>').join('') + '</div>' : '') +
@@ -3751,6 +4153,8 @@
           body = contactBlock(p);
         } else if (propertyTab === 'tenant') {
           body = tenantBlock(p);
+        } else if (propertyTab === 'listing') {
+          body = listingTabBody(p);
         } else if (propertyTab === 'leases') {
           body = leaseBlock(p);
         } else if (propertyTab === 'maintenance') {
