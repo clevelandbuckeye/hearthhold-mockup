@@ -612,23 +612,13 @@
     .ls-kicker.draft { background: var(--mist); color: var(--mute); }
     .ls-kicker.paused { background: #f7f1e6; color: var(--warn); }
     .ls-kicker.filled { background: #e9f0f4; color: var(--river); }
-    .ls-exp {
-      display: flex;
-      width: 100%;
-      min-height: 44px;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      border: none;
-      border-top: 1px solid var(--line);
-      background: #fafbfa;
-      padding: 8px 12px;
-      text-align: left;
-      font-weight: 650;
-      color: var(--forest);
-    }
-    .ls-exp:hover { background: var(--mist); }
-    .ls-ch { background: #fafbfa; padding: 0 12px 8px; }
+    .ls-body { padding: 0 14px 14px; }
+    .ls-facts { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--mute); margin: 0 0 8px; }
+    .ls-blurb { font-size: 13px; line-height: 1.45; margin: 0 0 10px; }
+    .ls-sec { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 4px; }
+    .pipe-row { padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .pipe-row:last-child { border-bottom: none; }
+    .next-step { font-size: 13px; font-weight: 700; color: var(--forest); margin-top: 4px; }
     .ch-line { padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
     .ch-stats { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 4px; }
     .ch-row {
@@ -3587,14 +3577,57 @@
         '<span>' + (st.contacts || 0) + ' contacts</span>' +
         '<span>' + (st.unread || 0) + ' unread</span>';
     }
+    function nextStepText(a) {
+      if (a.stage === 'denied') return 'Closed. Application denied.';
+      if (a.stage === 'tenant') return 'Done. They are the tenant.';
+      if (!a.interested) return 'Closed. They are not interested.';
+      const map = {
+        interested: 'Next: mark the application received.',
+        applied: 'Next: review the application.',
+        review: 'Next: approve or deny.',
+        approved: 'Next: sign the contract and add them as the tenant.',
+        signed: 'Next: add them as the tenant.'
+      };
+      return map[a.stage] || '';
+    }
+    function nextStepButtons(l, a, idx) {
+      if (a.stage === 'interested' && a.interested) {
+        return '<button class="pill" type="button" onclick="markApplicationSent(\'' + l.id + '\',' + idx + ')">Application received</button>';
+      }
+      if (a.stage === 'applied') {
+        return '<button class="pill" type="button" onclick="setApplicantStage(\'' + l.id + '\',' + idx + ',\'review\')">Review application</button>';
+      }
+      if (a.stage === 'review') {
+        return '<button class="btn btn-primary" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'approved\')">Approve</button>' +
+          '<button class="pill" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'denied\')">Deny</button>';
+      }
+      if (a.stage === 'approved') {
+        return '<button class="btn btn-primary" type="button" onclick="signAndMoveIn(\'' + l.id + '\',' + idx + ')">Contract signed</button>';
+      }
+      return '';
+    }
     function listingCard(l) {
       const p = propertyBy(l.property);
-      const live = liveChannels(l);
-      const unread = live.reduce((n, c) => n + ((l.channels[c.id].unread) || 0), 0);
-      const open = !!openChannels[l.id];
-      const summary = live.length
-        ? live.length + ' channel' + (live.length === 1 ? '' : 's') + (unread ? ' · ' + unread + ' unread' : '')
-        : 'Not on a channel';
+      const channels = listingChannels.map(c => {
+        const st = l.channels[c.id] || { on: false };
+        return '<div class="ch-line"><div class="row" style="align-items:flex-start;"><b>' + esc(c.name) + '</b>' +
+          '<span class="ls-kicker ' + (st.on ? 'active' : 'draft') + '">' + (st.on ? 'On' : 'Off') + '</span></div>' +
+          '<div class="ch-stats muted">' + channelStats(st) +
+            (st.on && st.last ? '<span>Last sync ' + fmtIsoDate(st.last) + '</span>' : '') +
+          '</div></div>';
+      }).join('');
+      const pipes = (l.inquiries || []).map((a, idx) => {
+        const ch = channelBy(a.channel);
+        const buttons = nextStepButtons(l, a, idx);
+        return '<div class="pipe-row">' +
+          '<div class="row" style="align-items:flex-start;"><div><b>' + esc(a.name) + '</b>' +
+            '<div class="muted">' + esc(ch ? ch.short : a.channel) + ' · ' + esc(a.when) + '</div></div>' +
+            '<span class="ls-kicker ' + (a.stage === 'denied' || !a.interested ? 'paused' : 'active') + '">' + stageLabel(a.interested || a.stage === 'tenant' ? a.stage : 'out') + '</span></div>' +
+          '<div class="flow">' + flowHtml(a) + '</div>' +
+          '<div class="next-step">' + esc(nextStepText(a)) + '</div>' +
+          (buttons ? '<div class="btn-row">' + buttons + '</div>' : '') +
+        '</div>';
+      }).join('');
       return '<div class="card ls-wrap">' +
         '<button type="button" class="ls-head" data-listing="' + l.id + '">' +
           '<span class="thumb" style="background-image:url(\'' + listingCover(l) + '\')"></span>' +
@@ -3602,16 +3635,23 @@
             '<b style="display:block;">' + esc(l.title) + '</b>' +
             '<span class="muted" style="display:block;">' + esc(p ? p.name : '') + ' · ' + esc(l.unit) + ' · ' + usd(l.rent) + '/mo</span></span>' +
         '</button>' +
-        '<button type="button" class="ls-exp" onclick="toggleListingChannels(\'' + l.id + '\')">' +
-          '<span>Channels</span><span class="muted">' + summary + ' ' + (open ? '▴' : '▾') + '</span></button>' +
-        (open
-          ? '<div class="ls-ch">' + (live.length
-              ? live.map(c => {
-                  const st = l.channels[c.id];
-                  return '<div class="ch-line"><b>' + esc(c.name) + '</b><div class="ch-stats muted">' + channelStats(st) + '</div></div>';
-                }).join('')
-              : '<div class="ch-line muted">Nothing posted. Open the listing to sync a channel.</div>') + '</div>'
-          : '') +
+        '<div class="ls-body">' +
+          '<div class="ls-facts">' +
+            '<span>' + l.beds + ' bed · ' + l.baths + ' bath</span>' +
+            '<span>' + (l.sqft ? l.sqft + ' sq ft' : 'Sq ft —') + '</span>' +
+            '<span>Deposit ' + usd(l.deposit) + '</span>' +
+            '<span>Available ' + esc(l.available) + '</span>' +
+            '<span>' + esc(l.leaseMin) + '</span>' +
+            '<span>' + esc(l.pets) + '</span>' +
+            '<span>' + esc(l.parking) + '</span>' +
+            '<span>' + esc(l.manager) + '</span>' +
+          '</div>' +
+          '<p class="ls-blurb">' + esc(l.description) + '</p>' +
+          '<div class="ls-sec"><div class="kicker">Channels</div>' + channels + '</div>' +
+          '<div class="ls-sec"><div class="kicker">Pipeline</div>' +
+            (pipes || '<p class="empty">No applicants yet.</p>') +
+          '</div>' +
+        '</div>' +
       '</div>';
     }
     function channelRow(l, c) {
@@ -4114,7 +4154,7 @@
         const shown = listingFilter === 'all' ? listings : listings.filter(l => l.status === listingFilter);
         const asks = listings.reduce((n, l) => n + l.inquiries.filter(i => i.stage !== 'tenant' && i.stage !== 'denied' && i.stage !== 'out').length, 0);
         return '<h1 class="page">Listings</h1>' +
-          '<p class="sub">Ads tied to a unit. Open Channels on a card to see where it is posted.</p>' +
+          '<p class="sub">Each card shows the ad, every channel, and where each applicant is. Tap the title for messages and the full note.</p>' +
           '<div class="grid g-3" style="margin-bottom:12px;">' +
             '<div class="card"><div class="kicker">Active</div><div class="stat">' + live.length + '</div><div class="muted">on at least one channel</div></div>' +
             '<div class="card"><div class="kicker">Drafts</div><div class="stat">' + draft.length + '</div><div class="muted">not posted yet</div></div>' +
