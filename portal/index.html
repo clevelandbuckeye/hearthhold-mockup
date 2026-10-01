@@ -616,8 +616,51 @@
     .ls-facts { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--mute); margin: 0 0 8px; }
     .ls-blurb { font-size: 13px; line-height: 1.45; margin: 0 0 10px; }
     .ls-sec { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 4px; }
-    .pipe-row { padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .pipe-row { padding: 10px 0; border-bottom: 1px solid var(--line); }
     .pipe-row:last-child { border-bottom: none; }
+    .gauge-track { position: relative; height: 22px; margin: 8px 0 2px; }
+    .gauge-line, .gauge-fill {
+      position: absolute;
+      top: 9px;
+      left: 8px;
+      height: 4px;
+      border-radius: 99px;
+    }
+    .gauge-line { right: 8px; background: var(--line); }
+    .gauge-fill { background: var(--forest-2); }
+    .gauge.bad .gauge-fill { background: var(--bad); }
+    .gauge-dots {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .gauge-dots i {
+      width: 14px;
+      height: 14px;
+      border-radius: 99px;
+      background: #fff;
+      border: 3px solid var(--line);
+      box-sizing: border-box;
+    }
+    .gauge-dots i.on { background: var(--forest-2); border-color: var(--forest-2); }
+    .gauge.bad .gauge-dots i.on { background: var(--bad); border-color: var(--bad); }
+    .gauge-dots i.now { box-shadow: 0 0 0 3px rgba(47,106,74,.22); }
+    .gauge.bad .gauge-dots i.now { box-shadow: 0 0 0 3px rgba(155,58,42,.22); }
+    .gauge-status { font-size: 13px; font-weight: 700; margin-top: 2px; }
+    .rev-pop { width: min(680px, calc(100vw - 24px)); }
+    .rev-doc { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .rev-actions {
+      position: sticky;
+      bottom: 0;
+      background: #fff;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+    .rev-doc .kind { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--mute); }
     .next-step { font-size: 13px; font-weight: 700; color: var(--forest); margin-top: 4px; }
     .ch-line { padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
     .ch-stats { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 4px; }
@@ -886,6 +929,7 @@
   <div class="overlay" id="overlay" onclick="if(event.target.id==='overlay') hideOverlay()"></div>
   <div class="overlay" id="damage-pop" onclick="if(event.target.id==='damage-pop') closeDamage()"></div>
   <div class="overlay" id="task-pop" onclick="if(event.target.id==='task-pop') closeTask()"></div>
+  <div class="overlay" id="review-pop" onclick="if(event.target.id==='review-pop') closeReview()"></div>
 
   <button class="fb-btn no-shot" type="button" onclick="openFeedback()">Feedback</button>
   <div class="fb-panel no-shot" id="fb-panel">
@@ -1384,7 +1428,22 @@
               pets: 'One cat',
               employer: 'UH Geauga',
               moveIn: '2026-10-01',
-              decision: null
+              currentAddress: '88 Mentor Ave, Mentor, OH',
+              reason: 'Lease ends Sep 30. They want a yard.',
+              decision: null,
+              background: {
+                status: 'Clear',
+                checked: '2026-09-11',
+                criminal: 'None',
+                eviction: 'None',
+                incomeMatch: 'Paystubs match the $5,200 they listed'
+              },
+              docs: [
+                { kind: 'Paystub', file: 'UH-Geauga-Aug.pdf', when: 'Sep 10', note: 'Two stubs. $2,600 gross each, biweekly.' },
+                { kind: 'Reference letter', file: 'mentor-landlord.pdf', when: 'Sep 10', note: 'Prior landlord. On time for three years. No damage.' },
+                { kind: 'Credit check', file: 'credit-elena.pdf', when: 'Sep 11', note: 'Score 742. No collections.' },
+                { kind: 'Background check', file: 'background-elena.pdf', when: 'Sep 11', note: 'Clear. No evictions, no criminal record.' }
+              ]
             },
             messages: [
               { who: 'Elena Ruiz', when: 'Sep 10', text: 'Can we see it Saturday? Two kids and one cat.' },
@@ -1452,7 +1511,22 @@
               pets: 'None',
               employer: 'Cleveland Clinic',
               moveIn: '2026-09-20',
-              decision: null
+              currentAddress: '2100 W 17th St, Cleveland, OH',
+              reason: 'Downsizing after a roommate moved out.',
+              decision: null,
+              background: {
+                status: 'In progress',
+                checked: '—',
+                criminal: 'Waiting on the county report',
+                eviction: 'None on the first pass',
+                incomeMatch: 'One paystub in. Second stub not uploaded.'
+              },
+              docs: [
+                { kind: 'Paystub', file: 'clinic-sep.pdf', when: 'Sep 11', note: 'One stub. $1,700 gross. Asked for the second.' },
+                { kind: 'Reference letter', file: 'roommate-note.pdf', when: 'Sep 11', note: 'Current roommate. Quiet, pays their half.' },
+                { kind: 'Credit check', file: '', when: '', note: 'Not in yet.' },
+                { kind: 'Background check', file: '', when: '', note: 'Ordered Sep 11. Report not back.' }
+              ]
             },
             messages: [
               { who: 'Jamie Cole', when: 'Sep 10', text: 'Application is in. Can I see it Wednesday after work?' }
@@ -1856,6 +1930,7 @@
         let listingId = 'l-ohio';
         let listingFilter = 'all';
         let openChannels = {};
+        let reviewTarget = null;
 
     const inspectCatalog = {
       inside: [
@@ -2423,6 +2498,7 @@
       popping = true;
       if (damagePopOpen) closeDamage();
       if (taskPopId) closeTask();
+      if (reviewTarget) closeReview();
       if (st.screen !== 'inspection') stopInspMic();
       screen = st.screen;
       if (st.companyId) companyId = st.companyId;
@@ -2487,6 +2563,7 @@
       }
       if (damagePopOpen) closeDamage();
       if (taskPopId) closeTask();
+      if (reviewTarget) closeReview();
       if (name !== 'inspection') stopInspMic();
       screen = name;
       if (name === 'company' && extra) { companyId = extra; companyTab = 'dashboard'; }
@@ -3594,12 +3671,8 @@
       if (a.stage === 'interested' && a.interested) {
         return '<button class="pill" type="button" onclick="markApplicationSent(\'' + l.id + '\',' + idx + ')">Application received</button>';
       }
-      if (a.stage === 'applied') {
-        return '<button class="pill" type="button" onclick="setApplicantStage(\'' + l.id + '\',' + idx + ',\'review\')">Review application</button>';
-      }
-      if (a.stage === 'review') {
-        return '<button class="btn btn-primary" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'approved\')">Approve</button>' +
-          '<button class="pill" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'denied\')">Deny</button>';
+      if (a.stage === 'applied' || a.stage === 'review') {
+        return '<button class="btn btn-primary" type="button" onclick="openReview(\'' + l.id + '\',' + idx + ')">Review</button>';
       }
       if (a.stage === 'approved') {
         return '<button class="btn btn-primary" type="button" onclick="signAndMoveIn(\'' + l.id + '\',' + idx + ')">Contract signed</button>';
@@ -3621,10 +3694,8 @@
         const buttons = nextStepButtons(l, a, idx);
         return '<div class="pipe-row">' +
           '<div class="row" style="align-items:flex-start;"><div><b>' + esc(a.name) + '</b>' +
-            '<div class="muted">' + esc(ch ? ch.short : a.channel) + ' · ' + esc(a.when) + '</div></div>' +
-            '<span class="ls-kicker ' + (a.stage === 'denied' || !a.interested ? 'paused' : 'active') + '">' + stageLabel(a.interested || a.stage === 'tenant' ? a.stage : 'out') + '</span></div>' +
-          '<div class="flow">' + flowHtml(a) + '</div>' +
-          '<div class="next-step">' + esc(nextStepText(a)) + '</div>' +
+            '<div class="muted">' + esc(ch ? ch.short : a.channel) + ' · ' + esc(a.when) + '</div></div></div>' +
+          gaugeHtml(a) +
           (buttons ? '<div class="btn-row">' + buttons + '</div>' : '') +
         '</div>';
       }).join('');
@@ -3679,17 +3750,29 @@
         out: 'Not interested'
       }[s] || s;
     }
-    function flowHtml(a) {
+    function gaugeHtml(a) {
       const path = ['interested', 'applied', 'review', 'approved', 'signed', 'tenant'];
-      if (a.stage === 'denied') {
-        return path.slice(0, 3).map(id => '<span class="step on">' + stageLabel(id) + '</span>').join('') +
-          '<span class="step bad">Denied</span>';
-      }
-      if (!a.interested && a.stage !== 'tenant') {
-        return '<span class="step bad">Not interested</span>';
-      }
-      const at = Math.max(0, path.indexOf(a.stage));
-      return path.map((id, i) => '<span class="step' + (i <= at ? ' on' : '') + '">' + stageLabel(id) + '</span>').join('');
+      const bad = a.stage === 'denied' || (!a.interested && a.stage !== 'tenant');
+      let at = path.indexOf(a.stage);
+      if (a.stage === 'denied') at = 2;
+      if (at < 0) at = 0;
+      const ratio = at / (path.length - 1);
+      const label = stageLabel(bad && a.stage !== 'denied' ? 'out' : a.stage);
+      const dots = path.map(function (id, i) {
+        const cls = i < at ? 'on' : (i === at ? 'on now' : '');
+        return '<i class="' + cls + '"></i>';
+      }).join('');
+      return '<div class="gauge' + (bad ? ' bad' : '') + '">' +
+        '<div class="gauge-track">' +
+          '<span class="gauge-line"></span>' +
+          '<span class="gauge-fill" style="width:calc((100% - 16px) * ' + ratio + ')"></span>' +
+          '<span class="gauge-dots">' + dots + '</span>' +
+        '</div>' +
+        '<div class="gauge-status">' + esc(label) + '</div>' +
+      '</div>';
+    }
+    function flowHtml(a) {
+      return gaugeHtml(a);
     }
     function applicantCard(l, a, idx) {
       const ch = channelBy(a.channel);
@@ -3697,11 +3780,8 @@
       let actions = '';
       if (a.stage === 'interested' && a.interested) {
         actions = '<button class="btn btn-primary" type="button" onclick="markApplicationSent(\'' + l.id + '\',' + idx + ')">Application received</button>';
-      } else if (a.stage === 'applied') {
-        actions = '<button class="btn btn-primary" type="button" onclick="setApplicantStage(\'' + l.id + '\',' + idx + ',\'review\')">Review application</button>';
-      } else if (a.stage === 'review') {
-        actions = '<button class="btn btn-primary" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'approved\')">Approve</button>' +
-          '<button class="pill" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'denied\')">Deny</button>';
+      } else if (a.stage === 'applied' || a.stage === 'review') {
+        actions = '<button class="btn btn-primary" type="button" onclick="openReview(\'' + l.id + '\',' + idx + ')">Review</button>';
       } else if (a.stage === 'approved') {
         actions = '<button class="btn btn-primary" type="button" onclick="signAndMoveIn(\'' + l.id + '\',' + idx + ')">Contract signed — add as tenant</button>';
       } else if (a.stage === 'tenant') {
@@ -3723,15 +3803,14 @@
       ).join('');
       return '<div class="card app-card">' +
         '<div class="row" style="align-items:flex-start;">' +
-          '<div><span class="ls-kicker ' + (a.stage === 'denied' || !a.interested ? 'paused' : 'active') + '">' + stageLabel(a.interested || a.stage === 'tenant' ? a.stage : 'out') + '</span>' +
-            '<b style="display:block;margin-top:4px;">' + esc(a.name) + '</b>' +
+          '<div><b style="display:block;">' + esc(a.name) + '</b>' +
             '<div class="muted">' + esc(ch ? ch.short : a.channel) + ' · ' + esc(a.when) +
               (a.phone ? ' · ' + esc(a.phone) : '') + '</div></div>' +
           (a.stage === 'tenant' || a.stage === 'denied' ? '' :
             '<button class="pill' + (a.interested ? ' on' : '') + '" type="button" onclick="toggleInterested(\'' + l.id + '\',' + idx + ')">' +
               (a.interested ? 'Still interested' : 'Mark interested') + '</button>') +
         '</div>' +
-        '<div class="flow">' + flowHtml(a) + '</div>' +
+        gaugeHtml(a) +
         (a.stage === 'tenant'
           ? '<p class="muted">' + (propertyBy(l.property) && propertyBy(l.property).tenant && propertyBy(l.property).tenant.name === a.name
               ? 'They are the tenant on this property. The lease is on file.'
@@ -3964,7 +4043,90 @@
       a.stage = decision === 'approved' ? 'approved' : 'denied';
       a.interested = decision === 'approved';
       audit.unshift({ who: 'Bryan', action: decision === 'approved' ? 'Approved application' : 'Denied application', target: a.name, where: row.listing.title, at: 'Just now' });
+      closeReview();
       render();
+    }
+    function openReview(listingId, idx) {
+      const row = applicantAt(listingId, idx);
+      if (!row || !row.person.application) return;
+      if (row.person.stage === 'applied') row.person.stage = 'review';
+      reviewTarget = { listingId: listingId, idx: idx };
+      render();
+      fillReview();
+    }
+    function closeReview() {
+      reviewTarget = null;
+      const o = document.getElementById('review-pop');
+      if (!o) return;
+      o.classList.remove('on');
+      o.innerHTML = '';
+    }
+    function fillReview() {
+      const o = document.getElementById('review-pop');
+      if (!o || !reviewTarget) return;
+      const row = applicantAt(reviewTarget.listingId, reviewTarget.idx);
+      if (!row) { closeReview(); return; }
+      o.classList.add('on');
+      o.innerHTML = reviewPopHtml(row.listing, row.person, reviewTarget.idx);
+    }
+    function reviewPopHtml(l, a, idx) {
+      const p = propertyBy(l.property);
+      const app = a.application || {};
+      const bg = app.background || { status: 'Not run', checked: '—', criminal: '—', eviction: '—', incomeMatch: '—' };
+      const docs = app.docs || [
+        { kind: 'Paystub', file: '', note: 'Not in yet.' },
+        { kind: 'Reference letter', file: '', note: 'Not in yet.' },
+        { kind: 'Credit check', file: '', note: 'Not in yet.' },
+        { kind: 'Background check', file: '', note: 'Not in yet.' }
+      ];
+      const clear = bg.status === 'Clear';
+      return '<div class="card rev-pop" onclick="event.stopPropagation()">' +
+        '<div class="row" style="align-items:flex-start;">' +
+          '<div><div class="kicker">Review</div><b>' + esc(a.name) + '</b>' +
+            '<div class="muted">' + esc(l.title) + '</div></div>' +
+          '<button class="btn btn-ghost" type="button" onclick="closeReview()">Close</button>' +
+        '</div>' +
+        '<div class="kicker" style="margin-top:14px;">Property</div>' +
+        '<div class="line-card" style="margin-top:8px;">' +
+          '<div class="thumb" style="background-image:url(\'' + (p ? p.image : '') + '\')"></div>' +
+          '<div><b>' + esc(p ? p.name : '') + '</b>' +
+            '<div class="muted">' + esc(p ? p.address : '') + '</div>' +
+            '<div class="muted">' + esc(l.unit) + ' · ' + usd(l.rent) + '/mo · ' + l.beds + ' bed · ' + l.baths + ' bath · available ' + esc(l.available) + '</div>' +
+          '</div></div>' +
+        '<div class="kicker" style="margin-top:16px;">Application</div>' +
+        '<div class="kv" style="margin-top:8px;">' +
+          '<span>Name</span><span>' + esc(a.name) + '</span>' +
+          '<span>Phone</span><span>' + esc(a.phone || '—') + '</span>' +
+          '<span>Email</span><span>' + esc(a.email || '—') + '</span>' +
+          '<span>Sent</span><span>' + esc(app.sent || '—') + '</span>' +
+          '<span>Income</span><span>' + esc(app.income || '—') + '</span>' +
+          '<span>People</span><span>' + esc(app.occupants || '—') + '</span>' +
+          '<span>Pets</span><span>' + esc(app.pets || '—') + '</span>' +
+          '<span>Work</span><span>' + esc(app.employer || '—') + '</span>' +
+          '<span>Now at</span><span>' + esc(app.currentAddress || '—') + '</span>' +
+          '<span>Move-in</span><span>' + esc(app.moveIn || '—') + '</span>' +
+          '<span>Why</span><span>' + esc(app.reason || '—') + '</span>' +
+        '</div>' +
+        '<div class="kicker" style="margin-top:16px;">Background check</div>' +
+        '<div class="row" style="margin-top:8px;"><b>' + esc(bg.status) + '</b>' +
+          '<span class="ls-kicker ' + (clear ? 'active' : 'paused') + '">' + (clear ? 'Clear' : 'Needs a look') + '</span></div>' +
+        '<div class="kv" style="margin-top:8px;">' +
+          '<span>Checked</span><span>' + esc(bg.checked) + '</span>' +
+          '<span>Criminal</span><span>' + esc(bg.criminal) + '</span>' +
+          '<span>Eviction</span><span>' + esc(bg.eviction) + '</span>' +
+          '<span>Income</span><span>' + esc(bg.incomeMatch) + '</span>' +
+        '</div>' +
+        '<div class="kicker" style="margin-top:16px;">Documents</div>' +
+        docs.map(function (d) {
+          return '<div class="rev-doc"><div style="flex:1;"><div class="kind">' + esc(d.kind) + '</div>' +
+            '<b>' + esc(d.file || 'Not submitted') + '</b>' +
+            '<div class="muted">' + (d.when ? esc(d.when) + ' · ' : '') + esc(d.note || '') + '</div></div></div>';
+        }).join('') +
+        '<div class="btn-row rev-actions">' +
+          '<button class="btn btn-primary" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'approved\')">Approve</button>' +
+          '<button class="pill" type="button" onclick="decideApplication(\'' + l.id + '\',' + idx + ',\'denied\')">Deny</button>' +
+        '</div>' +
+      '</div>';
     }
     function addYear(iso) {
       const p = String(iso || TODAY).split('-');
@@ -5342,6 +5504,7 @@
       if (e.key !== 'Escape') return;
       const photo = document.getElementById('overlay');
       if (photo && photo.classList.contains('on')) { hideOverlay(); return; }
+      if (reviewTarget) { closeReview(); return; }
       if (damagePopOpen) { closeDamage(); return; }
       if (taskPopId) { closeTask(); return; }
       closeNav();
